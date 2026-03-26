@@ -1,0 +1,534 @@
+import Link from 'next/link'
+import Image from 'next/image'
+import { createMetadata } from '@/lib/seo'
+import { breadcrumbSchema } from '@/lib/schema'
+
+export const metadata = createMetadata({
+  title: 'Property Management for Central Oregon Owners',
+  description:
+    'Full-service property management in Bend, Redmond, Sisters, and Central Oregon. Tenant placement, maintenance coordination, financial reporting, and more. Get a free rental analysis.',
+  path: '/owners',
+})
+
+/* ------------------------------------------------------------------ */
+/*  Data                                                               */
+/* ------------------------------------------------------------------ */
+
+const whyHdpm = [
+  {
+    title: 'Local Expertise',
+    description:
+      'We live and work in Central Oregon. Our deep knowledge of the Bend, Redmond, Sisters, Prineville, and La Pine markets means accurate pricing and faster placements.',
+    icon: (
+      <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Transparent Pricing',
+    description:
+      'No hidden fees, no surprise charges. Our competitive management fees are clearly outlined so you know exactly what to expect from day one.',
+    icon: (
+      <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    title: 'Technology-Driven',
+    description:
+      'Real-time owner portals, online rent collection, digital lease signing, and automated reporting. Modern tools that keep you informed and your tenants happy.',
+    icon: (
+      <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z" />
+      </svg>
+    ),
+  },
+]
+
+const services = [
+  {
+    id: 'full-service',
+    title: 'Full-Service Property Management',
+    description:
+      'Let us handle every aspect of your rental property so you can enjoy true passive income. From the moment a tenant signs the lease to the day they move out, we manage it all.',
+    features: [
+      'Comprehensive tenant screening with credit, criminal, and rental history checks',
+      'Lease preparation, execution, and enforcement',
+      'Monthly rent collection with direct-deposit owner disbursements',
+      'Regular property inspections and condition reports',
+      'Lease renewal negotiations to minimize turnover',
+    ],
+    icon: (
+      <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
+      </svg>
+    ),
+  },
+  {
+    id: 'tenant-placement',
+    title: 'Tenant Placement',
+    description:
+      'Finding the right tenant is the single most important factor in protecting your investment. Our proven process fills vacancies fast with qualified, reliable renters.',
+    features: [
+      'Professional photography and compelling listing descriptions',
+      'Syndication across 30+ rental platforms including Zillow, Apartments.com, and more',
+      'Coordinated showings and open houses',
+      'Thorough background checks including employment and income verification',
+      'Lease signing and move-in coordination',
+    ],
+    icon: (
+      <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'maintenance',
+    title: 'Maintenance Coordination',
+    description:
+      'Protect your property value with responsive, cost-effective maintenance. Our vetted network of Central Oregon contractors ensures quality work at fair prices.',
+    features: [
+      '24/7 emergency maintenance hotline for tenants',
+      'Trusted network of licensed, insured local contractors',
+      'Preventive maintenance programs to avoid costly repairs',
+      'Owner approval on non-emergency repairs above set thresholds',
+      'Detailed documentation and photos for every work order',
+    ],
+    icon: (
+      <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17l-5.384 5.383a2.1 2.1 0 01-2.97-2.97l5.384-5.383m1.414-1.414l1.414-1.414a2.1 2.1 0 012.97 0l1.414 1.414a2.1 2.1 0 010 2.97l-1.414 1.414M7.5 10.5l4-4m2 8l4-4m-8.5 8.5l-1.5 1.5m6-14l1.5-1.5" />
+      </svg>
+    ),
+  },
+  {
+    id: 'reporting',
+    title: 'Financial Reporting',
+    description:
+      'Full visibility into your investment performance. Our detailed reporting keeps you informed and makes tax time a breeze.',
+    features: [
+      'Monthly owner statements with income and expense breakdowns',
+      'Year-end tax-ready financial packages (1099s included)',
+      'Real-time online owner portal with 24/7 access',
+      'Customizable reporting for multi-property portfolios',
+      'Direct deposit of owner proceeds on a consistent schedule',
+    ],
+    icon: (
+      <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+      </svg>
+    ),
+  },
+]
+
+const ownerTestimonials = [
+  {
+    quote:
+      'High Desert PM has managed our Bend rental for over 5 years. They found excellent tenants every time and handle maintenance before I even know about it. My property value has only gone up.',
+    author: 'Mark & Sarah T.',
+    context: 'Property Owners, NW Bend',
+    rating: 5,
+  },
+  {
+    quote:
+      'I own three rental properties in Sisters and Redmond. The financial reporting alone is worth it — I can see exactly how each property performs. The team really knows the Central Oregon market.',
+    author: 'David K.',
+    context: 'Multi-property Owner',
+    rating: 5,
+  },
+  {
+    quote:
+      'After trying to self-manage for two years, switching to High Desert PM was the best decision I made. They reduced my vacancy rate and increased my rental income by 15%. Highly recommend.',
+    author: 'Patricia W.',
+    context: 'Property Owner, Bend',
+    rating: 5,
+  },
+]
+
+/* ------------------------------------------------------------------ */
+/*  Sub-components                                                     */
+/* ------------------------------------------------------------------ */
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg
+          key={i}
+          className={`h-5 w-5 ${i < rating ? 'text-accent' : 'text-gray-300'}`}
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" />
+        </svg>
+      ))}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                               */
+/* ------------------------------------------------------------------ */
+
+export default function OwnersPage() {
+  const jsonLd = breadcrumbSchema([
+    { name: 'Home', url: '/' },
+    { name: 'Property Owners', url: '/owners' },
+  ])
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* ==================== HERO ==================== */}
+      <section className="relative flex min-h-[70vh] items-center overflow-hidden bg-primary">
+        <Image
+          src="https://images.unsplash.com/photo-1687451225150-e25d21b013cc?w=1920&q=80"
+          alt="Central Oregon landscape with mountains and high desert terrain"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-transparent" />
+
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-24 sm:px-8 lg:px-12">
+          <div className="max-w-3xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium tracking-wide text-white/90 backdrop-blur-sm">
+              <span className="inline-block h-2 w-2 rounded-full bg-accent-light animate-pulse" />
+              For Property Owners
+            </div>
+
+            <h1 className="font-heading text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Property Management for{' '}
+              <span className="relative">
+                Central Oregon
+                <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-accent opacity-80" />
+              </span>{' '}
+              Owners
+            </h1>
+
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
+              Maximize your rental income and protect your investment with
+              Central Oregon&apos;s most trusted property management team. We
+              deliver peace of mind so you can enjoy the lifestyle you moved here
+              for.
+            </p>
+
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+              <Link
+                href="#get-started"
+                className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
+              >
+                Get a Free Rental Analysis
+                <svg
+                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+              <a
+                href="tel:5413891680"
+                className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-8 py-4 text-base font-semibold text-white border border-white/20 shadow-lg shadow-black/20 backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                </svg>
+                (541) 389-1680
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== WHY HDPM ==================== */}
+      <section className="bg-neutral-light py-24">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+              Why HDPM
+            </p>
+            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+              The Central Oregon Advantage
+            </h2>
+            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+              We combine local market knowledge with modern technology to deliver
+              results that out-of-area firms simply can&apos;t match.
+            </p>
+          </div>
+
+          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {whyHdpm.map((item) => (
+              <div
+                key={item.title}
+                className="group relative rounded-xl border border-gray-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-accent/20"
+              >
+                <div className="mb-5 inline-flex items-center justify-center rounded-lg bg-accent/10 p-3 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
+                  {item.icon}
+                </div>
+                <h3 className="font-heading text-lg font-bold text-neutral-dark">
+                  {item.title}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-mid">
+                  {item.description}
+                </p>
+                <div className="absolute inset-x-0 top-0 h-0.5 scale-x-0 rounded-t-xl bg-gradient-to-r from-accent to-accent-light transition-transform duration-300 group-hover:scale-x-100" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== SERVICES DETAIL ==================== */}
+      <section className="bg-white py-24">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+              Our Services
+            </p>
+            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+              Everything Your Property Needs
+            </h2>
+            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+              Comprehensive property management services tailored to Central
+              Oregon&apos;s unique rental market.
+            </p>
+          </div>
+
+          <div className="mt-20 space-y-24">
+            {services.map((service, i) => (
+              <div
+                key={service.id}
+                id={service.id}
+                className={`flex flex-col items-center gap-12 lg:flex-row ${
+                  i % 2 === 1 ? 'lg:flex-row-reverse' : ''
+                }`}
+              >
+                {/* Icon / visual side */}
+                <div className="flex w-full items-center justify-center lg:w-5/12">
+                  <div className="flex h-48 w-48 items-center justify-center rounded-2xl bg-accent/10 text-accent transition-colors duration-300 sm:h-56 sm:w-56">
+                    {service.icon}
+                  </div>
+                </div>
+
+                {/* Content side */}
+                <div className="w-full lg:w-7/12">
+                  <h3 className="font-heading text-2xl font-extrabold tracking-tight text-neutral-dark sm:text-3xl">
+                    {service.title}
+                  </h3>
+                  <p className="mt-4 text-base leading-relaxed text-neutral-mid">
+                    {service.description}
+                  </p>
+                  <ul className="mt-6 space-y-3">
+                    {service.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-3 text-sm text-neutral-dark">
+                        <svg
+                          className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== PRICING ==================== */}
+      <section className="bg-neutral-light py-24">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+              Pricing
+            </p>
+            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+              Competitive, Transparent Pricing
+            </h2>
+            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+              Every property is unique, so we customize our management plans to
+              fit your goals and property type. No hidden fees, no long-term
+              contracts required.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-12 max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-sm sm:p-12">
+            <div className="grid gap-6 sm:grid-cols-2">
+              {[
+                { label: 'Full-Service Management', note: 'Percentage of monthly rent collected' },
+                { label: 'Tenant Placement', note: 'One-time fee per placement' },
+                { label: 'Lease Renewal', note: 'Flat fee per renewal' },
+                { label: 'Maintenance Coordination', note: 'Included with full-service' },
+              ].map((item) => (
+                <div key={item.label} className="rounded-lg bg-neutral-light p-5">
+                  <p className="font-heading text-sm font-bold text-neutral-dark">{item.label}</p>
+                  <p className="mt-1 text-xs text-neutral-mid">{item.note}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 border-t border-gray-200 pt-8 text-center">
+              <p className="text-sm text-neutral-mid">
+                Contact us for a personalized quote based on your property type,
+                location, and management needs.
+              </p>
+              <Link
+                href="#get-started"
+                className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
+              >
+                Schedule a Consultation
+                <svg
+                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== TESTIMONIALS ==================== */}
+      <section className="bg-white py-24">
+        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+              Testimonials
+            </p>
+            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+              Trusted by Central Oregon Owners
+            </h2>
+            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+              Hear from property owners who trust us to protect their investments.
+            </p>
+          </div>
+
+          <div className="mt-16 grid gap-8 md:grid-cols-3">
+            {ownerTestimonials.map((testimonial, i) => (
+              <div
+                key={i}
+                className="relative rounded-xl border border-gray-200 bg-neutral-light p-8 shadow-sm"
+              >
+                <div className="absolute -top-3 left-6">
+                  <span className="inline-block rounded-lg bg-accent px-3 py-1 font-heading text-2xl font-bold leading-none text-white">
+                    &ldquo;
+                  </span>
+                </div>
+
+                <StarRating rating={testimonial.rating} />
+
+                <blockquote className="mt-4 text-sm leading-relaxed text-neutral-dark">
+                  {testimonial.quote}
+                </blockquote>
+
+                <div className="mt-6 border-t border-gray-200 pt-4">
+                  <p className="font-heading text-sm font-bold text-neutral-dark">
+                    {testimonial.author}
+                  </p>
+                  <p className="text-xs text-neutral-mid">{testimonial.context}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== GET STARTED CTA ==================== */}
+      <section id="get-started" className="relative overflow-hidden py-24">
+        <Image
+          src="https://images.unsplash.com/photo-1687451223552-c7afa980bdad?w=1920&q=80"
+          alt="Mt. Bachelor reflected in a Central Oregon lake"
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-black/55" />
+        <div className="absolute -right-32 -top-32 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+
+        <div className="relative z-10 mx-auto max-w-4xl px-6 text-center sm:px-8">
+          <h2 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            Get Your Free Rental Analysis
+          </h2>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
+            Find out how much your Central Oregon property could earn with
+            professional management. Our free, no-obligation analysis includes a
+            market rent estimate, property assessment, and customized management
+            plan.
+          </p>
+
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <a
+              href="mailto:info@highdesertpm.com?subject=Free%20Rental%20Analysis%20Request"
+              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+              Request Your Free Analysis
+              <svg
+                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+            <a
+              href="tel:5413891680"
+              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-8 py-4 text-base font-semibold text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
+              Call (541) 389-1680
+            </a>
+          </div>
+
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-white/60">
+            <div className="flex items-center gap-2">
+              <svg className="h-5 w-5 text-accent-light" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" />
+              </svg>
+              No Obligation
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="h-5 w-5 text-accent-light" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" />
+              </svg>
+              Response Within 24 Hours
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="h-5 w-5 text-accent-light" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" />
+              </svg>
+              Custom Management Plan
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}

@@ -1,0 +1,171 @@
+export interface MarketArea {
+  slug: string
+  city: string
+  state: string
+  tagline: string
+  description: string[]
+  population: number
+  medianRent: number
+  highlights: string[]
+  seoTitle: string
+  seoDescription: string
+  image: string
+  imageAlt: string
+}
+
+export const marketAreas: Record<string, MarketArea> = {
+  bend: {
+    slug: 'bend',
+    city: 'Bend',
+    state: 'OR',
+    tagline: "Oregon's outdoor playground",
+    description: [
+      'Bend is the crown jewel of Central Oregon, drawing residents and visitors alike with world-class outdoor recreation, a thriving craft beer scene, and stunning Cascade mountain views. With over 300 days of sunshine per year, the city offers year-round access to skiing at Mt. Bachelor, mountain biking on hundreds of miles of trails, fly fishing on the Deschutes River, and kayaking on alpine lakes.',
+      "The Bend rental market is one of the strongest in the Pacific Northwest. Consistent population growth, a booming tourism economy, and limited housing inventory keep demand high for quality rental properties. Whether you own a single-family home in the Old Mill District or a multi-unit complex on the east side, professional property management ensures you're maximizing returns while keeping your investment protected.",
+      'High Desert Property Management has deep expertise in the Bend market. We understand neighborhood-level pricing differences, seasonal rental trends, and the expectations of Bend tenants. Our local presence means faster maintenance response times, more effective tenant screening, and higher occupancy rates for your property.',
+    ],
+    population: 105000,
+    medianRent: 2100,
+    highlights: [
+      'Strongest rental demand in Central Oregon with consistently low vacancy rates',
+      'Year-round outdoor recreation drives a steady stream of relocating tenants',
+      'Thriving local economy with tech, healthcare, and tourism sectors',
+      'Premium rental rates supported by high quality of life and limited inventory',
+    ],
+    seoTitle: 'Property Management in Bend, Oregon',
+    seoDescription:
+      'Professional property management in Bend, OR. High Desert Property Management handles tenant screening, maintenance, rent collection, and more for Bend rental properties.',
+    image: 'https://images.unsplash.com/photo-1575397283492-fde3e31e31f8?w=1920&q=80',
+    imageAlt: 'Deschutes River flowing through downtown Bend, Oregon',
+  },
+  redmond: {
+    slug: 'redmond',
+    city: 'Redmond',
+    state: 'OR',
+    tagline: 'The hub of Central Oregon',
+    description: [
+      "Redmond is the transportation and commercial hub of Central Oregon, home to Roberts Field (the region's only commercial airport) and a rapidly growing population. The city has evolved from its agricultural roots into a diverse economic center with a growing tech sector, major retail corridors, and proximity to both Bend's amenities and the wide-open spaces of the high desert.",
+      'The Redmond rental market offers property owners an attractive balance of affordability and demand. With median rents lower than neighboring Bend but strong tenant demand from airport employees, tech workers, and families seeking more space, Redmond delivers solid returns. New construction and infrastructure investment continue to drive growth and appreciation.',
+      "Our team at High Desert Property Management knows the Redmond market inside and out. From established neighborhoods near downtown to newer developments on the city's expanding edges, we match properties with qualified tenants quickly and manage every detail from lease signing through move-out.",
+    ],
+    population: 38000,
+    medianRent: 1700,
+    highlights: [
+      'Home to Central Oregon\'s commercial airport (Roberts Field/RDM)',
+      'More affordable than Bend with strong rental demand from a growing workforce',
+      'Major tech sector growth with Facebook and Apple data center proximity',
+      'Excellent schools and family-friendly neighborhoods attract long-term tenants',
+    ],
+    seoTitle: 'Property Management in Redmond, Oregon',
+    seoDescription:
+      'Trusted property management in Redmond, OR. High Desert Property Management provides full-service rental management for Redmond property owners — tenant placement, maintenance, and more.',
+    image: 'https://images.unsplash.com/photo-1542425967-a2dd69fefbb9?w=600&q=80',
+    imageAlt: 'Mountain views near Redmond, Oregon',
+  },
+  sisters: {
+    slug: 'sisters',
+    city: 'Sisters',
+    state: 'OR',
+    tagline: 'Small-town mountain charm',
+    description: [
+      "Sisters is a picturesque mountain town nestled at the base of the Three Sisters peaks, known for its Western-themed downtown, vibrant arts community, and the legendary Sisters Folk Festival. With a population of around 3,500, it offers a tight-knit community atmosphere that's increasingly attractive to remote workers, retirees, and outdoor enthusiasts looking for a quieter pace of life.",
+      "The rental market in Sisters is characterized by limited inventory and high demand, particularly for well-maintained homes that capture the town's mountain lodge aesthetic. Proximity to Hoodoo Ski Area, miles of hiking and mountain biking trails, and a charming downtown with galleries and restaurants make Sisters rentals highly desirable. Short supply keeps vacancy rates extremely low.",
+      'High Desert Property Management provides Sisters property owners with responsive, hands-on management that matches the community\'s high standards. We understand what Sisters tenants expect and ensure your property reflects the quality and character that make this town special.',
+    ],
+    population: 3500,
+    medianRent: 1850,
+    highlights: [
+      'Extremely low vacancy rates due to limited rental inventory',
+      'Desirable mountain-town lifestyle attracts high-quality tenants',
+      'Near Hoodoo Ski Area and extensive trail systems for year-round recreation',
+      'Strong arts and culture scene with the Sisters Folk Festival and gallery walks',
+    ],
+    seoTitle: 'Property Management in Sisters, Oregon',
+    seoDescription:
+      'Professional property management in Sisters, OR. High Desert Property Management handles everything for Sisters rental owners — tenant screening, maintenance coordination, and rent collection.',
+    image: 'https://images.unsplash.com/photo-1687388217723-251d0ea8fc55?w=1920&q=80',
+    imageAlt: 'Three Sisters mountains near Sisters, Oregon',
+  },
+  prineville: {
+    slug: 'prineville',
+    city: 'Prineville',
+    state: 'OR',
+    tagline: 'Where the desert meets the Ochocos',
+    description: [
+      "Prineville sits at the intersection of Central Oregon's high desert and the forested Ochoco Mountains, offering a unique landscape and a community rich in ranching heritage. As the county seat of Crook County and one of Oregon's oldest inland cities, Prineville has experienced a dramatic economic transformation thanks to major data center investments by Facebook (Meta) and Apple.",
+      "The Prineville rental market benefits from this economic growth, with data center employment and supporting industries creating steady demand for housing. Rent levels remain significantly more affordable than Bend or Redmond, making Prineville an attractive option for investors seeking strong cash-on-cash returns. The area's proximity to Smith Rock State Park and the Crooked River also draws outdoor recreation enthusiasts.",
+      "High Desert Property Management brings the same professional standards to Prineville that we deliver across all of Central Oregon. We handle tenant screening, maintenance coordination, and financial reporting so you can enjoy the returns from Prineville's growing rental market without the day-to-day hassle.",
+    ],
+    population: 12000,
+    medianRent: 1400,
+    highlights: [
+      'Growing economy driven by Meta and Apple data center campuses',
+      'Most affordable rental market in Central Oregon with strong ROI potential',
+      'Gateway to Smith Rock State Park and the Ochoco National Forest',
+      'Historic downtown with a tight-knit community and improving infrastructure',
+    ],
+    seoTitle: 'Property Management in Prineville, Oregon',
+    seoDescription:
+      'Reliable property management in Prineville, OR. High Desert Property Management offers tenant placement, maintenance, and full-service rental management for Prineville property owners.',
+    image: 'https://images.unsplash.com/photo-1693719205045-dc0f15254790?w=1920&q=80',
+    imageAlt: 'Smith Rock State Park near Prineville, Oregon',
+  },
+  'la-pine': {
+    slug: 'la-pine',
+    city: 'La Pine',
+    state: 'OR',
+    tagline: 'Ponderosa pine living',
+    description: [
+      "La Pine is a peaceful community surrounded by towering ponderosa pine forests in the southern reaches of the Deschutes County. Known as the gateway to Newberry Volcanic Monument, La Pine offers residents an affordable entry point to the Central Oregon lifestyle with easy access to fishing, hiking, snowmobiling, and some of the region's most beautiful natural areas.",
+      "The La Pine rental market appeals to tenants who value space, affordability, and a rural feel while still being within commuting distance of Bend and Sunriver. Properties on larger lots with natural surroundings are especially popular. La Pine State Park, the Deschutes River, and Paulina and East Lakes provide year-round recreation right outside the front door.",
+      "High Desert Property Management understands the unique characteristics of the La Pine rental market. From cabin-style homes to newer construction, we manage properties with the care and attention your investment deserves, ensuring reliable tenants and well-maintained homes in this beautiful forest setting.",
+    ],
+    population: 4000,
+    medianRent: 1500,
+    highlights: [
+      'Affordable rents attract tenants priced out of Bend and Sunriver',
+      'Gateway to Newberry Volcanic Monument and La Pine State Park',
+      'Large lot sizes and rural character appeal to families and outdoor lovers',
+      'Growing community with improving amenities and services',
+    ],
+    seoTitle: 'Property Management in La Pine, Oregon',
+    seoDescription:
+      'Property management in La Pine, OR. High Desert Property Management provides full-service rental management for La Pine property owners — from tenant placement to maintenance.',
+    image: 'https://images.unsplash.com/photo-1687451223552-c7afa980bdad?w=1920&q=80',
+    imageAlt: 'Mt. Bachelor reflected in a lake near La Pine, Oregon',
+  },
+  madras: {
+    slug: 'madras',
+    city: 'Madras',
+    state: 'OR',
+    tagline: 'Gateway to the high desert',
+    description: [
+      "Madras is the warm-weather capital of Central Oregon, sitting on the sunny side of the Cascades in Jefferson County. Known for its agricultural heritage, stunning views of the Cascade peaks, and proximity to Lake Billy Chinook — one of Oregon's premier warm-water recreation destinations — Madras offers a lifestyle that blends small-town community with big outdoor adventure.",
+      "The Madras rental market is driven by a diverse local economy that includes agriculture, manufacturing, and a growing tourism sector. With some of the most affordable rents in the region and a strong sense of community, Madras attracts tenants looking for value and a slower pace of life. The annual SolarFest and access to the Deschutes River canyon add to the area's appeal.",
+      "High Desert Property Management serves Madras property owners with the same commitment to excellence we bring across Central Oregon. Our knowledge of the local market helps you price competitively, attract reliable tenants, and maintain your property to the highest standards.",
+    ],
+    population: 8000,
+    medianRent: 1350,
+    highlights: [
+      'Warmest and sunniest climate in Central Oregon with over 300 days of sun',
+      'Lake Billy Chinook offers world-class fishing and water recreation',
+      'Affordable cost of living draws steady tenant demand',
+      'Diverse economy with agriculture, manufacturing, and growing tourism',
+    ],
+    seoTitle: 'Property Management in Madras, Oregon',
+    seoDescription:
+      'Professional property management in Madras, OR. High Desert Property Management delivers tenant screening, maintenance, rent collection, and more for Madras rental property owners.',
+    image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80',
+    imageAlt: 'High desert landscape near Madras, Oregon',
+  },
+}
+
+export const marketAreaSlugs = Object.keys(marketAreas)
+
+export function getMarketArea(slug: string): MarketArea | undefined {
+  return marketAreas[slug]
+}
+
+export function getAllMarketAreas(): MarketArea[] {
+  return Object.values(marketAreas)
+}

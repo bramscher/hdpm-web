@@ -1,0 +1,51 @@
+import { buildConfig } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { postgresAdapter } from '@payloadcms/db-postgres'
+import sharp from 'sharp'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+import { Users } from './collections/Users'
+import { Media } from './collections/Media'
+import { Posts } from './collections/Posts'
+import { Pages } from './collections/Pages'
+import { Categories } from './collections/Categories'
+import { MarketAreas } from './collections/MarketAreas'
+import { Testimonials } from './collections/Testimonials'
+import { TeamMembers } from './collections/TeamMembers'
+import { Leads } from './collections/Leads'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+export default buildConfig({
+  admin: {
+    user: Users.slug,
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
+  collections: [
+    Users,
+    Media,
+    Posts,
+    Pages,
+    Categories,
+    MarketAreas,
+    Testimonials,
+    TeamMembers,
+    Leads,
+  ],
+  editor: lexicalEditor(),
+  secret: process.env.PAYLOAD_SECRET || '',
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URL || '',
+    },
+    schemaName: 'payload_web',
+  }),
+  sharp,
+})
