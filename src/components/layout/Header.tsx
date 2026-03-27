@@ -135,11 +135,11 @@ export default function Header() {
           </div>
           <div className="mt-8 space-y-3 text-sm text-white/60">
             <a
-              href="tel:+15413300023"
+              href="tel:+15415480383"
               className="flex items-center gap-2 transition-colors hover:text-accent"
             >
               <PhoneIcon />
-              (541) 330-0023
+              (541) 548-0383
             </a>
             <a
               href="mailto:info@highdesertpm.com"

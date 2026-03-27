@@ -363,7 +363,12 @@ export interface TeamMember {
   name: string;
   title: string;
   bio?: string | null;
+  email?: string | null;
+  phone?: string | null;
   photo?: (number | null) | Media;
+  /**
+   * Lower numbers appear first
+   */
   order?: number | null;
   updatedAt: string;
   createdAt: string;
@@ -676,6 +681,8 @@ export interface TeamMembersSelect<T extends boolean = true> {
   name?: T;
   title?: T;
   bio?: T;
+  email?: T;
+  phone?: T;
   photo?: T;
   order?: T;
   updatedAt?: T;

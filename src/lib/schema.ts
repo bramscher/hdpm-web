@@ -11,7 +11,7 @@ export function localBusinessSchema() {
     description:
       'Professional property management services in Central Oregon — Bend, Redmond, Sisters, Prineville, La Pine, and Madras.',
     url: SITE_URL,
-    telephone: '(541) 330-0023',
+    telephone: '(541) 548-0383',
     address: {
       '@type': 'PostalAddress',
       streetAddress: '413 NW Greenwood Ave, Ste 200',
