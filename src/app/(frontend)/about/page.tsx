@@ -1,6 +1,10 @@
 import Link from 'next/link'
+import Image from 'next/image'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
+import type { Media as MediaType } from '@/payload-types'
 
 export const metadata = createMetadata({
   title: 'About Us',
@@ -59,32 +63,15 @@ const values = [
   },
 ]
 
-const teamMembers = [
-  {
-    name: 'Team Member',
-    title: 'Designated Broker / Owner',
-    bio: 'With over 15 years in Central Oregon real estate, they bring deep local knowledge and a passion for helping property owners succeed.',
-  },
-  {
-    name: 'Team Member',
-    title: 'Property Manager',
-    bio: 'Dedicated to maintaining strong tenant relationships and ensuring every property is kept to the highest standards.',
-  },
-  {
-    name: 'Team Member',
-    title: 'Leasing Coordinator',
-    bio: 'Expert in marketing vacant properties and finding qualified tenants quickly to minimize vacancy periods.',
-  },
-  {
-    name: 'Team Member',
-    title: 'Maintenance Coordinator',
-    bio: 'Manages our network of trusted contractors to keep every property in top condition with fast, cost-effective repairs.',
-  },
-]
-
 const serviceAreas = ['Bend', 'Redmond', 'Sisters', 'Prineville', 'La Pine', 'Madras']
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const payload = await getPayload({ config })
+  const { docs: teamMembers } = await payload.find({
+    collection: 'team-members',
+    sort: 'order',
+    limit: 20,
+  })
   const breadcrumbs = breadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'About', url: '/about' },
@@ -257,36 +244,54 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {teamMembers.map((member, i) => (
-              <div
-                key={i}
-                className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm"
-              >
-                {/* Placeholder avatar */}
-                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-accent/10 text-accent">
-                  <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                    />
-                  </svg>
+          <div className={`mt-16 grid gap-8 sm:grid-cols-2 ${teamMembers.length >= 4 ? 'lg:grid-cols-4' : teamMembers.length === 3 ? 'lg:grid-cols-3' : ''}`}>
+            {teamMembers.map((member) => {
+              const photo = member.photo as MediaType | null | undefined
+              return (
+                <div
+                  key={member.id}
+                  className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm"
+                >
+                  {photo?.url ? (
+                    <div className="mx-auto h-28 w-28 overflow-hidden rounded-full">
+                      <Image
+                        src={photo.url}
+                        alt={member.name}
+                        width={112}
+                        height={112}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-accent/10 text-accent">
+                      <svg className="h-14 w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                  <h3 className="mt-4 font-heading text-lg font-bold text-neutral-dark">
+                    {member.name}
+                  </h3>
+                  <p className="text-sm font-medium text-accent">{member.title}</p>
+                  {member.bio && (
+                    <p className="mt-3 text-sm leading-relaxed text-neutral-mid">
+                      {member.bio}
+                    </p>
+                  )}
                 </div>
-                <h3 className="mt-4 font-heading text-lg font-bold text-neutral-dark">
-                  {member.name}
-                </h3>
-                <p className="text-sm font-medium text-accent">{member.title}</p>
-                <p className="mt-3 text-sm leading-relaxed text-neutral-mid">
-                  {member.bio}
-                </p>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
-          <p className="mt-8 text-center text-sm text-neutral-mid">
-            Team member profiles will be populated from the CMS.
-          </p>
+          {teamMembers.length === 0 && (
+            <p className="mt-8 text-center text-sm text-neutral-mid">
+              Team profiles coming soon.
+            </p>
+          )}
         </div>
       </section>
 

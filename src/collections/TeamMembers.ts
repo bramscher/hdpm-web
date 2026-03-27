@@ -24,6 +24,14 @@ export const TeamMembers: CollectionConfig = {
       type: 'textarea',
     },
     {
+      name: 'email',
+      type: 'email',
+    },
+    {
+      name: 'phone',
+      type: 'text',
+    },
+    {
       name: 'photo',
       type: 'upload',
       relationTo: 'media',
@@ -33,6 +41,7 @@ export const TeamMembers: CollectionConfig = {
       type: 'number',
       admin: {
         position: 'sidebar',
+        description: 'Lower numbers appear first',
       },
     },
   ],
