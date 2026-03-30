@@ -47,7 +47,7 @@ export interface AppFolioListing {
 
 const APPFOLIO_V0_BASE = 'https://api.appfolio.com/api/v0'
 const APPFOLIO_PUBLIC_BASE = 'https://highdesertpm.appfolio.com'
-const CDN_IMAGE_REGEX = /https:\/\/images\.cdn\.appfolio\.com\/highdesertpm\/images\/[a-f0-9-]+\/large\.jpg/g
+const CDN_IMAGE_REGEX = /https:\/\/images\.cdn\.appfolio\.com\/highdesertpm\/images\/[a-f0-9-]+\/large\.(?:jpg|png)/g
 
 function getConfig() {
   const clientId = process.env.APPFOLIO_CLIENT_ID
@@ -575,14 +575,220 @@ function buildListing(
 }
 
 // ============================================
+// Public page-only fallback: scrape listings without v0 API
+// ============================================
+
+interface PublicPageListing {
+  address: string
+  default_photo_url: string
+  rent_range: string
+  unit_specs: string
+  listing_id: number
+  detail_page_url: string
+  latitude?: number
+  longitude?: number
+}
+
+/**
+ * Parse detail page HTML for availability, pets, deposit, description, and amenities.
+ */
+async function fetchDetailPageData(detailId: string): Promise<{
+  availableOn: string
+  description: string
+  catsAllowed: boolean
+  dogPolicy: string
+  deposit: number
+  amenities: string[]
+}> {
+  const defaults = {
+    availableOn: '',
+    description: '',
+    catsAllowed: false,
+    dogPolicy: 'Contact for details',
+    deposit: 0,
+    amenities: [],
+  }
+  try {
+    const response = await fetch(`${APPFOLIO_PUBLIC_BASE}/listings/detail/${detailId}`, {
+      headers: { 'User-Agent': 'HDPM-Website/1.0', Accept: 'text/html' },
+      next: { revalidate: 900 },
+    })
+    if (!response.ok) return defaults
+    const html = await response.text()
+
+    // Availability date: "Available 4/3/26" or "Available Now"
+    const availMatch = html.match(/Available\s+(Now|\d{1,2}\/\d{1,2}\/\d{2,4})/i)
+    let availableOn = ''
+    if (availMatch) {
+      if (availMatch[1].toLowerCase() === 'now') {
+        availableOn = 'Now'
+      } else {
+        // Convert M/D/YY to YYYY-MM-DD
+        const parts = availMatch[1].split('/')
+        if (parts.length === 3) {
+          const month = parts[0].padStart(2, '0')
+          const day = parts[1].padStart(2, '0')
+          let year = parts[2]
+          if (year.length === 2) year = `20${year}`
+          availableOn = `${year}-${month}-${day}`
+        } else {
+          availableOn = availMatch[1]
+        }
+      }
+    }
+
+    // Description from og:description
+    const descMatch = html.match(/property="og:description"\s+content="([^"]*)"/)
+    const description = descMatch ? descMatch[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"') : ''
+
+    // Pet policy
+    const dogMatch = html.match(/(?:Dogs?\s+(?:not\s+)?allowed[^<]*)/i)
+    const dogPolicy = dogMatch ? dogMatch[0].trim() : 'Contact for details'
+    const catsAllowed = /cats?\s+allowed/i.test(html)
+
+    // Deposit
+    const depositMatch = html.match(/Security\s+Deposit:\s*\$?([\d,]+)/i)
+    const deposit = depositMatch ? parseInt(depositMatch[1].replace(/,/g, ''), 10) : 0
+
+    // Amenities
+    const amenities: string[] = []
+    const amenityRegex = /class="amenity[^"]*"[^>]*>([^<]+)</g
+    let amMatch
+    while ((amMatch = amenityRegex.exec(html)) !== null) {
+      amenities.push(amMatch[1].trim())
+    }
+
+    return { availableOn, description, catsAllowed, dogPolicy, deposit, amenities }
+  } catch {
+    return defaults
+  }
+}
+
+/**
+ * Build listings entirely from the public AppFolio listings page.
+ * No v0 API credentials required. Scrapes the main listings page for
+ * basic data (address, rent, beds/baths/sqft, photo, detail ID) and
+ * optionally enriches from detail pages.
+ */
+async function getListingsFromPublicPage(): Promise<AppFolioListing[]> {
+  try {
+    const response = await fetch(`${APPFOLIO_PUBLIC_BASE}/listings`, {
+      headers: { 'User-Agent': 'HDPM-Website/1.0', Accept: 'text/html' },
+      next: { revalidate: 900 },
+    })
+    if (!response.ok) {
+      console.error(`[AppFolio] Public page returned ${response.status}`)
+      return getMockListings()
+    }
+
+    const html = await response.text()
+
+    // Extract the JSON listings array — it's a standalone array of objects with "address" keys
+    const jsonMatch = html.match(/(\[(?:\{[^{}]*"address"[^{}]*\},?\s*)+\])/)
+    if (!jsonMatch) {
+      console.error('[AppFolio] Could not find listings JSON in public page')
+      return getMockListings()
+    }
+
+    let publicListings: PublicPageListing[]
+    try {
+      publicListings = JSON.parse(jsonMatch[1])
+    } catch {
+      console.error('[AppFolio] Failed to parse listings JSON from public page')
+      return getMockListings()
+    }
+
+    console.log(`[AppFolio] Public page fallback: found ${publicListings.length} listings`)
+
+    const listings: AppFolioListing[] = []
+
+    for (const pl of publicListings) {
+      // Parse address: "424 NE Chestnut St. , Madras, OR 97741"
+      const addrParts = pl.address.split(',').map((s) => s.trim())
+      const address1 = addrParts[0] || ''
+      const city = addrParts[1] || ''
+      const stateZip = (addrParts[2] || '').split(/\s+/)
+      const state = stateZip[0] || 'OR'
+      const zip = stateZip[1] || ''
+
+      // Parse rent: "$1,695" or "$1,695 - $1,895"
+      const rentStr = pl.rent_range.replace(/[^0-9]/g, '')
+      const rent = parseInt(rentStr, 10) || 0
+
+      // Parse unit specs: "3 bd, 2.5 ba, 1,126 Sq. Ft."
+      const bedsMatch = pl.unit_specs.match(/([\d.]+)\s*bd/i)
+      const bathsMatch = pl.unit_specs.match(/([\d.]+)\s*ba/i)
+      const sqftMatch = pl.unit_specs.match(/([\d,]+)\s*Sq/i)
+      const beds = bedsMatch ? Math.round(parseFloat(bedsMatch[1])) : 0
+      const baths = bathsMatch ? parseFloat(bathsMatch[1]) : 0
+      const sqft = sqftMatch ? parseInt(sqftMatch[1].replace(/,/g, ''), 10) : 0
+
+      // Detail page ID from URL
+      const detailMatch = pl.detail_page_url.match(/detail\/([a-f0-9-]+)/)
+      const detailId = detailMatch ? detailMatch[1] : ''
+
+      // Photo
+      const photos: { Url: string; Caption?: string }[] = []
+      if (pl.default_photo_url) {
+        photos.push({ Url: pl.default_photo_url, Caption: 'Primary photo' })
+      }
+
+      // Fetch detail page for richer data (rate-limited)
+      let detailData = {
+        availableOn: '',
+        description: '',
+        catsAllowed: false,
+        dogPolicy: 'Contact for details',
+        deposit: rent,
+        amenities: [] as string[],
+      }
+      if (detailId) {
+        detailData = await fetchDetailPageData(detailId)
+        if (!detailData.deposit) detailData.deposit = rent
+        // Brief delay to avoid hammering the server
+        await new Promise((r) => setTimeout(r, 500))
+      }
+
+      listings.push({
+        Id: String(pl.listing_id),
+        Address1: address1,
+        City: city,
+        State: state,
+        Zip: zip,
+        AdvertisedRent: rent,
+        Bedrooms: beds,
+        Bathrooms: baths,
+        SquareFeet: sqft,
+        AvailableOn: detailData.availableOn,
+        MarketingTitle: `${beds}BR/${baths}BA in ${city}`,
+        MarketingDescription: detailData.description,
+        UnitPhotos: photos,
+        UnitAmenities: detailData.amenities,
+        ApplicationURL: `${APPFOLIO_PUBLIC_BASE}/listings/detail/${detailId}`,
+        CatsAllowed: detailData.catsAllowed,
+        DogPolicy: detailData.dogPolicy,
+        Deposit: detailData.deposit,
+        AppFolioDetailId: detailId,
+      })
+    }
+
+    console.log(`[AppFolio] Public page fallback: built ${listings.length} listings`)
+    return listings
+  } catch (err) {
+    console.error('[AppFolio] Public page fallback failed:', err)
+    return getMockListings()
+  }
+}
+
+// ============================================
 // Public: Get all available listings
 // ============================================
 
 export async function getListings(): Promise<AppFolioListing[]> {
   const config = getConfig()
   if (!config) {
-    console.warn('[AppFolio] Missing API credentials, returning mock listings')
-    return getMockListings()
+    console.warn('[AppFolio] Missing API credentials, falling back to public page scrape')
+    return getListingsFromPublicPage()
   }
 
   const { clientId, clientSecret, developerId } = config
@@ -654,8 +860,9 @@ export async function getListings(): Promise<AppFolioListing[]> {
     console.log(`[AppFolio] Total published listings: ${listings.length}`)
     return listings
   } catch (err) {
-    console.error('[AppFolio] Failed to fetch listings:', err)
-    return getMockListings()
+    console.error('[AppFolio] Failed to fetch listings via v0 API:', err)
+    console.log('[AppFolio] Falling back to public page scrape...')
+    return getListingsFromPublicPage()
   }
 }
 
@@ -666,8 +873,8 @@ export async function getListings(): Promise<AppFolioListing[]> {
 export async function getListingById(id: string): Promise<AppFolioListing | undefined> {
   const config = getConfig()
   if (!config) {
-    const mocks = getMockListings()
-    return mocks.find((l) => l.Id === id)
+    const listings = await getListingsFromPublicPage()
+    return listings.find((l) => l.Id === id)
   }
 
   // For live lookups, get all listings (which includes public page matching)
