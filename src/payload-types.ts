@@ -165,6 +165,18 @@ export interface Media {
   id: number;
   alt: string;
   caption?: string | null;
+  /**
+   * Photographer or source credit
+   */
+  attribution?: string | null;
+  /**
+   * License type (e.g. Unsplash, CC-BY-SA, Public Domain)
+   */
+  license?: string | null;
+  /**
+   * Original URL where the image was sourced from
+   */
+  sourceUrl?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -520,6 +532,9 @@ export interface UsersSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  attribution?: T;
+  license?: T;
+  sourceUrl?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
