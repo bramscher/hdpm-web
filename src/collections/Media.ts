@@ -23,5 +23,20 @@ export const Media: CollectionConfig = {
       name: 'caption',
       type: 'text',
     },
+    {
+      name: 'attribution',
+      type: 'text',
+      admin: { description: 'Photographer or source credit' },
+    },
+    {
+      name: 'license',
+      type: 'text',
+      admin: { description: 'License type (e.g. Unsplash, CC-BY-SA, Public Domain)' },
+    },
+    {
+      name: 'sourceUrl',
+      type: 'text',
+      admin: { description: 'Original URL where the image was sourced from' },
+    },
   ],
 }

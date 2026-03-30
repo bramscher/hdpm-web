@@ -187,6 +187,10 @@ export function supabaseStorage(options: SupabaseStorageOptions): Plugin {
         [slug]: {
           ...(collOptions === true ? {} : collOptions),
           adapter,
+          generateFileURL: ({ filename, prefix = '' }: { filename: string; prefix?: string }) => {
+            const filePath = path.posix.join(prefix, filename)
+            return `/api/media/file/${filePath}`
+          },
         },
       }),
       {} as Record<string, CollectionOptions>,

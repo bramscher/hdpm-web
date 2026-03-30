@@ -25,6 +25,15 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      afterNavLinks: ['./admin/components/ImageBrowserNavLink'],
+      views: {
+        imageBrowser: {
+          Component: './admin/components/ImageBrowserView',
+          path: '/image-browser',
+        },
+      },
+    },
   },
   collections: [
     Users,
