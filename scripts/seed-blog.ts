@@ -57,57 +57,57 @@ function richText(blocks: ReturnType<typeof heading | typeof paragraph>[]) {
   }
 }
 
-// ─── Image definitions (Unsplash — free to use, all URLs verified) ──
+// ─── Image definitions (Wikimedia Commons — Central Oregon specific) ──
 const IMAGES: { id: string; url: string; alt: string }[] = [
   {
     id: 'bend-neighborhood',
-    url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop&q=80',
-    alt: 'Stunning mountain landscape with snow-capped peaks overlooking a valley in Central Oregon',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Bend%2C_Oregon_%282014%29_-_02.JPG/1920px-Bend%2C_Oregon_%282014%29_-_02.JPG',
+    alt: 'Downtown Bend, Oregon with local shops and the Cascade mountain range in the background',
   },
   {
     id: 'tenant-moving',
-    url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1920&h=1080&fit=crop&q=80',
-    alt: 'Beautiful well-maintained home with landscaped yard ready for new tenants',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Old_Mill_District%2C_Bend%2C_OR_2009.jpg/1920px-Old_Mill_District%2C_Bend%2C_OR_2009.jpg',
+    alt: 'The Old Mill District in Bend, Oregon along the Deschutes River',
   },
   {
     id: 'winter-property',
-    url: 'https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?w=1920&h=1080&fit=crop&q=80',
-    alt: 'Snow-covered cabin surrounded by winter pines in the high desert',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Mt._Bachelor%2C_Oregon%2C_early_morning.jpg/1920px-Mt._Bachelor%2C_Oregon%2C_early_morning.jpg',
+    alt: 'Mt. Bachelor, Oregon covered in snow on an early winter morning',
   },
   {
     id: 'oregon-law',
-    url: 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1920&h=1080&fit=crop&q=80',
-    alt: 'Legal documents and rental agreement paperwork on a professional desk',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/6/65/Deschutes_River_%28Deschutes_County%2C_Oregon_scenic_images%29_%28desDA0093a%29.jpg',
+    alt: 'The Deschutes River flowing through Deschutes County, Oregon',
   },
   {
     id: 'property-manager',
-    url: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=1080&fit=crop&q=80',
-    alt: 'House keys and property documents representing professional property management',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Smith_Rock_State_Park_Oregon_D3C1205-400516A033.jpg/1920px-Smith_Rock_State_Park_Oregon_D3C1205-400516A033.jpg',
+    alt: 'Smith Rock State Park near Redmond, Oregon with the Crooked River below',
   },
   {
     id: 'pet-friendly',
-    url: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1920&h=1080&fit=crop&q=80',
-    alt: 'Happy golden retriever enjoying a sunny day at a pet-friendly rental home',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Central_Oregon_landscape.jpg/1920px-Central_Oregon_landscape.jpg',
+    alt: 'Wide open Central Oregon high desert landscape with juniper and sagebrush',
   },
   {
     id: 'central-oregon-living',
-    url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1920&h=1080&fit=crop&q=80',
-    alt: 'Breathtaking scenic mountain landscape at golden hour in the Pacific Northwest',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Main_road_in_Sisters_town%2C_Oregon_in_2011_%281%29.JPG/1920px-Main_road_in_Sisters_town%2C_Oregon_in_2011_%281%29.JPG',
+    alt: 'Main street in downtown Sisters, Oregon with the Cascade mountains in the background',
   },
   {
     id: 'wildfire-prep',
-    url: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=1920&h=1080&fit=crop&q=80',
-    alt: 'Dense forest and trees in fire-prone landscape requiring defensible space management',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Forest_in_Central_Oregon_2.jpg/1920px-Forest_in_Central_Oregon_2.jpg',
+    alt: 'Dense ponderosa pine forest in Central Oregon during fire season',
   },
   {
     id: 'rental-income',
-    url: 'https://images.unsplash.com/photo-1560184897-ae75f418493e?w=1920&h=1080&fit=crop&q=80',
-    alt: 'Modern well-maintained rental property with attractive curb appeal',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/View_of_South_Sister_and_Broken_Top_from_the_Cascade_Lakes_National_Scenic_Byway_near_the_bottom_of_Mount_Bachelor%2C_2011.jpg/1920px-View_of_South_Sister_and_Broken_Top_from_the_Cascade_Lakes_National_Scenic_Byway_near_the_bottom_of_Mount_Bachelor%2C_2011.jpg',
+    alt: 'South Sister and Broken Top mountains from the Cascade Lakes Scenic Byway near Mt. Bachelor',
   },
   {
     id: 'things-to-do',
-    url: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=1920&h=1080&fit=crop&q=80',
-    alt: 'Outdoor recreation and adventure activities in a stunning natural setting',
+    url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Three_Sisters_and_Mirror_Lake%2C_Oregon_%2875490%29.jpg/1920px-Three_Sisters_and_Mirror_Lake%2C_Oregon_%2875490%29.jpg',
+    alt: 'The Three Sisters mountains reflected in Mirror Lake, Central Oregon',
   },
 ]
 
