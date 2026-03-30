@@ -38,21 +38,25 @@ export default buildConfig({
     Leads,
   ],
   plugins: [
-    s3Storage({
-      collections: {
-        media: true,
-      },
-      bucket: process.env.S3_BUCKET || 'media',
-      config: {
-        credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
-        },
-        region: process.env.S3_REGION || 'us-east-2',
-        endpoint: process.env.S3_ENDPOINT || `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/s3`,
-        forcePathStyle: true,
-      },
-    }),
+    ...(process.env.S3_ACCESS_KEY_ID
+      ? [
+          s3Storage({
+            collections: {
+              media: true,
+            },
+            bucket: process.env.S3_BUCKET || 'media',
+            config: {
+              credentials: {
+                accessKeyId: process.env.S3_ACCESS_KEY_ID,
+                secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+              },
+              region: process.env.S3_REGION || 'us-east-2',
+              endpoint: process.env.S3_ENDPOINT || `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/s3`,
+              forcePathStyle: true,
+            },
+          }),
+        ]
+      : []),
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
