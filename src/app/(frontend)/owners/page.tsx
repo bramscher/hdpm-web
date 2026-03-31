@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 
@@ -111,29 +113,6 @@ const services = [
   },
 ]
 
-const ownerTestimonials = [
-  {
-    quote:
-      'High Desert PM has managed our Bend rental for over 5 years. They found excellent tenants every time and handle maintenance before I even know about it. My property value has only gone up.',
-    author: 'Mark & Sarah T.',
-    context: 'Property Owners, NW Bend',
-    rating: 5,
-  },
-  {
-    quote:
-      'I own three rental properties in Sisters and Redmond. The financial reporting alone is worth it — I can see exactly how each property performs. The team really knows the Central Oregon market.',
-    author: 'David K.',
-    context: 'Multi-property Owner',
-    rating: 5,
-  },
-  {
-    quote:
-      'After trying to self-manage for two years, switching to High Desert PM was the best decision I made. They reduced my vacancy rate and increased my rental income by 15%. Highly recommend.',
-    author: 'Patricia W.',
-    context: 'Property Owner, Bend',
-    rating: 5,
-  },
-]
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
@@ -160,7 +139,16 @@ function StarRating({ rating }: { rating: number }) {
 /*  Page                                                               */
 /* ------------------------------------------------------------------ */
 
-export default function OwnersPage() {
+export default async function OwnersPage() {
+  const payload = await getPayload({ config })
+  const { docs: ownerTestimonials } = await payload.find({
+    collection: 'testimonials',
+    where: { approved: { equals: true }, rating: { equals: 5 } },
+    sort: '-publishedAt',
+    limit: 3,
+    depth: 0,
+  })
+
   const jsonLd = breadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'Property Owners', url: '/owners' },
@@ -418,9 +406,9 @@ export default function OwnersPage() {
           </div>
 
           <div className="mt-16 grid gap-8 md:grid-cols-3">
-            {ownerTestimonials.map((testimonial, i) => (
+            {ownerTestimonials.map((testimonial) => (
               <div
-                key={i}
+                key={testimonial.id}
                 className="relative rounded-xl border border-gray-200 bg-neutral-light p-8 shadow-sm"
               >
                 <div className="absolute -top-3 left-6">
@@ -432,14 +420,21 @@ export default function OwnersPage() {
                 <StarRating rating={testimonial.rating} />
 
                 <blockquote className="mt-4 text-sm leading-relaxed text-neutral-dark">
-                  {testimonial.quote}
+                  {testimonial.text}
                 </blockquote>
 
                 <div className="mt-6 border-t border-gray-200 pt-4">
                   <p className="font-heading text-sm font-bold text-neutral-dark">
                     {testimonial.author}
                   </p>
-                  <p className="text-xs text-neutral-mid">{testimonial.context}</p>
+                  {testimonial.publishedAt && (
+                    <p className="text-xs text-neutral-mid">
+                      {new Date(testimonial.publishedAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}

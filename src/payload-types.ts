@@ -373,9 +373,14 @@ export interface MarketArea {
 export interface Testimonial {
   id: number;
   author: string;
-  company?: string | null;
   text: string;
   rating: number;
+  source?: ('google' | 'manual') | null;
+  /**
+   * Unique ID to prevent duplicate imports
+   */
+  googleReviewId?: string | null;
+  publishedAt?: string | null;
   approved?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -707,9 +712,11 @@ export interface MarketAreasSelect<T extends boolean = true> {
  */
 export interface TestimonialsSelect<T extends boolean = true> {
   author?: T;
-  company?: T;
   text?: T;
   rating?: T;
+  source?: T;
+  googleReviewId?: T;
+  publishedAt?: T;
   approved?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -4,6 +4,7 @@ export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
   admin: {
     useAsTitle: 'author',
+    defaultColumns: ['author', 'rating', 'source', 'approved', 'publishedAt'],
   },
   access: {
     read: () => true,
@@ -13,10 +14,6 @@ export const Testimonials: CollectionConfig = {
       name: 'author',
       type: 'text',
       required: true,
-    },
-    {
-      name: 'company',
-      type: 'text',
     },
     {
       name: 'text',
@@ -32,9 +29,38 @@ export const Testimonials: CollectionConfig = {
       defaultValue: 5,
     },
     {
+      name: 'source',
+      type: 'select',
+      defaultValue: 'google',
+      options: [
+        { label: 'Google', value: 'google' },
+        { label: 'Manual', value: 'manual' },
+      ],
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'googleReviewId',
+      type: 'text',
+      unique: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Unique ID to prevent duplicate imports',
+      },
+    },
+    {
+      name: 'publishedAt',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        date: { pickerAppearance: 'dayOnly' },
+      },
+    },
+    {
       name: 'approved',
       type: 'checkbox',
-      defaultValue: false,
+      defaultValue: true,
       admin: {
         position: 'sidebar',
       },
