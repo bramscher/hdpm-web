@@ -7,42 +7,55 @@ export const leadsAfterChange: CollectionAfterChangeHook = async ({
   previousDoc,
   req,
 }) => {
+  // Defer side effects to run after the transaction commits
+  // Using setImmediate/setTimeout to escape the transaction context
   if (operation === 'create') {
     const source = doc.source ?? 'unknown'
-
-    // Log lead creation activity
-    await createActivityLog(req.payload, doc.id, 'note', `Lead created from ${source}`, {
-      direction: 'internal',
-      performedById: req.user?.id ?? undefined,
-    })
-
-    // Create initial follow-up task for the assigned user
     const assignedToId =
       typeof doc.assignedTo === 'object' ? doc.assignedTo?.id : doc.assignedTo
-    if (assignedToId) {
-      await createFollowUpTask(req.payload, doc.id, assignedToId, {
-        taskType: 'follow_up_call',
-        title: `Initial follow-up: ${doc.firstName} ${doc.lastName}`,
-        dueMinutes: 10,
-        priority: 'high',
-      })
-    }
+    const userId = req.user?.id
+
+    setImmediate(async () => {
+      try {
+        await createActivityLog(req.payload, doc.id, 'note', `Lead created from ${source}`, {
+          direction: 'internal',
+          performedById: userId ?? undefined,
+        })
+
+        if (assignedToId) {
+          await createFollowUpTask(req.payload, doc.id, assignedToId, {
+            taskType: 'follow_up_call',
+            title: `Initial follow-up: ${doc.firstName} ${doc.lastName}`,
+            dueMinutes: 10,
+            priority: 'high',
+          })
+        }
+      } catch (err) {
+        console.error('[CRM] Failed to create post-lead activity/task:', err)
+      }
+    })
   }
 
   if (operation === 'update') {
-    // Log status transitions
     if (previousDoc?.status && doc.status && previousDoc.status !== doc.status) {
-      await createActivityLog(
-        req.payload,
-        doc.id,
-        'status_changed',
-        `Status changed from ${previousDoc.status} to ${doc.status}`,
-        {
-          direction: 'internal',
-          metadata: { from: previousDoc.status, to: doc.status },
-          performedById: req.user?.id ?? undefined,
-        },
-      )
+      const userId = req.user?.id
+      setImmediate(async () => {
+        try {
+          await createActivityLog(
+            req.payload,
+            doc.id,
+            'status_changed',
+            `Status changed from ${previousDoc.status} to ${doc.status}`,
+            {
+              direction: 'internal',
+              metadata: { from: previousDoc.status, to: doc.status },
+              performedById: userId ?? undefined,
+            },
+          )
+        } catch (err) {
+          console.error('[CRM] Failed to log status change:', err)
+        }
+      })
     }
   }
 
