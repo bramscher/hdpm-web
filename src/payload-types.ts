@@ -344,23 +344,39 @@ export interface MarketArea {
   city: string;
   slug: string;
   state?: string | null;
-  heroText?: string | null;
+  /**
+   * Short tagline shown under the city name
+   */
+  tagline?: string | null;
   heroImage?: (number | null) | Media;
-  marketDescription?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  /**
+   * External image URL (used if no heroImage uploaded)
+   */
+  heroImageUrl?: string | null;
+  imageAlt?: string | null;
+  population?: number | null;
+  /**
+   * Monthly median rent ($)
+   */
+  medianRent?: number | null;
+  /**
+   * Body paragraphs for the market area detail page
+   */
+  description?:
+    | {
+        paragraph: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Bullet point highlights
+   */
+  highlights?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
   updatedAt: string;
@@ -698,9 +714,24 @@ export interface MarketAreasSelect<T extends boolean = true> {
   city?: T;
   slug?: T;
   state?: T;
-  heroText?: T;
+  tagline?: T;
   heroImage?: T;
-  marketDescription?: T;
+  heroImageUrl?: T;
+  imageAlt?: T;
+  population?: T;
+  medianRent?: T;
+  description?:
+    | T
+    | {
+        paragraph?: T;
+        id?: T;
+      };
+  highlights?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   seoTitle?: T;
   seoDescription?: T;
   updatedAt?: T;
