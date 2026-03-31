@@ -16,6 +16,11 @@ import { MarketAreas } from './collections/MarketAreas'
 import { Testimonials } from './collections/Testimonials'
 import { TeamMembers } from './collections/TeamMembers'
 import { Leads } from './collections/Leads'
+import { LeadActivities } from './collections/LeadActivities'
+import { LeadTasks } from './collections/LeadTasks'
+import { PropertiesInterest } from './collections/PropertiesInterest'
+import { LeadConversations } from './collections/LeadConversations'
+import { AutomationRules } from './collections/AutomationRules'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -27,11 +32,26 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     components: {
-      afterNavLinks: ['./admin/components/ImageBrowserNavLink'],
+      afterNavLinks: [
+        './admin/components/ImageBrowserNavLink',
+        './admin/components/CrmNavLink',
+      ],
       views: {
         imageBrowser: {
           Component: './admin/components/ImageBrowserView',
           path: '/image-browser',
+        },
+        crmDashboard: {
+          Component: './admin/components/crm/CrmDashboardView',
+          path: '/crm',
+        },
+        crmInbox: {
+          Component: './admin/components/crm/InboxView',
+          path: '/crm/inbox',
+        },
+        crmReporting: {
+          Component: './admin/components/crm/ReportingView',
+          path: '/crm/reporting',
         },
       },
     },
@@ -46,6 +66,11 @@ export default buildConfig({
     Testimonials,
     TeamMembers,
     Leads,
+    LeadActivities,
+    LeadTasks,
+    PropertiesInterest,
+    LeadConversations,
+    AutomationRules,
   ],
   plugins: [
     seoPlugin({

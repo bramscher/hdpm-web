@@ -76,6 +76,11 @@ export interface Config {
     testimonials: Testimonial;
     'team-members': TeamMember;
     leads: Lead;
+    'lead-activities': LeadActivity;
+    'lead-tasks': LeadTask;
+    'properties-interest': PropertiesInterest;
+    'lead-conversations': LeadConversation;
+    'automation-rules': AutomationRule;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +97,11 @@ export interface Config {
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
+    'lead-activities': LeadActivitiesSelect<false> | LeadActivitiesSelect<true>;
+    'lead-tasks': LeadTasksSelect<false> | LeadTasksSelect<true>;
+    'properties-interest': PropertiesInterestSelect<false> | PropertiesInterestSelect<true>;
+    'lead-conversations': LeadConversationsSelect<false> | LeadConversationsSelect<true>;
+    'automation-rules': AutomationRulesSelect<false> | AutomationRulesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -138,6 +148,20 @@ export interface UserAuthOperations {
 export interface User {
   id: number;
   role: 'admin' | 'editor' | 'viewer' | 'api';
+  firstName?: string | null;
+  lastName?: string | null;
+  /**
+   * If checked, this user can be assigned leads via round-robin
+   */
+  isAssignable?: boolean | null;
+  /**
+   * Used for routing Spanish-speaking leads
+   */
+  speaksSpanish?: boolean | null;
+  /**
+   * Maximum number of open leads this user can be assigned
+   */
+  maxLeads?: number | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -426,12 +450,214 @@ export interface TeamMember {
  */
 export interface Lead {
   id: number;
-  name: string;
+  status?:
+    | (
+        | 'new'
+        | 'attempted_contact'
+        | 'engaged'
+        | 'tour_scheduled'
+        | 'toured'
+        | 'applied'
+        | 'approved'
+        | 'leased'
+        | 'lost'
+        | 'archived'
+      )
+    | null;
+  assignedTo?: (number | null) | User;
+  nextFollowUpAt?: string | null;
+  firstName: string;
+  lastName: string;
   email: string;
   phone?: string | null;
+  preferredLanguage?: ('en' | 'es') | null;
+  doNotContact?: boolean | null;
+  smsOptIn?: boolean | null;
+  emailOptIn?: boolean | null;
+  source?:
+    | ('zillow' | 'apartments_com' | 'website' | 'facebook' | 'instagram' | 'phone' | 'walk_in' | 'referral' | 'other')
+    | null;
+  sourceDetail?: string | null;
+  leadType?: ('tenant' | 'owner' | 'vendor' | 'other') | null;
+  stageReason?: string | null;
+  notesSummary?: string | null;
+  /**
+   * Initial inquiry message (from contact form)
+   */
   message?: string | null;
-  propertyInterest?: ('owner' | 'tenant' | 'general') | null;
-  source?: string | null;
+  desiredMoveInDate?: string | null;
+  monthlyBudgetMin?: number | null;
+  monthlyBudgetMax?: number | null;
+  lastContactedAt?: string | null;
+  lastInboundAt?: string | null;
+  lastOutboundAt?: string | null;
+  /**
+   * AppFolio guest card ID for sync
+   */
+  appfolioGuestCardId?: string | null;
+  /**
+   * Rentzap application ID
+   */
+  rentzapApplicationId?: string | null;
+  /**
+   * ID of the original lead if this is a duplicate
+   */
+  isDuplicateOfLeadId?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-activities".
+ */
+export interface LeadActivity {
+  id: number;
+  lead: number | Lead;
+  type:
+    | 'note'
+    | 'email_sent'
+    | 'email_received'
+    | 'sms_sent'
+    | 'sms_received'
+    | 'call_logged'
+    | 'voicemail'
+    | 'task_created'
+    | 'task_completed'
+    | 'status_changed'
+    | 'property_matched'
+    | 'guest_card_created';
+  direction?: ('inbound' | 'outbound' | 'internal') | null;
+  body: string;
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  performedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-tasks".
+ */
+export interface LeadTask {
+  id: number;
+  lead: number | Lead;
+  title: string;
+  description?: string | null;
+  taskType:
+    | 'follow_up_call'
+    | 'follow_up_sms'
+    | 'follow_up_email'
+    | 'manual_review'
+    | 'spanish_follow_up'
+    | 'appfolio_push'
+    | 'other';
+  status?: ('open' | 'in_progress' | 'complete' | 'canceled' | 'overdue') | null;
+  dueAt: string;
+  completedAt?: string | null;
+  assignedTo: number | User;
+  priority?: ('low' | 'medium' | 'high' | 'urgent') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "properties-interest".
+ */
+export interface PropertiesInterest {
+  id: number;
+  lead: number | Lead;
+  /**
+   * AppFolio listing ID
+   */
+  propertyExternalId?: string | null;
+  propertyName?: string | null;
+  unitIdentifier?: string | null;
+  address?: string | null;
+  rent?: number | null;
+  availabilityDate?: string | null;
+  /**
+   * Link to the listing
+   */
+  sourceUrl?: string | null;
+  status?: ('interested' | 'touring' | 'applied' | 'leased' | 'lost') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-conversations".
+ */
+export interface LeadConversation {
+  id: number;
+  lead: number | Lead;
+  channel: 'email' | 'sms' | 'phone' | 'web' | 'social' | 'internal';
+  subject?: string | null;
+  body: string;
+  direction?: ('inbound' | 'outbound') | null;
+  language?: ('en' | 'es') | null;
+  /**
+   * Null for inbound messages from the lead
+   */
+  sentBy?: (number | null) | User;
+  latestMessageAt?: string | null;
+  metadata?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "automation-rules".
+ */
+export interface AutomationRule {
+  id: number;
+  name: string;
+  description?: string | null;
+  isActive?: boolean | null;
+  triggerType: 'lead_created' | 'status_changed' | 'no_activity_timeout' | 'task_overdue' | 'follow_up_due';
+  /**
+   * JSON object with condition key-value pairs to match against the lead
+   */
+  conditions?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  actionType: 'create_task' | 'change_status' | 'send_notification' | 'assign_lead';
+  /**
+   * JSON object with action parameters (varies by action type)
+   */
+  actionConfig?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Execution order (lower = first)
+   */
+  priority?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -494,6 +720,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'leads';
         value: number | Lead;
+      } | null)
+    | ({
+        relationTo: 'lead-activities';
+        value: number | LeadActivity;
+      } | null)
+    | ({
+        relationTo: 'lead-tasks';
+        value: number | LeadTask;
+      } | null)
+    | ({
+        relationTo: 'properties-interest';
+        value: number | PropertiesInterest;
+      } | null)
+    | ({
+        relationTo: 'lead-conversations';
+        value: number | LeadConversation;
+      } | null)
+    | ({
+        relationTo: 'automation-rules';
+        value: number | AutomationRule;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -543,6 +789,11 @@ export interface PayloadMigration {
  */
 export interface UsersSelect<T extends boolean = true> {
   role?: T;
+  firstName?: T;
+  lastName?: T;
+  isAssignable?: T;
+  speaksSpanish?: T;
+  maxLeads?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -772,12 +1023,113 @@ export interface TeamMembersSelect<T extends boolean = true> {
  * via the `definition` "leads_select".
  */
 export interface LeadsSelect<T extends boolean = true> {
-  name?: T;
+  status?: T;
+  assignedTo?: T;
+  nextFollowUpAt?: T;
+  firstName?: T;
+  lastName?: T;
   email?: T;
   phone?: T;
-  message?: T;
-  propertyInterest?: T;
+  preferredLanguage?: T;
+  doNotContact?: T;
+  smsOptIn?: T;
+  emailOptIn?: T;
   source?: T;
+  sourceDetail?: T;
+  leadType?: T;
+  stageReason?: T;
+  notesSummary?: T;
+  message?: T;
+  desiredMoveInDate?: T;
+  monthlyBudgetMin?: T;
+  monthlyBudgetMax?: T;
+  lastContactedAt?: T;
+  lastInboundAt?: T;
+  lastOutboundAt?: T;
+  appfolioGuestCardId?: T;
+  rentzapApplicationId?: T;
+  isDuplicateOfLeadId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-activities_select".
+ */
+export interface LeadActivitiesSelect<T extends boolean = true> {
+  lead?: T;
+  type?: T;
+  direction?: T;
+  body?: T;
+  metadata?: T;
+  performedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-tasks_select".
+ */
+export interface LeadTasksSelect<T extends boolean = true> {
+  lead?: T;
+  title?: T;
+  description?: T;
+  taskType?: T;
+  status?: T;
+  dueAt?: T;
+  completedAt?: T;
+  assignedTo?: T;
+  priority?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "properties-interest_select".
+ */
+export interface PropertiesInterestSelect<T extends boolean = true> {
+  lead?: T;
+  propertyExternalId?: T;
+  propertyName?: T;
+  unitIdentifier?: T;
+  address?: T;
+  rent?: T;
+  availabilityDate?: T;
+  sourceUrl?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-conversations_select".
+ */
+export interface LeadConversationsSelect<T extends boolean = true> {
+  lead?: T;
+  channel?: T;
+  subject?: T;
+  body?: T;
+  direction?: T;
+  language?: T;
+  sentBy?: T;
+  latestMessageAt?: T;
+  metadata?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "automation-rules_select".
+ */
+export interface AutomationRulesSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  isActive?: T;
+  triggerType?: T;
+  conditions?: T;
+  actionType?: T;
+  actionConfig?: T;
+  priority?: T;
   updatedAt?: T;
   createdAt?: T;
 }

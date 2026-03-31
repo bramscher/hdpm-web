@@ -2,6 +2,7 @@
 
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { splitName } from '../../../lib/crm/normalization'
 
 export type ContactFormState = {
   success: boolean
@@ -31,15 +32,26 @@ export async function submitContactForm(
   try {
     const payload = await getPayload({ config })
 
+    const { firstName, lastName } = splitName(name)
+
+    // Map propertyInterest to leadType
+    const leadTypeMap: Record<string, string> = {
+      owner: 'owner',
+      tenant: 'tenant',
+      general: 'other',
+    }
+    const leadType = propertyInterest ? leadTypeMap[propertyInterest] || 'other' : undefined
+
     await payload.create({
       collection: 'leads',
       data: {
-        name,
+        firstName,
+        lastName: lastName || name, // fallback if no last name parsed
         email,
         phone,
-        propertyInterest: propertyInterest as 'owner' | 'tenant' | 'general' | undefined,
+        leadType: leadType as 'tenant' | 'owner' | 'vendor' | 'other' | undefined,
         message,
-        source: 'contact-page',
+        source: 'website' as const,
       },
     })
 

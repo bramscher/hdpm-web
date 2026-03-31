@@ -25,5 +25,45 @@ export const Users: CollectionConfig = {
         position: 'sidebar',
       },
     },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'firstName',
+          type: 'text',
+        },
+        {
+          name: 'lastName',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'isAssignable',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'If checked, this user can be assigned leads via round-robin',
+      },
+    },
+    {
+      name: 'speaksSpanish',
+      type: 'checkbox',
+      defaultValue: false,
+      admin: {
+        position: 'sidebar',
+        description: 'Used for routing Spanish-speaking leads',
+      },
+    },
+    {
+      name: 'maxLeads',
+      type: 'number',
+      min: 0,
+      admin: {
+        position: 'sidebar',
+        description: 'Maximum number of open leads this user can be assigned',
+      },
+    },
   ],
 }
