@@ -1,4 +1,5 @@
-import type { Payload } from 'payload'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyPayload = any
 
 interface AutomationRule {
   id: number
@@ -33,7 +34,7 @@ function conditionsMatch(
  * Executes a single automation action against a lead.
  */
 async function executeAction(
-  payload: Payload,
+  payload: AnyPayload,
   rule: AutomationRule,
   lead: { id: number; [key: string]: unknown },
 ): Promise<void> {
@@ -46,9 +47,9 @@ async function executeAction(
         data: {
           lead: lead.id,
           title: (config.title as string) || `Auto: ${rule.name}`,
-          taskType: (config.taskType as string) || 'follow_up',
-          status: 'pending',
-          priority: (config.priority as string) || 'normal',
+          taskType: ((config.taskType as string) || 'follow_up_call') as 'follow_up_call' | 'follow_up_sms' | 'follow_up_email' | 'manual_review' | 'spanish_follow_up' | 'appfolio_push' | 'other',
+          status: 'open' as const,
+          priority: ((config.priority as string) || 'medium') as 'low' | 'medium' | 'high' | 'urgent',
           dueAt: config.dueInHours
             ? new Date(Date.now() + Number(config.dueInHours) * 3600000).toISOString()
             : undefined,
@@ -65,7 +66,7 @@ async function executeAction(
         await payload.update({
           collection: 'leads',
           id: lead.id,
-          data: { status: newStatus },
+          data: { status: newStatus as 'new' | 'attempted_contact' | 'engaged' | 'tour_scheduled' | 'toured' | 'applied' | 'approved' | 'leased' | 'lost' | 'archived' },
         })
       }
       break
@@ -101,7 +102,7 @@ async function executeAction(
  * Rules are fetched ordered by priority (ascending) and executed sequentially.
  */
 export async function evaluateRules(
-  payload: Payload,
+  payload: AnyPayload,
   trigger: string,
   lead: { id: number; [key: string]: unknown },
 ): Promise<void> {
