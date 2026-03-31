@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin '@tailwindcss/typography';
 
 @theme {
   /* Brand Colors — modernized from existing HDPM site */
@@ -196,7 +197,8 @@
       background-color: #f9fafb;
     }
 
-    /* Drop cap for first paragraph (optional flair) */
+    /* Drop cap for first paragraph (works with Lexical .payload-richtext wrapper) */
+    & > .payload-richtext > p:first-of-type::first-letter,
     & > p:first-of-type::first-letter {
       float: left;
       font-family: var(--font-heading);

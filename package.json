@@ -16,10 +16,11 @@
   "dependencies": {
     "@payloadcms/db-postgres": "^3.80.0",
     "@payloadcms/next": "^3.80.0",
+    "@payloadcms/plugin-cloud-storage": "^3.80.0",
     "@payloadcms/plugin-seo": "^3.80.0",
     "@payloadcms/richtext-lexical": "^3.80.0",
-    "@payloadcms/plugin-cloud-storage": "^3.80.0",
     "@supabase/supabase-js": "^2.100.1",
+    "@tailwindcss/typography": "^0.5.19",
     "cross-env": "^10.1.0",
     "graphql": "^16.13.2",
     "next": "15.4.11",
