@@ -410,12 +410,59 @@ export interface TeamMember {
  */
 export interface Lead {
   id: number;
-  name: string;
+  status?:
+    | (
+        | 'new'
+        | 'attempted_contact'
+        | 'engaged'
+        | 'tour_scheduled'
+        | 'toured'
+        | 'applied'
+        | 'approved'
+        | 'leased'
+        | 'lost'
+        | 'archived'
+      )
+    | null;
+  assignedTo?: (number | null) | User;
+  nextFollowUpAt?: string | null;
+  firstName: string;
+  lastName: string;
   email: string;
   phone?: string | null;
+  preferredLanguage?: ('en' | 'es') | null;
+  doNotContact?: boolean | null;
+  smsOptIn?: boolean | null;
+  emailOptIn?: boolean | null;
+  source?:
+    | ('zillow' | 'apartments_com' | 'website' | 'facebook' | 'instagram' | 'phone' | 'walk_in' | 'referral' | 'other')
+    | null;
+  sourceDetail?: string | null;
+  leadType?: ('tenant' | 'owner' | 'vendor' | 'other') | null;
+  stageReason?: string | null;
+  notesSummary?: string | null;
+  /**
+   * Initial inquiry message (from contact form)
+   */
   message?: string | null;
-  propertyInterest?: ('owner' | 'tenant' | 'general') | null;
-  source?: string | null;
+  desiredMoveInDate?: string | null;
+  monthlyBudgetMin?: number | null;
+  monthlyBudgetMax?: number | null;
+  lastContactedAt?: string | null;
+  lastInboundAt?: string | null;
+  lastOutboundAt?: string | null;
+  /**
+   * AppFolio guest card ID for sync
+   */
+  appfolioGuestCardId?: string | null;
+  /**
+   * Rentzap application ID
+   */
+  rentzapApplicationId?: string | null;
+  /**
+   * ID of the original lead if this is a duplicate
+   */
+  isDuplicateOfLeadId?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -741,12 +788,32 @@ export interface TeamMembersSelect<T extends boolean = true> {
  * via the `definition` "leads_select".
  */
 export interface LeadsSelect<T extends boolean = true> {
-  name?: T;
+  status?: T;
+  assignedTo?: T;
+  nextFollowUpAt?: T;
+  firstName?: T;
+  lastName?: T;
   email?: T;
   phone?: T;
-  message?: T;
-  propertyInterest?: T;
+  preferredLanguage?: T;
+  doNotContact?: T;
+  smsOptIn?: T;
+  emailOptIn?: T;
   source?: T;
+  sourceDetail?: T;
+  leadType?: T;
+  stageReason?: T;
+  notesSummary?: T;
+  message?: T;
+  desiredMoveInDate?: T;
+  monthlyBudgetMin?: T;
+  monthlyBudgetMax?: T;
+  lastContactedAt?: T;
+  lastInboundAt?: T;
+  lastOutboundAt?: T;
+  appfolioGuestCardId?: T;
+  rentzapApplicationId?: T;
+  isDuplicateOfLeadId?: T;
   updatedAt?: T;
   createdAt?: T;
 }
