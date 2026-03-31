@@ -6,6 +6,7 @@ export const Leads: CollectionConfig = {
   slug: 'leads',
   admin: {
     useAsTitle: 'email',
+    group: 'CRM',
     defaultColumns: [
       'firstName',
       'lastName',
