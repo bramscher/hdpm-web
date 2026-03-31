@@ -53,18 +53,11 @@ async function main() {
 
     const buffer = Buffer.from(await blob.arrayBuffer())
 
-    // Generate and upload each size variant
+    // Generate and upload each size variant (always overwrite to fix mismatches)
     for (const size of SIZES) {
       const ext = filename.match(/\.[^.]+$/)?.[0] || '.jpg'
       const baseName = filename.replace(/\.[^.]+$/, '')
       const sizeFilename = `${baseName}-${size.width}x${size.height}${ext}`
-
-      // Check if already exists
-      const { data: existing } = await supabase.storage.from(BUCKET).list('', { search: sizeFilename })
-      if (existing && existing.some((f) => f.name === sizeFilename)) {
-        console.log(`  ✓ ${size.name} (exists)`)
-        continue
-      }
 
       try {
         const resized = await sharp(buffer)

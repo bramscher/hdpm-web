@@ -20,7 +20,7 @@ async function searchWikimedia(query: string, page: number): Promise<SearchResul
     action: 'query',
     generator: 'search',
     gsrnamespace: '6', // File namespace
-    gsrsearch: `${query} filetype:jpg OR filetype:png`,
+    gsrsearch: query,
     gsrlimit: '20',
     gsroffset: String(offset),
     prop: 'imageinfo',
