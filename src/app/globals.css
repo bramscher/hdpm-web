@@ -45,3 +45,167 @@
     border-radius: 4px;
   }
 }
+
+/* ── Blog Article Typography ── */
+@layer components {
+  .blog-article {
+    /* Paragraphs: generous spacing and comfortable line height */
+    & p {
+      margin-top: 1.5em;
+      margin-bottom: 1.5em;
+      line-height: 1.8;
+      font-size: 1.0625rem;
+    }
+
+    /* First paragraph after a heading: slight extra top spacing */
+    & h2 + p,
+    & h3 + p,
+    & h4 + p {
+      margin-top: 1em;
+    }
+
+    /* H2: Primary section headers — bold visual break */
+    & h2 {
+      margin-top: 3em;
+      margin-bottom: 0.75em;
+      padding-bottom: 0.5em;
+      border-bottom: 2px solid #e5e7eb;
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+
+    /* H3: Sub-section headers */
+    & h3 {
+      margin-top: 2.25em;
+      margin-bottom: 0.6em;
+      font-size: 1.375rem;
+      font-weight: 700;
+      letter-spacing: -0.005em;
+      line-height: 1.35;
+      color: var(--color-primary-light);
+    }
+
+    /* H4: Minor headers */
+    & h4 {
+      margin-top: 1.75em;
+      margin-bottom: 0.5em;
+      font-size: 1.125rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--color-neutral-mid);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-size: 0.875rem;
+    }
+
+    /* First h2 in the article shouldn't have excessive top margin */
+    & > h2:first-child {
+      margin-top: 0;
+    }
+
+    /* Lists: comfortable spacing */
+    & ul,
+    & ol {
+      margin-top: 1.25em;
+      margin-bottom: 1.25em;
+      padding-left: 1.5em;
+    }
+
+    & li {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+      line-height: 1.75;
+    }
+
+    & li::marker {
+      color: var(--color-accent);
+    }
+
+    /* Nested lists */
+    & li > ul,
+    & li > ol {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+    }
+
+    /* Blockquotes */
+    & blockquote {
+      margin-top: 2em;
+      margin-bottom: 2em;
+      padding-left: 1.25em;
+      border-left-width: 3px;
+      font-size: 1.0625rem;
+      line-height: 1.75;
+    }
+
+    /* Horizontal rules as section dividers */
+    & hr {
+      margin-top: 3em;
+      margin-bottom: 3em;
+    }
+
+    /* Images: center and add breathing room */
+    & img {
+      margin-top: 2em;
+      margin-bottom: 2em;
+    }
+
+    /* Code blocks */
+    & pre {
+      margin-top: 1.75em;
+      margin-bottom: 1.75em;
+      border-radius: 0.75rem;
+    }
+
+    /* Inline code */
+    & :not(pre) > code {
+      padding: 0.15em 0.4em;
+      border-radius: 0.25rem;
+      background-color: #f3f4f6;
+      font-size: 0.875em;
+      font-weight: 500;
+      color: var(--color-primary);
+    }
+
+    /* Tables */
+    & table {
+      margin-top: 2em;
+      margin-bottom: 2em;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    & th {
+      background-color: var(--color-primary);
+      color: white;
+      font-weight: 600;
+      padding: 0.75em 1em;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    & td {
+      padding: 0.75em 1em;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.9375rem;
+    }
+
+    & tr:nth-child(even) td {
+      background-color: #f9fafb;
+    }
+
+    /* Drop cap for first paragraph (optional flair) */
+    & > p:first-of-type::first-letter {
+      float: left;
+      font-family: var(--font-heading);
+      font-size: 3.5em;
+      font-weight: 700;
+      line-height: 0.85;
+      margin-right: 0.08em;
+      margin-top: 0.05em;
+      color: var(--color-primary);
+    }
+  }
+}
