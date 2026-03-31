@@ -75,19 +75,5 @@ export const Posts: CollectionConfig = {
       name: 'body',
       type: 'richText',
     },
-    {
-      name: 'seoTitle',
-      type: 'text',
-      admin: {
-        position: 'sidebar',
-      },
-    },
-    {
-      name: 'seoDescription',
-      type: 'textarea',
-      admin: {
-        position: 'sidebar',
-      },
-    },
   ],
 }

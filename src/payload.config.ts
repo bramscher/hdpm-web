@@ -1,6 +1,7 @@
 import { buildConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { seoPlugin } from '@payloadcms/plugin-seo'
 import { supabaseStorage } from './lib/supabase-storage-adapter'
 import sharp from 'sharp'
 import path from 'path'
@@ -47,6 +48,17 @@ export default buildConfig({
     Leads,
   ],
   plugins: [
+    seoPlugin({
+      collections: ['posts', 'pages'],
+      uploadsCollection: 'media',
+      generateTitle: ({ doc }: { doc: Record<string, unknown> }) =>
+        `${doc.title as string} | High Desert Property Management`,
+      generateDescription: ({ doc }: { doc: Record<string, unknown> }) =>
+        (doc.seoDescription as string) || '',
+      generateURL: ({ doc }: { doc: Record<string, unknown> }) =>
+        `https://highdesertpm.com/${(doc.slug as string) || ''}`,
+      tabbedUI: true,
+    }),
     ...(process.env.SUPABASE_SERVICE_ROLE_KEY
       ? [
           supabaseStorage({

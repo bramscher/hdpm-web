@@ -44,9 +44,9 @@ export async function generateMetadata({
   const post = docs[0]
   if (!post) return { title: 'Post Not Found' }
 
-  const title = post.seoTitle || post.title
+  const title = post.meta?.title || post.title
   const description =
-    post.seoDescription ||
+    post.meta?.description ||
     `Read "${post.title}" on the High Desert Property Management blog. Insights for Central Oregon property owners and tenants.`
   const featuredImage =
     typeof post.featuredImage === 'object'
