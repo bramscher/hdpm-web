@@ -13,7 +13,7 @@ const TEAM_MEMBERS = [
   {
     name: 'Craig Bramscher',
     title: 'President',
-    bio: 'Craig founded HDPM to bring a smarter, more transparent approach to property management in Central Oregon. He leads company strategy and technology adoption, and works directly with owners to make sure their investments are performing. When he\'s not in the office, he\'s usually somewhere on the west side with his family.',
+    bio: 'Craig leads HDPM\'s strategy and technology adoption, working directly with owners to make sure their investments are performing. He\'s passionate about bringing a smarter, more transparent approach to property management in Central Oregon. When he\'s not at the office, you\'ll find him tinkering with technology, fly fishing, or playing pickleball — ideally with his family, including his four children.',
     order: 1,
   },
   {

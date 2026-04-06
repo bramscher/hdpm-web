@@ -124,10 +124,10 @@ export default async function AboutPage() {
             </h2>
             <div className="mt-8 space-y-6 text-lg leading-relaxed text-neutral-mid">
               <p>
-                High Desert Property Management was founded with a simple mission: to provide
+                High Desert Property Management operates with a simple mission: to provide
                 Central Oregon property owners with professional, reliable management they can
-                trust. What started as a small operation has grown into one of the region&apos;s
-                most respected property management companies.
+                trust. Over the years, we&apos;ve grown into one of the region&apos;s most
+                respected property management companies.
               </p>
               <p>
                 Over the years, we&apos;ve built our reputation on honest communication,

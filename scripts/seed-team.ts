@@ -13,7 +13,7 @@ const TEAM_MEMBERS = [
   {
     name: 'Craig Bramscher',
     title: 'President',
-    bio: 'Craig founded High Desert Property Management with a vision to bring technology-forward, owner-first management to Central Oregon. He oversees company strategy, technology investments, and key owner relationships across the portfolio.',
+    bio: 'Craig leads HDPM\'s strategy and technology adoption, working directly with owners to make sure their investments are performing. He\'s passionate about bringing a smarter, more transparent approach to property management in Central Oregon. When he\'s not at the office, you\'ll find him tinkering with technology, fly fishing, or playing pickleball — ideally with his family, including his four children.',
     order: 1,
   },
   {
