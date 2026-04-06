@@ -62,7 +62,7 @@ export default function TenantFAQ() {
               <span className="font-heading text-sm font-bold text-neutral-dark sm:text-base">
                 {faq.question}
               </span>
-              <svg
+              <svg aria-hidden="true"
                 className={`h-5 w-5 flex-shrink-0 text-accent transition-transform duration-300 ${
                   isOpen ? 'rotate-180' : ''
                 }`}

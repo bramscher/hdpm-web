@@ -14,16 +14,16 @@ export function localBusinessSchema() {
     telephone: '(541) 548-0383',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: '413 NW Greenwood Ave, Ste 200',
-      addressLocality: 'Bend',
+      streetAddress: '1515 SW Reindeer Ave',
+      addressLocality: 'Redmond',
       addressRegion: 'OR',
-      postalCode: '97703',
+      postalCode: '97756',
       addressCountry: 'US',
     },
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: 44.0582,
-      longitude: -121.3153,
+      latitude: 44.2726,
+      longitude: -121.1739,
     },
     areaServed: [
       { '@type': 'City', name: 'Bend, OR' },

@@ -22,7 +22,7 @@ const tenantPortals = [
       'Make secure rent payments anytime through our online tenant portal. Set up auto-pay for hassle-free monthly payments.',
     href: 'https://highdesertpm.appfolio.com/connect/users/sign_in',
     icon: (
-      <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
       </svg>
     ),
@@ -34,7 +34,7 @@ const tenantPortals = [
       'Report maintenance issues quickly through our online portal. Emergency requests are prioritized and responded to 24/7.',
     href: 'https://highdesertpm.appfolio.com/connect/users/sign_in',
     icon: (
-      <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17l-5.384 5.383a2.1 2.1 0 01-2.97-2.97l5.384-5.383m1.414-1.414l1.414-1.414a2.1 2.1 0 012.97 0l1.414 1.414a2.1 2.1 0 010 2.97l-1.414 1.414M7.5 10.5l4-4m2 8l4-4m-8.5 8.5l-1.5 1.5m6-14l1.5-1.5" />
       </svg>
     ),
@@ -46,7 +46,7 @@ const tenantPortals = [
       'Access lease information, move-in and move-out guides, community guidelines, and other helpful documents for your tenancy.',
     href: 'https://highdesertpm.appfolio.com/connect/users/sign_in',
     icon: (
-      <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
       </svg>
     ),
@@ -138,7 +138,7 @@ export default function TenantsPage() {
                 className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
               >
                 Browse Available Rentals
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -155,7 +155,7 @@ export default function TenantsPage() {
                 className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-8 py-4 text-base font-semibold text-white border border-white/20 shadow-lg shadow-black/20 backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
               >
                 Tenant Portal Login
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -208,7 +208,7 @@ export default function TenantsPage() {
 
                 <div className="mt-5 flex items-center gap-1 text-sm font-semibold text-accent opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1">
                   Open Portal
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                   </svg>
                 </div>
@@ -226,7 +226,7 @@ export default function TenantsPage() {
           <div className="flex flex-col items-center gap-12 lg:flex-row">
             <div className="flex w-full items-center justify-center lg:w-5/12">
               <div className="flex h-48 w-48 items-center justify-center rounded-2xl bg-accent/10 text-accent sm:h-56 sm:w-56">
-                <svg className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg aria-hidden="true" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                 </svg>
               </div>
@@ -251,7 +251,7 @@ export default function TenantsPage() {
                   'Secure online rent payments and maintenance requests',
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3 text-sm text-neutral-dark">
-                    <svg
+                    <svg aria-hidden="true"
                       className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -269,7 +269,7 @@ export default function TenantsPage() {
                 className="group mt-8 inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
               >
                 View Available Listings
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -374,11 +374,11 @@ export default function TenantsPage() {
               href="/listings"
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
               Browse Listings
-              <svg
+              <svg aria-hidden="true"
                 className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -392,7 +392,7 @@ export default function TenantsPage() {
               href="tel:5415480383"
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-8 py-4 text-base font-semibold text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
               </svg>
               Call (541) 548-0383
@@ -401,7 +401,7 @@ export default function TenantsPage() {
 
           <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-white/60">
             <a href="mailto:info@highdesertpm.com" className="flex items-center gap-2 transition-colors hover:text-white">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
               </svg>
               info@highdesertpm.com

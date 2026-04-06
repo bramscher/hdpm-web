@@ -158,7 +158,7 @@ export default async function ListingDetailPage({
                 {listing.MarketingTitle}
               </h1>
               <p className="mt-2 flex items-center gap-1.5 font-body text-neutral-mid">
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4 shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -197,7 +197,7 @@ export default async function ListingDetailPage({
 
               {/* Available date */}
               <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-700">
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -253,7 +253,7 @@ export default async function ListingDetailPage({
                       className={`mt-0.5 rounded-full p-1.5 ${isPetFriendly ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}`}
                     >
                       {isPetFriendly ? (
-                        <svg
+                        <svg aria-hidden="true"
                           className="h-4 w-4"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -267,7 +267,7 @@ export default async function ListingDetailPage({
                           />
                         </svg>
                       ) : (
-                        <svg
+                        <svg aria-hidden="true"
                           className="h-4 w-4"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -375,7 +375,7 @@ export default async function ListingDetailPage({
               href="/listings"
               className="inline-flex items-center gap-2 font-body text-sm font-medium text-primary transition-colors hover:text-primary-dark"
             >
-              <svg
+              <svg aria-hidden="true"
                 className="h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -401,7 +401,7 @@ export default async function ListingDetailPage({
 
 function ChevronIcon() {
   return (
-    <svg
+    <svg aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
@@ -451,7 +451,7 @@ function PhotoPlaceholder({ caption }: { caption?: string }) {
 
 function CameraIcon() {
   return (
-    <svg
+    <svg aria-hidden="true"
       className="h-10 w-10"
       fill="none"
       viewBox="0 0 24 24"

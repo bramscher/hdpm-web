@@ -34,7 +34,7 @@ export default function ContactPage() {
                 </Link>
               </li>
               <li aria-hidden="true">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </li>
@@ -83,7 +83,7 @@ export default function ContactPage() {
                   {/* Address */}
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -108,7 +108,7 @@ export default function ContactPage() {
                   {/* Phone */}
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -130,7 +130,7 @@ export default function ContactPage() {
                   {/* Email */}
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -152,7 +152,7 @@ export default function ContactPage() {
                   {/* Office Hours */}
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -175,7 +175,7 @@ export default function ContactPage() {
               <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div className="flex h-64 items-center justify-center bg-gray-100 text-neutral-mid">
                   <div className="text-center">
-                    <svg
+                    <svg aria-hidden="true"
                       className="mx-auto h-10 w-10 text-gray-400"
                       fill="none"
                       viewBox="0 0 24 24"

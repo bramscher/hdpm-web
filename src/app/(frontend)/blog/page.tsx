@@ -129,7 +129,7 @@ export default async function BlogPage({
           </div>
         ) : (
           <div className="rounded-xl border border-gray-200 bg-white py-20 text-center">
-            <svg
+            <svg aria-hidden="true"
               className="mx-auto h-12 w-12 text-neutral-mid/40"
               fill="none"
               viewBox="0 0 24 24"
@@ -165,7 +165,7 @@ export default async function BlogPage({
                 }).toString()}`}
                 className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 font-body text-sm font-medium text-neutral-dark shadow-sm transition-colors hover:border-primary/30 hover:text-primary"
               >
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -182,7 +182,7 @@ export default async function BlogPage({
               </Link>
             ) : (
               <span className="inline-flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-5 py-2.5 font-body text-sm font-medium text-neutral-mid/50">
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -212,7 +212,7 @@ export default async function BlogPage({
                 className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 font-body text-sm font-medium text-neutral-dark shadow-sm transition-colors hover:border-primary/30 hover:text-primary"
               >
                 Next
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -229,7 +229,7 @@ export default async function BlogPage({
             ) : (
               <span className="inline-flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-5 py-2.5 font-body text-sm font-medium text-neutral-mid/50">
                 Next
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"

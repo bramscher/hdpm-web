@@ -15,7 +15,7 @@ export default function ContactForm() {
     return (
       <div className="rounded-xl border border-green-200 bg-green-50 p-8 text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600">
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg aria-hidden="true" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
@@ -119,7 +119,7 @@ export default function ContactForm() {
       >
         {isPending ? (
           <>
-            <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+            <svg aria-hidden="true" className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path
                 className="opacity-75"
@@ -132,7 +132,7 @@ export default function ContactForm() {
         ) : (
           <>
             Send Message
-            <svg
+            <svg aria-hidden="true"
               className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
               fill="none"
               viewBox="0 0 24 24"

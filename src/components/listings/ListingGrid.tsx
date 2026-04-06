@@ -9,7 +9,7 @@ export function ListingGrid({ listings }: ListingGridProps) {
   if (listings.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-gray-200 bg-white py-20 text-center">
-        <svg
+        <svg aria-hidden="true"
           className="mb-4 h-16 w-16 text-neutral-mid/40"
           fill="none"
           viewBox="0 0 24 24"

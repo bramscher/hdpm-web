@@ -107,7 +107,7 @@ export default function MarketAreasPage() {
                   {/* Learn More link */}
                   <div className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-accent transition-colors group-hover:text-accent-dark">
                     Learn More
-                    <svg
+                    <svg aria-hidden="true"
                       className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -143,7 +143,7 @@ export default function MarketAreasPage() {
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
             >
               Talk to Our Team
-              <svg
+              <svg aria-hidden="true"
                 className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -158,7 +158,7 @@ export default function MarketAreasPage() {
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:-translate-y-0.5"
             >
               Browse All Listings
-              <svg
+              <svg aria-hidden="true"
                 className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"

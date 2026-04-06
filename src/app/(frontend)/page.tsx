@@ -18,13 +18,13 @@ export default async function HomePage() {
   const listings = await getCachedListings()
 
   return (
-    <main>
+    <>
       <Hero />
       <ServicesOverview />
       <FeaturedListings listings={listings} />
       <MarketAreasSection />
       <TestimonialsSection />
       <CTASection />
-    </main>
+    </>
   )
 }

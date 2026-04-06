@@ -78,7 +78,7 @@ export default async function MarketAreaPage({
                 </Link>
               </li>
               <li>
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </li>
@@ -88,7 +88,7 @@ export default async function MarketAreaPage({
                 </Link>
               </li>
               <li>
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </li>
@@ -165,7 +165,7 @@ export default async function MarketAreaPage({
             <ul className="mt-8 space-y-4">
               {area.highlights.map((highlight, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <svg
+                  <svg aria-hidden="true"
                     className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -204,7 +204,7 @@ export default async function MarketAreaPage({
                 className="hidden items-center gap-1.5 text-sm font-semibold text-accent transition-colors hover:text-accent-dark sm:inline-flex"
               >
                 View All
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -228,7 +228,7 @@ export default async function MarketAreaPage({
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent"
               >
                 View All {area.city} Listings
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -309,7 +309,7 @@ export default async function MarketAreaPage({
                 className="rounded-xl bg-white p-8 shadow-sm"
               >
                 <div className="inline-flex rounded-lg bg-accent/10 p-3">
-                  <svg
+                  <svg aria-hidden="true"
                     className="h-6 w-6 text-accent"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -359,7 +359,7 @@ export default async function MarketAreaPage({
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
             >
               Free Consultation
-              <svg
+              <svg aria-hidden="true"
                 className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -373,7 +373,7 @@ export default async function MarketAreaPage({
               href="tel:5415480383"
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:-translate-y-0.5"
             >
-              <svg
+              <svg aria-hidden="true"
                 className="h-5 w-5"
                 fill="none"
                 viewBox="0 0 24 24"

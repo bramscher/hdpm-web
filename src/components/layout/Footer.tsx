@@ -11,12 +11,12 @@ const quickLinks = [
 ]
 
 const marketAreas = [
-  { href: '/areas/bend', label: 'Bend' },
-  { href: '/areas/redmond', label: 'Redmond' },
-  { href: '/areas/sisters', label: 'Sisters' },
-  { href: '/areas/prineville', label: 'Prineville' },
-  { href: '/areas/la-pine', label: 'La Pine' },
-  { href: '/areas/madras', label: 'Madras' },
+  { href: '/market-areas/bend', label: 'Bend' },
+  { href: '/market-areas/redmond', label: 'Redmond' },
+  { href: '/market-areas/sisters', label: 'Sisters' },
+  { href: '/market-areas/prineville', label: 'Prineville' },
+  { href: '/market-areas/la-pine', label: 'La Pine' },
+  { href: '/market-areas/madras', label: 'Madras' },
 ]
 
 export default function Footer() {

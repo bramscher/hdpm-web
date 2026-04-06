@@ -19,7 +19,7 @@ const values = [
     description:
       'We believe in transparent communication, honest reporting, and doing the right thing — even when no one is watching. Your trust is the foundation of everything we do.',
     icon: (
-      <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -33,7 +33,7 @@ const values = [
     description:
       'We live and work in Central Oregon. Our deep knowledge of local rental markets, seasonal trends, and community nuances gives your property a competitive edge.',
     icon: (
-      <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -52,7 +52,7 @@ const values = [
     description:
       'Your investment goals drive every decision we make. From maximizing rental income to minimizing vacancy, we treat your property as if it were our own.',
     icon: (
-      <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -95,7 +95,7 @@ export default async function AboutPage() {
                 </Link>
               </li>
               <li aria-hidden="true">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </li>
@@ -213,7 +213,7 @@ export default async function AboutPage() {
                 className="group inline-flex items-center gap-2 text-base font-semibold text-accent transition-colors hover:text-accent-dark"
               >
                 Explore Our Market Areas
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -264,7 +264,7 @@ export default async function AboutPage() {
                     </div>
                   ) : (
                     <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-accent/10 text-accent">
-                      <svg className="h-14 w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                      <svg aria-hidden="true" className="h-14 w-14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -311,7 +311,7 @@ export default async function AboutPage() {
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
             >
               Contact Us
-              <svg
+              <svg aria-hidden="true"
                 className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -326,7 +326,7 @@ export default async function AboutPage() {
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-8 py-4 text-base font-semibold text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
             >
               Owner Services
-              <svg
+              <svg aria-hidden="true"
                 className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"

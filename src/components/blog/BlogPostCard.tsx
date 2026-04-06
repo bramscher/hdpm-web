@@ -78,7 +78,7 @@ export default function BlogPostCard({
           <div
             className={`flex h-full w-full items-center justify-center bg-gradient-to-br ${gradientClass}`}
           >
-            <svg
+            <svg aria-hidden="true"
               className="h-16 w-16 text-white/30"
               fill="none"
               viewBox="0 0 24 24"
@@ -145,7 +145,7 @@ export default function BlogPostCard({
             className="mt-3 inline-flex items-center gap-1 font-body text-sm font-semibold text-accent transition-colors hover:text-primary"
           >
             Read More
-            <svg
+            <svg aria-hidden="true"
               className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
               fill="none"
               viewBox="0 0 24 24"

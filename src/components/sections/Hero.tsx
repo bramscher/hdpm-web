@@ -120,7 +120,7 @@ export default function Hero() {
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
             >
               For Property Owners
-              <svg
+              <svg aria-hidden="true"
                 className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -135,7 +135,7 @@ export default function Hero() {
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-8 py-4 text-base font-semibold text-white border border-white/20 shadow-lg shadow-black/20 backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
             >
               Find a Rental Home
-              <svg
+              <svg aria-hidden="true"
                 className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -150,19 +150,19 @@ export default function Hero() {
           {/* Trust indicators */}
           <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-white/60">
             <div className="flex items-center gap-2">
-              <svg className="h-5 w-5 text-accent-light" fill="currentColor" viewBox="0 0 20 20">
+              <svg aria-hidden="true" className="h-5 w-5 text-accent-light" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" />
               </svg>
               Hundreds of Properties Managed
             </div>
             <div className="flex items-center gap-2">
-              <svg className="h-5 w-5 text-accent-light" fill="currentColor" viewBox="0 0 20 20">
+              <svg aria-hidden="true" className="h-5 w-5 text-accent-light" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" />
               </svg>
               4.9 Owner Star Rating
             </div>
             <div className="flex items-center gap-2">
-              <svg className="h-5 w-5 text-accent-light" fill="currentColor" viewBox="0 0 20 20">
+              <svg aria-hidden="true" className="h-5 w-5 text-accent-light" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" />
               </svg>
               15+ Years Experience

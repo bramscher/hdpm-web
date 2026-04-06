@@ -267,7 +267,7 @@ export default async function BlogPostPage({
           <div className="mt-4 flex flex-wrap items-center gap-3 font-body text-sm text-neutral-mid">
             {post.author && (
               <span className="flex items-center gap-1.5">
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4 text-primary/60"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -292,7 +292,7 @@ export default async function BlogPostPage({
                   dateTime={post.publishedAt}
                   className="flex items-center gap-1.5"
                 >
-                  <svg
+                  <svg aria-hidden="true"
                     className="h-4 w-4 text-primary/60"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -313,7 +313,7 @@ export default async function BlogPostPage({
               |
             </span>
             <span className="flex items-center gap-1.5">
-              <svg
+              <svg aria-hidden="true"
                 className="h-4 w-4 text-primary/60"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -355,7 +355,7 @@ export default async function BlogPostPage({
           {tags.length > 0 && (
             <div className="mt-10 border-t border-gray-200 pt-6">
               <div className="flex flex-wrap items-center gap-2">
-                <svg
+                <svg aria-hidden="true"
                   className="h-4 w-4 text-neutral-mid"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -391,7 +391,7 @@ export default async function BlogPostPage({
               href="/blog"
               className="inline-flex items-center gap-2 font-body text-sm font-medium text-primary transition-colors hover:text-primary-dark"
             >
-              <svg
+              <svg aria-hidden="true"
                 className="h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -432,7 +432,7 @@ export default async function BlogPostPage({
 // ---------- Sub-components ----------
 function ChevronIcon() {
   return (
-    <svg
+    <svg aria-hidden="true"
       className="h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
