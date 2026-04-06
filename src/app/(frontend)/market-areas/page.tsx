@@ -1,18 +1,32 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema, localBusinessSchema } from '@/lib/schema'
-import { getAllMarketAreas } from '@/lib/market-areas'
+import type { MarketArea, Media } from '@/payload-types'
 
 export const metadata = createMetadata({
   title: 'Property Management Across Central Oregon',
   description:
-    'High Desert Property Management serves Bend, Redmond, Sisters, Prineville, La Pine, and Madras. Local expertise in every Central Oregon market — find your area.',
+    'High Desert Property Management serves Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras. Local expertise in every Central Oregon market — find your area.',
   path: '/market-areas',
 })
 
-export default function MarketAreasPage() {
-  const areas = getAllMarketAreas()
+function getAreaImage(area: MarketArea): string {
+  const heroImage = typeof area.heroImage === 'object' ? (area.heroImage as Media) : null
+  return heroImage?.url || area.heroImageUrl || ''
+}
+
+export default async function MarketAreasPage() {
+  const payload = await getPayload({ config })
+  const { docs: areas } = await payload.find({
+    collection: 'market-areas',
+    where: { status: { equals: 'published' } },
+    limit: 100,
+    sort: '-population',
+    depth: 1,
+  })
 
   const jsonLd = [
     breadcrumbSchema([
@@ -55,74 +69,89 @@ export default function MarketAreasPage() {
       <section className="bg-neutral-light py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {areas.map((area) => (
-              <Link
-                key={area.slug}
-                href={`/market-areas/${area.slug}`}
-                className="group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-              >
-                {/* Image */}
-                <div className="relative aspect-[16/10] overflow-hidden">
-                  <Image
-                    src={area.image}
-                    alt={area.imageAlt}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            {areas.map((area) => {
+              const image = getAreaImage(area)
+              const firstParagraph = area.description?.[0]?.paragraph || ''
 
-                  {/* City name overlay */}
-                  <div className="absolute bottom-4 left-5">
-                    <h2 className="font-heading text-2xl font-extrabold text-white">
-                      {area.city}
-                    </h2>
-                    <p className="text-sm text-white/70 italic">{area.tagline}</p>
-                  </div>
-                </div>
+              return (
+                <Link
+                  key={area.slug}
+                  href={`/market-areas/${area.slug}`}
+                  className="group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  {/* Image */}
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    {image && (
+                      <Image
+                        src={image}
+                        alt={area.imageAlt || `${area.city}, Oregon`}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
 
-                {/* Content */}
-                <div className="flex flex-1 flex-col p-6">
-                  <p className="text-sm leading-relaxed text-neutral-mid line-clamp-3">
-                    {area.description[0]}
-                  </p>
-
-                  {/* Quick stats */}
-                  <div className="mt-4 flex items-center gap-4 border-t border-gray-100 pt-4 text-xs text-neutral-mid">
-                    <span>
-                      Pop.{' '}
-                      <span className="font-semibold text-neutral-dark">
-                        {area.population.toLocaleString()}
-                      </span>
-                    </span>
-                    <span className="text-gray-300">|</span>
-                    <span>
-                      Median Rent{' '}
-                      <span className="font-semibold text-neutral-dark">
-                        ${area.medianRent.toLocaleString()}/mo
-                      </span>
-                    </span>
+                    {/* City name overlay */}
+                    <div className="absolute bottom-4 left-5">
+                      <h2 className="font-heading text-2xl font-extrabold text-white">
+                        {area.city}
+                      </h2>
+                      {area.tagline && (
+                        <p className="text-sm text-white/70 italic">{area.tagline}</p>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Learn More link */}
-                  <div className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-accent transition-colors group-hover:text-accent-dark">
-                    Learn More
-                    <svg aria-hidden="true"
-                      className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
+                  {/* Content */}
+                  <div className="flex flex-1 flex-col p-6">
+                    <p className="text-sm leading-relaxed text-neutral-mid line-clamp-3">
+                      {firstParagraph}
+                    </p>
 
-                {/* Bottom border accent on hover */}
-                <div className="absolute inset-x-0 bottom-0 h-1 scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100" />
-              </Link>
-            ))}
+                    {/* Quick stats */}
+                    <div className="mt-4 flex items-center gap-4 border-t border-gray-100 pt-4 text-xs text-neutral-mid">
+                      {area.population && (
+                        <span>
+                          Pop.{' '}
+                          <span className="font-semibold text-neutral-dark">
+                            {area.population.toLocaleString()}
+                          </span>
+                        </span>
+                      )}
+                      {area.population && area.medianRent && (
+                        <span className="text-gray-300">|</span>
+                      )}
+                      {area.medianRent && (
+                        <span>
+                          Median Rent{' '}
+                          <span className="font-semibold text-neutral-dark">
+                            ${area.medianRent.toLocaleString()}/mo
+                          </span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Learn More link */}
+                    <div className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-accent transition-colors group-hover:text-accent-dark">
+                      Learn More
+                      <svg aria-hidden="true"
+                        className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Bottom border accent on hover */}
+                  <div className="absolute inset-x-0 bottom-0 h-1 scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100" />
+                </Link>
+              )
+            })}
           </div>
         </div>
       </section>

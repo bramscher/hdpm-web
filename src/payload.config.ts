@@ -32,9 +32,11 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     components: {
+      beforeNavLinks: [
+        './admin/components/NavGroupIcons',
+      ],
       afterNavLinks: [
-        './admin/components/ImageBrowserNavLink',
-        './admin/components/CrmNavLink',
+        './admin/components/AdminNav',
       ],
       views: {
         imageBrowser: {
@@ -53,31 +55,38 @@ export default buildConfig({
           Component: './admin/components/crm/ReportingView',
           path: '/crm/reporting',
         },
+        automations: {
+          Component: './admin/components/AutomationsView',
+          path: '/automations',
+        },
       },
     },
   },
   collections: [
-    Users,
-    Media,
-    Posts,
+    // Content
     Pages,
-    Categories,
+    Posts,
+    Media,
     MarketAreas,
     Testimonials,
     TeamMembers,
+    Categories,
+    // CRM
     Leads,
     LeadActivities,
     LeadTasks,
-    PropertiesInterest,
     LeadConversations,
+    PropertiesInterest,
     AutomationRules,
+    // Admin
+    Users,
   ],
   plugins: [
     seoPlugin({
       collections: ['posts', 'pages'],
       uploadsCollection: 'media',
       generateTitle: ({ doc }: { doc: Record<string, unknown> }) =>
-        `${doc.title as string} | High Desert Property Management`,
+        doc.title as string,
       generateDescription: ({ doc }: { doc: Record<string, unknown> }) =>
         (doc.seoDescription as string) || '',
       generateURL: ({ doc }: { doc: Record<string, unknown> }) =>

@@ -4,6 +4,7 @@ export const TeamMembers: CollectionConfig = {
   slug: 'team-members',
   admin: {
     useAsTitle: 'name',
+    group: 'Content',
   },
   access: {
     read: () => true,

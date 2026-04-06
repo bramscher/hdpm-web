@@ -5,6 +5,7 @@ export const Testimonials: CollectionConfig = {
   admin: {
     useAsTitle: 'author',
     defaultColumns: ['author', 'rating', 'source', 'approved', 'publishedAt'],
+    group: 'Content',
   },
   access: {
     read: () => true,

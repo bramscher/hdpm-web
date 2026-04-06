@@ -2,7 +2,12 @@
 
 import { useState } from 'react'
 
-const faqs = [
+interface FAQItem {
+  question: string
+  answer: string
+}
+
+const defaultFaqs: FAQItem[] = [
   {
     question: 'How much is the security deposit?',
     answer:
@@ -45,12 +50,13 @@ const faqs = [
   },
 ]
 
-export default function TenantFAQ() {
+export default function TenantFAQ({ faqs }: { faqs?: FAQItem[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const items = faqs && faqs.length > 0 ? faqs : defaultFaqs
 
   return (
     <div className="divide-y divide-gray-200 rounded-xl border border-gray-200 bg-neutral-light">
-      {faqs.map((faq, i) => {
+      {items.map((faq, i) => {
         const isOpen = openIndex === i
         return (
           <div key={i}>

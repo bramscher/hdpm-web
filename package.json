@@ -14,6 +14,7 @@
     "seed:blog-ai": "npx tsx scripts/seed-blog-ai.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.82.0",
     "@payloadcms/db-postgres": "^3.80.0",
     "@payloadcms/next": "^3.80.0",
     "@payloadcms/plugin-cloud-storage": "^3.80.0",

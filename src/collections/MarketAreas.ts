@@ -5,6 +5,7 @@ export const MarketAreas: CollectionConfig = {
   admin: {
     useAsTitle: 'city',
     defaultColumns: ['city', 'slug', 'population', 'medianRent', 'updatedAt'],
+    group: 'Content',
   },
   access: {
     read: () => true,
@@ -20,6 +21,16 @@ export const MarketAreas: CollectionConfig = {
       type: 'text',
       required: true,
       unique: true,
+      admin: { position: 'sidebar' },
+    },
+    {
+      name: 'status',
+      type: 'select',
+      defaultValue: 'draft',
+      options: [
+        { label: 'Draft', value: 'draft' },
+        { label: 'Published', value: 'published' },
+      ],
       admin: { position: 'sidebar' },
     },
     {

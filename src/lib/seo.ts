@@ -18,7 +18,7 @@ export function createMetadata({
   const ogImage = image || `${SITE_URL}/og-default.jpg`
 
   return {
-    title: `${title} | ${SITE_NAME}`,
+    title,
     description,
     alternates: {
       canonical: url,

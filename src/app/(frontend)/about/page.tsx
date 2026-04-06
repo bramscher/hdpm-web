@@ -4,16 +4,21 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
+import { getPageBySlug } from '@/lib/page-content'
 import type { Media as MediaType } from '@/payload-types'
 
-export const metadata = createMetadata({
-  title: 'About Us',
-  description:
-    'Learn about High Desert Property Management — serving Central Oregon property owners since 2011. Local expertise in Bend, Redmond, Sisters, Prineville, La Pine, and Madras.',
-  path: '/about',
-})
+export async function generateMetadata() {
+  const page = await getPageBySlug('about')
+  return createMetadata({
+    title: page?.meta?.title ?? page?.title ?? 'About Us',
+    description:
+      page?.meta?.description ??
+      'Learn about High Desert Property Management — serving Central Oregon property owners since 2011. Local expertise in Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras.',
+    path: '/about',
+  })
+}
 
-const values = [
+const defaultValues = [
   {
     title: 'Integrity',
     description:
@@ -63,9 +68,18 @@ const values = [
   },
 ]
 
-const serviceAreas = ['Bend', 'Redmond', 'Sisters', 'Prineville', 'La Pine', 'Madras']
+const defaultIcon = (
+  <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+  </svg>
+)
+
+const serviceAreas = ['Bend', 'Redmond', 'Sisters', 'Prineville', 'Culver', 'Metolius', 'Madras']
 
 export default async function AboutPage() {
+  const page = await getPageBySlug('about')
+  const c = page?.aboutContent
+
   const payload = await getPayload({ config })
   const { docs: teamMembers } = await payload.find({
     collection: 'team-members',
@@ -104,10 +118,10 @@ export default async function AboutPage() {
           </nav>
 
           <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            About High Desert Property Management
+            {c?.heroHeading ?? 'About High Desert Property Management'}
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-white/80">
-            Trusted by Central Oregon property owners for over a decade.
+            {c?.heroSubheading ?? 'Trusted by Central Oregon property owners for over a decade.'}
           </p>
         </div>
       </section>
@@ -117,31 +131,37 @@ export default async function AboutPage() {
         <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
           <div className="mx-auto max-w-3xl">
             <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
-              Our Story
+              {c?.storyLabel ?? 'Our Story'}
             </p>
             <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
-              Serving Central Oregon Since 2011
+              {c?.storyHeading ?? 'Serving Central Oregon Since 2011'}
             </h2>
             <div className="mt-8 space-y-6 text-lg leading-relaxed text-neutral-mid">
-              <p>
-                High Desert Property Management operates with a simple mission: to provide
-                Central Oregon property owners with professional, reliable management they can
-                trust. Over the years, we&apos;ve grown into one of the region&apos;s most
-                respected property management companies.
-              </p>
-              <p>
-                Over the years, we&apos;ve built our reputation on honest communication,
-                meticulous attention to detail, and a genuine commitment to protecting our
-                clients&apos; investments. Today, we manage hundreds of properties across Bend,
-                Redmond, Sisters, Prineville, La Pine, and Madras — from single-family homes to
-                multi-unit complexes.
-              </p>
-              <p>
-                Our team lives and works in Central Oregon. We understand the unique dynamics of
-                this market — from seasonal rental trends to the nuances of each community. That
-                local knowledge, combined with proven systems and technology, allows us to deliver
-                results that out-of-area management companies simply can&apos;t match.
-              </p>
+              {c?.storyParagraphs && c.storyParagraphs.length > 0 ? (
+                c.storyParagraphs.map((para, i) => <p key={i}>{para.text}</p>)
+              ) : (
+                <>
+                  <p>
+                    High Desert Property Management operates with a simple mission: to provide
+                    Central Oregon property owners with professional, reliable management they can
+                    trust. Over the years, we&apos;ve grown into one of the region&apos;s most
+                    respected property management companies.
+                  </p>
+                  <p>
+                    Over the years, we&apos;ve built our reputation on honest communication,
+                    meticulous attention to detail, and a genuine commitment to protecting our
+                    clients&apos; investments. Today, we manage hundreds of properties across Bend,
+                    Redmond, Sisters, Prineville, Culver, Metolius, and Madras — from single-family homes to
+                    multi-unit complexes.
+                  </p>
+                  <p>
+                    Our team lives and works in Central Oregon. We understand the unique dynamics of
+                    this market — from seasonal rental trends to the nuances of each community. That
+                    local knowledge, combined with proven systems and technology, allows us to deliver
+                    results that out-of-area management companies simply can&apos;t match.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -160,7 +180,14 @@ export default async function AboutPage() {
           </div>
 
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {values.map((value) => (
+            {(c?.values && c.values.length > 0
+              ? c.values.map((v, i) => ({
+                  title: v.title,
+                  description: v.description,
+                  icon: defaultValues[i]?.icon ?? defaultIcon,
+                }))
+              : defaultValues
+            ).map((value) => (
               <div
                 key={value.title}
                 className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm"
@@ -191,7 +218,7 @@ export default async function AboutPage() {
               Our Service Area
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-neutral-mid">
-              We proudly serve property owners and tenants across six Central Oregon
+              We proudly serve property owners and tenants across seven Central Oregon
               communities. Each market has its own character, and we bring specialized
               knowledge to every one.
             </p>

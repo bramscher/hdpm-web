@@ -9,7 +9,8 @@ const CITIES = [
   'Redmond',
   'Sisters',
   'Prineville',
-  'La Pine',
+  'Culver',
+  'Metolius',
   'Madras',
 ]
 

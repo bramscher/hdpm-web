@@ -2,20 +2,26 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
+import { getPageBySlug } from '@/lib/page-content'
+import type { Media as MediaType } from '@/payload-types'
 import TenantFAQ from './TenantFAQ'
 
-export const metadata = createMetadata({
-  title: 'Tenants — Current & Prospective Renters',
-  description:
-    'Resources for current and prospective tenants of High Desert Property Management. Pay rent online, submit maintenance requests, browse available rentals, and learn about the application process.',
-  path: '/tenants',
-})
+export async function generateMetadata() {
+  const page = await getPageBySlug('tenants')
+  return createMetadata({
+    title: page?.meta?.title ?? page?.title ?? 'Tenants — Current & Prospective Renters',
+    description:
+      page?.meta?.description ??
+      'Resources for current and prospective tenants of High Desert Property Management. Pay rent online, submit maintenance requests, browse available rentals, and learn about the application process.',
+    path: '/tenants',
+  })
+}
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
 /* ------------------------------------------------------------------ */
 
-const tenantPortals = [
+const defaultPortalCards = [
   {
     title: 'Pay Rent Online',
     description:
@@ -54,7 +60,7 @@ const tenantPortals = [
   },
 ]
 
-const applicationSteps = [
+const defaultApplicationSteps = [
   {
     step: 1,
     title: 'Browse Listings',
@@ -85,7 +91,37 @@ const applicationSteps = [
 /*  Page                                                               */
 /* ------------------------------------------------------------------ */
 
-export default function TenantsPage() {
+export default async function TenantsPage() {
+  const page = await getPageBySlug('tenants')
+  const c = page?.tenantsContent
+
+  /* Merge CMS portal cards with hardcoded icons */
+  const portalCards = defaultPortalCards.map((card, i) => {
+    const cms = c?.portalCards?.[i]
+    return {
+      ...card,
+      title: cms?.title ?? card.title,
+      description: cms?.description ?? card.description,
+      href: cms?.href ?? card.href,
+    }
+  })
+
+  /* Merge CMS application steps */
+  const steps =
+    c?.applicationSteps && c.applicationSteps.length > 0
+      ? c.applicationSteps.map((s, i) => ({
+          step: i + 1,
+          title: s.title,
+          description: s.description,
+        }))
+      : defaultApplicationSteps
+
+  /* Hero image */
+  const heroImageUrl =
+    c?.heroImage && typeof c.heroImage === 'object' && (c.heroImage as MediaType).url
+      ? (c.heroImage as MediaType).url!
+      : 'https://images.unsplash.com/photo-1565846894054-51426d448b96?w=1920&q=80'
+
   const jsonLd = breadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'Tenants', url: '/tenants' },
@@ -101,7 +137,7 @@ export default function TenantsPage() {
       {/* ==================== HERO ==================== */}
       <section className="relative flex min-h-[70vh] items-center overflow-hidden bg-primary">
         <Image
-          src="https://images.unsplash.com/photo-1565846894054-51426d448b96?w=1920&q=80"
+          src={heroImageUrl}
           alt="Deschutes River flowing through Central Oregon landscape"
           fill
           priority
@@ -118,18 +154,15 @@ export default function TenantsPage() {
             </div>
 
             <h1 className="font-heading text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Your Next Home in{' '}
+              {c?.heroHeading ?? <>Your Next Home in{' '}
               <span className="relative">
                 Central Oregon
                 <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-accent opacity-80" />
-              </span>
+              </span></>}
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
-              Whether you&apos;re a current tenant or searching for your next
-              rental, we&apos;re here to make your experience seamless. Access
-              your portal, browse listings, or learn about our application
-              process.
+              {c?.heroSubheading ?? "Whether you're a current tenant or searching for your next rental, we're here to make your experience seamless. Access your portal, browse listings, or learn about our application process."}
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -186,7 +219,7 @@ export default function TenantsPage() {
           </div>
 
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {tenantPortals.map((portal) => (
+            {portalCards.map((portal) => (
               <a
                 key={portal.title}
                 href={portal.href}
@@ -240,7 +273,7 @@ export default function TenantsPage() {
               </h2>
               <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
                 We manage quality rental homes across Bend, Redmond, Sisters,
-                Prineville, La Pine, and Madras. Browse our current available
+                Prineville, Culver, Metolius, and Madras. Browse our current available
                 listings to find your next Central Oregon home.
               </p>
               <div className="mt-4 space-y-3">
@@ -301,7 +334,7 @@ export default function TenantsPage() {
           </div>
 
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {applicationSteps.map((item) => (
+            {steps.map((item) => (
               <div key={item.step} className="relative text-center">
                 {/* Step number */}
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent text-2xl font-extrabold text-white font-heading shadow-lg shadow-accent/20">
@@ -309,7 +342,7 @@ export default function TenantsPage() {
                 </div>
 
                 {/* Connector line (hidden on last item and mobile) */}
-                {item.step < 4 && (
+                {item.step < steps.length && (
                   <div className="absolute left-[calc(50%+2rem)] top-8 hidden h-0.5 w-[calc(100%-4rem)] bg-accent/20 lg:block" />
                 )}
 
@@ -341,7 +374,7 @@ export default function TenantsPage() {
           </div>
 
           <div className="mx-auto mt-16 max-w-3xl">
-            <TenantFAQ />
+            <TenantFAQ faqs={c?.faqs?.map(f => ({ question: f.question, answer: f.answer }))} />
           </div>
         </div>
       </section>
@@ -361,12 +394,10 @@ export default function TenantsPage() {
 
         <div className="relative z-10 mx-auto max-w-4xl px-6 text-center sm:px-8">
           <h2 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            Ready to Find Your Home?
+            {c?.ctaHeading ?? 'Ready to Find Your Home?'}
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
-            Browse our available rental listings or contact us to learn more
-            about living in Central Oregon. Our team is here to help you every
-            step of the way.
+            {c?.ctaBody ?? 'Browse our available rental listings or contact us to learn more about living in Central Oregon. Our team is here to help you every step of the way.'}
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">

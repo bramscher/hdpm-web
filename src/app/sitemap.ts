@@ -1,7 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { marketAreaSlugs } from '@/lib/market-areas'
 import { getCachedListings } from '@/lib/appfolio'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://highdesertpm.com'
@@ -34,14 +33,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route.priority,
   }))
 
-  const marketAreaEntries: MetadataRoute.Sitemap = marketAreaSlugs.map(
-    (slug) => ({
-      url: `${SITE_URL}/market-areas/${slug}`,
-      lastModified: now,
+  let marketAreaEntries: MetadataRoute.Sitemap = []
+  try {
+    const payload = await getPayload({ config })
+    const { docs } = await payload.find({
+      collection: 'market-areas',
+      where: { status: { equals: 'published' } },
+      limit: 100,
+      depth: 0,
+    })
+    marketAreaEntries = docs.map((area) => ({
+      url: `${SITE_URL}/market-areas/${area.slug}`,
+      lastModified: area.updatedAt ? new Date(area.updatedAt) : now,
       changeFrequency: 'monthly',
       priority: 0.8,
-    }),
-  )
+    }))
+  } catch {
+    // Payload unavailable at build time — skip market area entries
+  }
 
   let blogEntries: MetadataRoute.Sitemap = []
   try {
@@ -62,6 +71,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Payload unavailable at build time — skip blog entries
   }
 
+  let pageEntries: MetadataRoute.Sitemap = []
+  try {
+    const payload = await getPayload({ config })
+    const { docs } = await payload.find({
+      collection: 'pages',
+      where: { status: { equals: 'published' } },
+      limit: 1000,
+      depth: 0,
+    })
+    pageEntries = docs.map((page) => ({
+      url: `${SITE_URL}/${page.slug}`,
+      lastModified: page.updatedAt ? new Date(page.updatedAt) : now,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    }))
+  } catch {
+    // Payload unavailable at build time — skip CMS pages
+  }
+
   let listingEntries: MetadataRoute.Sitemap = []
   try {
     const listings = await getCachedListings()
@@ -79,6 +107,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticEntries,
     ...marketAreaEntries,
     ...blogEntries,
+    ...pageEntries,
     ...listingEntries,
   ]
 }

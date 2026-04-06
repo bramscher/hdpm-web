@@ -54,7 +54,7 @@ export async function generateMetadata({
       : null
 
   return {
-    title: `${title} | High Desert Property Management`,
+    title,
     description,
     alternates: {
       canonical: `${SITE_URL}/blog/${slug}`,

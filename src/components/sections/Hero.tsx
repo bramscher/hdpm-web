@@ -44,7 +44,17 @@ const heroImages = [
 
 const INTERVAL_MS = 20_000
 
-export default function Hero() {
+interface HeroContent {
+  heroBadge?: string | null
+  heroHeading?: string | null
+  heroSubheading?: string | null
+  heroCTA1Label?: string | null
+  heroCTA1Link?: string | null
+  heroCTA2Label?: string | null
+  heroCTA2Link?: string | null
+}
+
+export default function Hero({ content }: { content?: HeroContent | null }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
 
@@ -95,31 +105,34 @@ export default function Hero() {
           {/* Badge */}
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium tracking-wide text-white/90 backdrop-blur-sm">
             <span className="inline-block h-2 w-2 rounded-full bg-accent-light animate-pulse" />
-            Serving Central Oregon Since 2011
+            {content?.heroBadge ?? 'Serving Central Oregon Since 2011'}
           </div>
 
           <h1 className="font-heading text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Professional Property{' '}
-            <span className="relative">
-              Management
-              <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-accent opacity-80" />
-            </span>{' '}
-            in Central Oregon
+            {content?.heroHeading ?? (
+              <>
+                Professional Property{' '}
+                <span className="relative">
+                  Management
+                  <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-accent opacity-80" />
+                </span>{' '}
+                in Central Oregon
+              </>
+            )}
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
-            Trusted by property owners across Bend, Redmond, Sisters, and beyond.
-            We protect your investment and find exceptional tenants &mdash;
-            so you can enjoy the Central Oregon lifestyle.
+            {content?.heroSubheading ??
+              'Trusted by property owners across Bend, Redmond, Sisters, and beyond. We protect your investment and find exceptional tenants \u2014 so you can enjoy the Central Oregon lifestyle.'}
           </p>
 
           {/* CTA Buttons */}
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
             <Link
-              href="/owners"
+              href={content?.heroCTA1Link ?? '/owners'}
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
             >
-              For Property Owners
+              {content?.heroCTA1Label ?? 'For Property Owners'}
               <svg aria-hidden="true"
                 className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"
@@ -131,10 +144,10 @@ export default function Hero() {
               </svg>
             </Link>
             <Link
-              href="/listings"
+              href={content?.heroCTA2Link ?? '/listings'}
               className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-8 py-4 text-base font-semibold text-white border border-white/20 shadow-lg shadow-black/20 backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
             >
-              Find a Rental Home
+              {content?.heroCTA2Label ?? 'Find a Rental Home'}
               <svg aria-hidden="true"
                 className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                 fill="none"

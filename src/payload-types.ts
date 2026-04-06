@@ -67,20 +67,20 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
-    media: Media;
-    posts: Post;
     pages: Page;
-    categories: Category;
+    posts: Post;
+    media: Media;
     'market-areas': MarketArea;
     testimonials: Testimonial;
     'team-members': TeamMember;
+    categories: Category;
     leads: Lead;
     'lead-activities': LeadActivity;
     'lead-tasks': LeadTask;
-    'properties-interest': PropertiesInterest;
     'lead-conversations': LeadConversation;
+    'properties-interest': PropertiesInterest;
     'automation-rules': AutomationRule;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,20 +88,20 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     'market-areas': MarketAreasSelect<false> | MarketAreasSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     'lead-activities': LeadActivitiesSelect<false> | LeadActivitiesSelect<true>;
     'lead-tasks': LeadTasksSelect<false> | LeadTasksSelect<true>;
-    'properties-interest': PropertiesInterestSelect<false> | PropertiesInterestSelect<true>;
     'lead-conversations': LeadConversationsSelect<false> | LeadConversationsSelect<true>;
+    'properties-interest': PropertiesInterestSelect<false> | PropertiesInterestSelect<true>;
     'automation-rules': AutomationRulesSelect<false> | AutomationRulesSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -143,43 +143,210 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "pages".
  */
-export interface User {
+export interface Page {
   id: number;
-  role: 'admin' | 'editor' | 'viewer' | 'api';
-  firstName?: string | null;
-  lastName?: string | null;
-  /**
-   * If checked, this user can be assigned leads via round-robin
-   */
-  isAssignable?: boolean | null;
-  /**
-   * Used for routing Spanish-speaking leads
-   */
-  speaksSpanish?: boolean | null;
-  /**
-   * Maximum number of open leads this user can be assigned
-   */
-  maxLeads?: number | null;
+  title: string;
+  slug: string;
+  layout?:
+    | (
+        | 'default'
+        | 'home'
+        | 'about'
+        | 'owners'
+        | 'tenants'
+        | 'contact'
+        | 'listings'
+        | 'services'
+        | 'residents'
+        | 'privacy'
+      )
+    | null;
+  status?: ('draft' | 'published') | null;
+  homeContent?: {
+    heroBadge?: string | null;
+    heroHeading?: string | null;
+    heroSubheading?: string | null;
+    heroCTA1Label?: string | null;
+    heroCTA1Link?: string | null;
+    heroCTA2Label?: string | null;
+    heroCTA2Link?: string | null;
+  };
+  aboutContent?: {
+    heroHeading?: string | null;
+    heroSubheading?: string | null;
+    storyLabel?: string | null;
+    storyHeading?: string | null;
+    storyParagraphs?:
+      | {
+          text: string;
+          id?: string | null;
+        }[]
+      | null;
+    values?:
+      | {
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  ownersContent?: {
+    heroHeading?: string | null;
+    heroSubheading?: string | null;
+    heroImage?: (number | null) | Media;
+    heroCTA1Label?: string | null;
+    heroCTA1Link?: string | null;
+    whyItems?:
+      | {
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    services?:
+      | {
+          title: string;
+          description: string;
+          features?:
+            | {
+                text: string;
+                id?: string | null;
+              }[]
+            | null;
+          image?: (number | null) | Media;
+          /**
+           * External image URL fallback
+           */
+          imageUrl?: string | null;
+          imageAlt?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    pricingItems?:
+      | {
+          label: string;
+          note: string;
+          id?: string | null;
+        }[]
+      | null;
+    ctaHeading?: string | null;
+    ctaBody?: string | null;
+  };
+  tenantsContent?: {
+    heroHeading?: string | null;
+    heroSubheading?: string | null;
+    heroImage?: (number | null) | Media;
+    portalCards?:
+      | {
+          title: string;
+          description: string;
+          href: string;
+          id?: string | null;
+        }[]
+      | null;
+    applicationSteps?:
+      | {
+          title: string;
+          description: string;
+          id?: string | null;
+        }[]
+      | null;
+    faqs?:
+      | {
+          question: string;
+          answer: string;
+          id?: string | null;
+        }[]
+      | null;
+    ctaHeading?: string | null;
+    ctaBody?: string | null;
+  };
+  contactContent?: {
+    heroHeading?: string | null;
+    heroSubheading?: string | null;
+    officeAddress?: string | null;
+    officePhone?: string | null;
+    officeEmail?: string | null;
+    officeHours?: string | null;
+  };
+  listingsContent?: {
+    heroHeading?: string | null;
+    heroSubheading?: string | null;
+  };
+  richContent?: {
+    heroHeading?: string | null;
+    heroSubheading?: string | null;
+    body?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  sections?:
+    | (
+        | {
+            heading: string;
+            subheading?: string | null;
+            backgroundImage?: (number | null) | Media;
+            ctaText?: string | null;
+            ctaLink?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            body?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content';
+          }
+        | {
+            heading: string;
+            description?: string | null;
+            buttonText?: string | null;
+            buttonLink?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
+      )[]
+    | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
   updatedAt: string;
   createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -298,75 +465,13 @@ export interface Category {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
- */
-export interface Page {
-  id: number;
-  title: string;
-  slug: string;
-  status?: ('draft' | 'published') | null;
-  sections?:
-    | (
-        | {
-            heading: string;
-            subheading?: string | null;
-            backgroundImage?: (number | null) | Media;
-            ctaText?: string | null;
-            ctaLink?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'hero';
-          }
-        | {
-            body?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content';
-          }
-        | {
-            heading: string;
-            description?: string | null;
-            buttonText?: string | null;
-            buttonLink?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta';
-          }
-      )[]
-    | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "market-areas".
  */
 export interface MarketArea {
   id: number;
   city: string;
   slug: string;
+  status?: ('draft' | 'published') | null;
   state?: string | null;
   /**
    * Short tagline shown under the city name
@@ -508,6 +613,46 @@ export interface Lead {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  role: 'admin' | 'editor' | 'viewer' | 'api';
+  firstName?: string | null;
+  lastName?: string | null;
+  /**
+   * If checked, this user can be assigned leads via round-robin
+   */
+  isAssignable?: boolean | null;
+  /**
+   * Used for routing Spanish-speaking leads
+   */
+  speaksSpanish?: boolean | null;
+  /**
+   * Maximum number of open leads this user can be assigned
+   */
+  maxLeads?: number | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lead-activities".
  */
 export interface LeadActivity {
@@ -568,30 +713,6 @@ export interface LeadTask {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "properties-interest".
- */
-export interface PropertiesInterest {
-  id: number;
-  lead: number | Lead;
-  /**
-   * AppFolio listing ID
-   */
-  propertyExternalId?: string | null;
-  propertyName?: string | null;
-  unitIdentifier?: string | null;
-  address?: string | null;
-  rent?: number | null;
-  availabilityDate?: string | null;
-  /**
-   * Link to the listing
-   */
-  sourceUrl?: string | null;
-  status?: ('interested' | 'touring' | 'applied' | 'leased' | 'lost') | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lead-conversations".
  */
 export interface LeadConversation {
@@ -616,6 +737,30 @@ export interface LeadConversation {
     | number
     | boolean
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "properties-interest".
+ */
+export interface PropertiesInterest {
+  id: number;
+  lead: number | Lead;
+  /**
+   * AppFolio listing ID
+   */
+  propertyExternalId?: string | null;
+  propertyName?: string | null;
+  unitIdentifier?: string | null;
+  address?: string | null;
+  rent?: number | null;
+  availabilityDate?: string | null;
+  /**
+   * Link to the listing
+   */
+  sourceUrl?: string | null;
+  status?: ('interested' | 'touring' | 'applied' | 'leased' | 'lost') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -686,24 +831,16 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: number | Media;
+        relationTo: 'pages';
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'posts';
         value: number | Post;
       } | null)
     | ({
-        relationTo: 'pages';
-        value: number | Page;
-      } | null)
-    | ({
-        relationTo: 'categories';
-        value: number | Category;
+        relationTo: 'media';
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'market-areas';
@@ -718,6 +855,10 @@ export interface PayloadLockedDocument {
         value: number | TeamMember;
       } | null)
     | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
         relationTo: 'leads';
         value: number | Lead;
       } | null)
@@ -730,16 +871,20 @@ export interface PayloadLockedDocument {
         value: number | LeadTask;
       } | null)
     | ({
-        relationTo: 'properties-interest';
-        value: number | PropertiesInterest;
-      } | null)
-    | ({
         relationTo: 'lead-conversations';
         value: number | LeadConversation;
       } | null)
     | ({
+        relationTo: 'properties-interest';
+        value: number | PropertiesInterest;
+      } | null)
+    | ({
         relationTo: 'automation-rules';
         value: number | AutomationRule;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -785,31 +930,210 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "pages_select".
  */
-export interface UsersSelect<T extends boolean = true> {
-  role?: T;
-  firstName?: T;
-  lastName?: T;
-  isAssignable?: T;
-  speaksSpanish?: T;
-  maxLeads?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  layout?: T;
+  status?: T;
+  homeContent?:
     | T
     | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
+        heroBadge?: T;
+        heroHeading?: T;
+        heroSubheading?: T;
+        heroCTA1Label?: T;
+        heroCTA1Link?: T;
+        heroCTA2Label?: T;
+        heroCTA2Link?: T;
       };
+  aboutContent?:
+    | T
+    | {
+        heroHeading?: T;
+        heroSubheading?: T;
+        storyLabel?: T;
+        storyHeading?: T;
+        storyParagraphs?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
+        values?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  ownersContent?:
+    | T
+    | {
+        heroHeading?: T;
+        heroSubheading?: T;
+        heroImage?: T;
+        heroCTA1Label?: T;
+        heroCTA1Link?: T;
+        whyItems?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        services?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              features?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              image?: T;
+              imageUrl?: T;
+              imageAlt?: T;
+              id?: T;
+            };
+        pricingItems?:
+          | T
+          | {
+              label?: T;
+              note?: T;
+              id?: T;
+            };
+        ctaHeading?: T;
+        ctaBody?: T;
+      };
+  tenantsContent?:
+    | T
+    | {
+        heroHeading?: T;
+        heroSubheading?: T;
+        heroImage?: T;
+        portalCards?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              href?: T;
+              id?: T;
+            };
+        applicationSteps?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              id?: T;
+            };
+        faqs?:
+          | T
+          | {
+              question?: T;
+              answer?: T;
+              id?: T;
+            };
+        ctaHeading?: T;
+        ctaBody?: T;
+      };
+  contactContent?:
+    | T
+    | {
+        heroHeading?: T;
+        heroSubheading?: T;
+        officeAddress?: T;
+        officePhone?: T;
+        officeEmail?: T;
+        officeHours?: T;
+      };
+  listingsContent?:
+    | T
+    | {
+        heroHeading?: T;
+        heroSubheading?: T;
+      };
+  richContent?:
+    | T
+    | {
+        heroHeading?: T;
+        heroSubheading?: T;
+        body?: T;
+      };
+  sections?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              heading?: T;
+              subheading?: T;
+              backgroundImage?: T;
+              ctaText?: T;
+              ctaLink?: T;
+              id?: T;
+              blockName?: T;
+            };
+        content?:
+          | T
+          | {
+              body?: T;
+              id?: T;
+              blockName?: T;
+            };
+        cta?:
+          | T
+          | {
+              heading?: T;
+              description?: T;
+              buttonText?: T;
+              buttonLink?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  publishedAt?: T;
+  author?: T;
+  featuredImage?: T;
+  categories?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  body?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -869,101 +1193,12 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  status?: T;
-  publishedAt?: T;
-  author?: T;
-  featuredImage?: T;
-  categories?: T;
-  tags?:
-    | T
-    | {
-        tag?: T;
-        id?: T;
-      };
-  body?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
- */
-export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  status?: T;
-  sections?:
-    | T
-    | {
-        hero?:
-          | T
-          | {
-              heading?: T;
-              subheading?: T;
-              backgroundImage?: T;
-              ctaText?: T;
-              ctaLink?: T;
-              id?: T;
-              blockName?: T;
-            };
-        content?:
-          | T
-          | {
-              body?: T;
-              id?: T;
-              blockName?: T;
-            };
-        cta?:
-          | T
-          | {
-              heading?: T;
-              description?: T;
-              buttonText?: T;
-              buttonLink?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  description?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "market-areas_select".
  */
 export interface MarketAreasSelect<T extends boolean = true> {
   city?: T;
   slug?: T;
+  status?: T;
   state?: T;
   tagline?: T;
   heroImage?: T;
@@ -1015,6 +1250,17 @@ export interface TeamMembersSelect<T extends boolean = true> {
   phone?: T;
   photo?: T;
   order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1085,23 +1331,6 @@ export interface LeadTasksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "properties-interest_select".
- */
-export interface PropertiesInterestSelect<T extends boolean = true> {
-  lead?: T;
-  propertyExternalId?: T;
-  propertyName?: T;
-  unitIdentifier?: T;
-  address?: T;
-  rent?: T;
-  availabilityDate?: T;
-  sourceUrl?: T;
-  status?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lead-conversations_select".
  */
 export interface LeadConversationsSelect<T extends boolean = true> {
@@ -1114,6 +1343,23 @@ export interface LeadConversationsSelect<T extends boolean = true> {
   sentBy?: T;
   latestMessageAt?: T;
   metadata?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "properties-interest_select".
+ */
+export interface PropertiesInterestSelect<T extends boolean = true> {
+  lead?: T;
+  propertyExternalId?: T;
+  propertyName?: T;
+  unitIdentifier?: T;
+  address?: T;
+  rent?: T;
+  availabilityDate?: T;
+  sourceUrl?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1132,6 +1378,34 @@ export interface AutomationRulesSelect<T extends boolean = true> {
   priority?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  role?: T;
+  firstName?: T;
+  lastName?: T;
+  isAssignable?: T;
+  speaksSpanish?: T;
+  maxLeads?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

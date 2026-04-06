@@ -2,15 +2,20 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { getCachedListings } from '@/lib/appfolio'
 import { createMetadata } from '@/lib/seo'
+import { getPageBySlug } from '@/lib/page-content'
 import { ListingFilters } from '@/components/listings/ListingFilters'
 import { ListingGrid } from '@/components/listings/ListingGrid'
 
-export const metadata = createMetadata({
-  title: 'Available Rentals',
-  description:
-    'Browse available rental properties in Central Oregon. Homes and apartments for rent in Bend, Redmond, Sisters, Prineville, La Pine, and Madras.',
-  path: '/listings',
-})
+export async function generateMetadata() {
+  const page = await getPageBySlug('listings')
+  return createMetadata({
+    title: page?.meta?.title ?? page?.title ?? 'Available Rentals',
+    description:
+      page?.meta?.description ??
+      'Browse available rental properties in Central Oregon. Homes and apartments for rent in Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras.',
+    path: '/listings',
+  })
+}
 
 export default async function ListingsPage({
   searchParams,
@@ -18,6 +23,8 @@ export default async function ListingsPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const params = await searchParams
+  const page = await getPageBySlug('listings')
+  const c = page?.listingsContent
   const allListings = await getCachedListings()
 
   // Apply filters server-side
@@ -101,10 +108,10 @@ export default async function ListingsPage({
           </nav>
 
           <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl">
-            Available Rentals
+            {c?.heroHeading ?? 'Available Rentals'}
           </h1>
           <p className="mt-2 text-lg text-white/80">
-            Find your next home in Central Oregon
+            {c?.heroSubheading ?? 'Find your next home in Central Oregon'}
           </p>
         </div>
       </section>

@@ -22,7 +22,7 @@ export async function generateMetadata({
   const description = `${listing.Bedrooms} bed / ${listing.Bathrooms} bath rental in ${listing.City}, OR — $${listing.AdvertisedRent.toLocaleString()}/mo. ${listing.MarketingDescription.slice(0, 120)}...`
 
   return {
-    title: `${title} | High Desert Property Management`,
+    title,
     description,
     openGraph: {
       title,

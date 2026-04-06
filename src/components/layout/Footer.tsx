@@ -15,7 +15,8 @@ const marketAreas = [
   { href: '/market-areas/redmond', label: 'Redmond' },
   { href: '/market-areas/sisters', label: 'Sisters' },
   { href: '/market-areas/prineville', label: 'Prineville' },
-  { href: '/market-areas/la-pine', label: 'La Pine' },
+  { href: '/market-areas/culver', label: 'Culver' },
+  { href: '/market-areas/metolius', label: 'Metolius' },
   { href: '/market-areas/madras', label: 'Madras' },
 ]
 

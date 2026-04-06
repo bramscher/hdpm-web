@@ -2,15 +2,22 @@ import Link from 'next/link'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 import ContactForm from '@/components/forms/ContactForm'
+import { getPageBySlug } from '@/lib/page-content'
 
-export const metadata = createMetadata({
-  title: 'Contact Us',
-  description:
-    'Get in touch with High Desert Property Management. Contact our Redmond office for property management services in Bend, Redmond, Sisters, Prineville, La Pine, and Madras.',
-  path: '/contact',
-})
+export async function generateMetadata() {
+  const page = await getPageBySlug('contact')
+  return createMetadata({
+    title: page?.meta?.title ?? page?.title ?? 'Contact Us',
+    description:
+      page?.meta?.description ??
+      'Get in touch with High Desert Property Management. Contact our Redmond office for property management services in Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras.',
+    path: '/contact',
+  })
+}
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const page = await getPageBySlug('contact')
+  const c = page?.contactContent
   const breadcrumbs = breadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'Contact', url: '/contact' },
@@ -43,11 +50,10 @@ export default function ContactPage() {
           </nav>
 
           <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            Get in Touch
+            {c?.heroHeading ?? 'Get in Touch'}
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-white/80">
-            Have questions about our property management services? We&apos;d love to hear from
-            you. Fill out the form or reach us directly.
+            {c?.heroSubheading ?? "Have questions about our property management services? We'd love to hear from you. Fill out the form or reach us directly."}
           </p>
         </div>
       </section>
@@ -99,8 +105,7 @@ export default function ContactPage() {
                     <div>
                       <p className="text-sm font-semibold text-neutral-dark">Address</p>
                       <p className="mt-0.5 text-sm text-neutral-mid">
-                        1515 SW Reindeer Ave<br />
-                        Redmond, OR 97756
+                        {c?.officeAddress ?? '1515 SW Reindeer Ave\nRedmond, OR 97756'}
                       </p>
                     </div>
                   </div>
@@ -119,10 +124,10 @@ export default function ContactPage() {
                     <div>
                       <p className="text-sm font-semibold text-neutral-dark">Phone</p>
                       <a
-                        href="tel:5415480383"
+                        href={`tel:${(c?.officePhone ?? '(541) 548-0383').replace(/\D/g, '')}`}
                         className="mt-0.5 block text-sm text-accent transition-colors hover:text-accent-dark"
                       >
-                        (541) 548-0383
+                        {c?.officePhone ?? '(541) 548-0383'}
                       </a>
                     </div>
                   </div>
@@ -141,10 +146,10 @@ export default function ContactPage() {
                     <div>
                       <p className="text-sm font-semibold text-neutral-dark">Email</p>
                       <a
-                        href="mailto:info@highdesertpm.com"
+                        href={`mailto:${c?.officeEmail ?? 'info@highdesertpm.com'}`}
                         className="mt-0.5 block text-sm text-accent transition-colors hover:text-accent-dark"
                       >
-                        info@highdesertpm.com
+                        {c?.officeEmail ?? 'info@highdesertpm.com'}
                       </a>
                     </div>
                   </div>
@@ -163,8 +168,7 @@ export default function ContactPage() {
                     <div>
                       <p className="text-sm font-semibold text-neutral-dark">Office Hours</p>
                       <p className="mt-0.5 text-sm text-neutral-mid">
-                        Monday &ndash; Friday<br />
-                        9:00 AM &ndash; 5:00 PM
+                        {c?.officeHours ?? 'Monday \u2013 Friday\n9:00 AM \u2013 5:00 PM'}
                       </p>
                     </div>
                   </div>

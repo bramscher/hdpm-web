@@ -9,7 +9,7 @@ export function localBusinessSchema() {
     '@id': SITE_URL,
     name: 'High Desert Property Management',
     description:
-      'Professional property management services in Central Oregon — Bend, Redmond, Sisters, Prineville, La Pine, and Madras.',
+      'Professional property management services in Central Oregon — Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras.',
     url: SITE_URL,
     telephone: '(541) 548-0383',
     address: {
@@ -30,7 +30,8 @@ export function localBusinessSchema() {
       { '@type': 'City', name: 'Redmond, OR' },
       { '@type': 'City', name: 'Sisters, OR' },
       { '@type': 'City', name: 'Prineville, OR' },
-      { '@type': 'City', name: 'La Pine, OR' },
+      { '@type': 'City', name: 'Culver, OR' },
+      { '@type': 'City', name: 'Metolius, OR' },
       { '@type': 'City', name: 'Madras, OR' },
     ],
     openingHours: 'Mo-Fr 09:00-17:00',

@@ -2,14 +2,32 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema, localBusinessSchema } from '@/lib/schema'
 import { getCachedListingsByCity } from '@/lib/appfolio'
-import { getMarketArea, marketAreaSlugs } from '@/lib/market-areas'
 import ListingCard from '@/components/listings/ListingCard'
+import type { MarketArea, Media } from '@/payload-types'
 
-export function generateStaticParams() {
-  return marketAreaSlugs.map((slug) => ({ slug }))
+function getAreaImage(area: MarketArea): string {
+  const heroImage = typeof area.heroImage === 'object' ? (area.heroImage as Media) : null
+  return heroImage?.url || area.heroImageUrl || ''
+}
+
+export async function generateStaticParams() {
+  try {
+    const payload = await getPayload({ config })
+    const { docs } = await payload.find({
+      collection: 'market-areas',
+      where: { status: { equals: 'published' } },
+      limit: 100,
+      select: { slug: true },
+    })
+    return docs.map((area) => ({ slug: area.slug }))
+  } catch {
+    return []
+  }
 }
 
 export async function generateMetadata({
@@ -18,12 +36,23 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  const area = getMarketArea(slug)
+  const payload = await getPayload({ config })
+  const { docs } = await payload.find({
+    collection: 'market-areas',
+    where: {
+      slug: { equals: slug },
+      status: { equals: 'published' },
+    },
+    limit: 1,
+    depth: 0,
+  })
+
+  const area = docs[0]
   if (!area) return {}
 
   return createMetadata({
-    title: area.seoTitle,
-    description: area.seoDescription,
+    title: area.seoTitle || `Property Management in ${area.city}, Oregon`,
+    description: area.seoDescription || `Professional property management in ${area.city}, OR.`,
     path: `/market-areas/${area.slug}`,
   })
 }
@@ -34,8 +63,24 @@ export default async function MarketAreaPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const area = getMarketArea(slug)
+  const payload = await getPayload({ config })
+
+  const { docs } = await payload.find({
+    collection: 'market-areas',
+    where: {
+      slug: { equals: slug },
+      status: { equals: 'published' },
+    },
+    limit: 1,
+    depth: 2,
+  })
+
+  const area = docs[0]
   if (!area) notFound()
+
+  const image = getAreaImage(area)
+  const descriptions = area.description?.map((d) => d.paragraph) ?? []
+  const highlights = area.highlights?.map((h) => h.text) ?? []
 
   const listings = await getCachedListingsByCity(area.city)
   const featuredListings = listings.slice(0, 3)
@@ -58,14 +103,16 @@ export default async function MarketAreaPage({
 
       {/* Hero */}
       <section className="relative flex min-h-[50vh] items-end overflow-hidden">
-        <Image
-          src={area.image}
-          alt={area.imageAlt}
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
+        {image && (
+          <Image
+            src={image}
+            alt={area.imageAlt || `${area.city}, Oregon`}
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
         <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-16 pt-32 sm:px-8 lg:px-12">
@@ -103,9 +150,11 @@ export default async function MarketAreaPage({
               <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-accent opacity-80" />
             </span>
           </h1>
-          <p className="mt-4 max-w-2xl text-xl text-white/80 italic">
-            {area.tagline}
-          </p>
+          {area.tagline && (
+            <p className="mt-4 max-w-2xl text-xl text-white/80 italic">
+              {area.tagline}
+            </p>
+          )}
         </div>
       </section>
 
@@ -115,19 +164,19 @@ export default async function MarketAreaPage({
           <div className="grid grid-cols-3 divide-x divide-gray-100">
             <div className="py-8 text-center">
               <p className="font-heading text-3xl font-extrabold text-primary sm:text-4xl">
-                {area.population.toLocaleString()}
+                {(area.population ?? 0).toLocaleString()}
               </p>
               <p className="mt-1 text-sm text-neutral-mid">Population</p>
             </div>
             <div className="py-8 text-center">
               <p className="font-heading text-3xl font-extrabold text-primary sm:text-4xl">
-                ${area.medianRent.toLocaleString()}
+                ${(area.medianRent ?? 0).toLocaleString()}
               </p>
               <p className="mt-1 text-sm text-neutral-mid">Median Rent/Mo</p>
             </div>
             <div className="py-8 text-center">
               <p className="font-heading text-3xl font-extrabold text-primary sm:text-4xl">
-                {area.state}
+                {area.state || 'OR'}
               </p>
               <p className="mt-1 text-sm text-neutral-mid">State</p>
             </div>
@@ -147,7 +196,7 @@ export default async function MarketAreaPage({
             </h2>
 
             <div className="mt-8 space-y-6 text-base leading-relaxed text-neutral-mid">
-              {area.description.map((paragraph, i) => (
+              {descriptions.map((paragraph, i) => (
                 <p key={i}>{paragraph}</p>
               ))}
             </div>
@@ -156,35 +205,37 @@ export default async function MarketAreaPage({
       </section>
 
       {/* Area Highlights */}
-      <section className="bg-neutral-light py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="font-heading text-2xl font-extrabold tracking-tight text-neutral-dark sm:text-3xl">
-              Why {area.city}?
-            </h2>
-            <ul className="mt-8 space-y-4">
-              {area.highlights.map((highlight, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <svg aria-hidden="true"
-                    className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M4.5 12.75l6 6 9-13.5"
-                    />
-                  </svg>
-                  <span className="text-neutral-mid">{highlight}</span>
-                </li>
-              ))}
-            </ul>
+      {highlights.length > 0 && (
+        <section className="bg-neutral-light py-20 sm:py-24">
+          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+            <div className="mx-auto max-w-3xl">
+              <h2 className="font-heading text-2xl font-extrabold tracking-tight text-neutral-dark sm:text-3xl">
+                Why {area.city}?
+              </h2>
+              <ul className="mt-8 space-y-4">
+                {highlights.map((highlight, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <svg aria-hidden="true"
+                      className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.5 12.75l6 6 9-13.5"
+                      />
+                    </svg>
+                    <span className="text-neutral-mid">{highlight}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Featured Listings */}
       {featuredListings.length > 0 && (
@@ -334,13 +385,15 @@ export default async function MarketAreaPage({
 
       {/* Contact CTA */}
       <section className="relative overflow-hidden py-24">
-        <Image
-          src={area.image}
-          alt={area.imageAlt}
-          fill
-          className="object-cover"
-          sizes="100vw"
-        />
+        {image && (
+          <Image
+            src={image}
+            alt={area.imageAlt || `${area.city}, Oregon`}
+            fill
+            className="object-cover"
+            sizes="100vw"
+          />
+        )}
         <div className="absolute inset-0 bg-black/55" />
 
         <div className="relative z-10 mx-auto max-w-4xl px-6 text-center sm:px-8">

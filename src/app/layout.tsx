@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import React from 'react'
-import './globals.css'
 
 export const metadata: Metadata = {
   title: {
@@ -8,7 +7,7 @@ export const metadata: Metadata = {
     template: '%s | High Desert Property Management',
   },
   description:
-    'Professional property management in Bend, Redmond, Sisters, Prineville, La Pine & Madras. Trusted by Central Oregon property owners since 2003.',
+    'Professional property management in Bend, Redmond, Sisters, Prineville, Culver, Metolius & Madras. Trusted by Central Oregon property owners since 2003.',
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || 'https://highdesertpm.com',
   ),
@@ -19,9 +18,5 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body>{children}</body>
-    </html>
-  )
+  return children
 }

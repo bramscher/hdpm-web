@@ -4,23 +4,32 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
+import { getPageBySlug } from '@/lib/page-content'
+import type { Media as MediaType } from '@/payload-types'
 
-export const metadata = createMetadata({
-  title: 'Property Management for Central Oregon Owners',
-  description:
-    'Full-service property management in Bend, Redmond, Sisters, and Central Oregon. Tenant placement, maintenance coordination, financial reporting, and more. Get a free rental analysis.',
-  path: '/owners',
-})
+export async function generateMetadata() {
+  const page = await getPageBySlug('owners')
+  return createMetadata({
+    title:
+      page?.meta?.title ??
+      page?.title ??
+      'Property Management for Central Oregon Owners',
+    description:
+      page?.meta?.description ??
+      'Full-service property management in Bend, Redmond, Sisters, and Central Oregon. Tenant placement, maintenance coordination, financial reporting, and more. Get a free rental analysis.',
+    path: '/owners',
+  })
+}
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
 /* ------------------------------------------------------------------ */
 
-const whyHdpm = [
+const defaultWhyItems = [
   {
     title: 'Local Expertise',
     description:
-      'We live and work in Central Oregon. Our deep knowledge of the Bend, Redmond, Sisters, Prineville, and La Pine markets means accurate pricing and faster placements.',
+      'We live and work in Central Oregon. Our deep knowledge of the Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras markets means accurate pricing and faster placements.',
     icon: (
       <svg aria-hidden="true" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -50,7 +59,7 @@ const whyHdpm = [
   },
 ]
 
-const services = [
+const defaultServices = [
   {
     id: 'full-service',
     title: 'Full-Service Property Management',
@@ -140,6 +149,42 @@ function StarRating({ rating }: { rating: number }) {
 /* ------------------------------------------------------------------ */
 
 export default async function OwnersPage() {
+  const page = await getPageBySlug('owners')
+  const c = page?.ownersContent
+
+  const whyHdpm = defaultWhyItems.map((item, i) => ({
+    ...item,
+    title: c?.whyItems?.[i]?.title ?? item.title,
+    description: c?.whyItems?.[i]?.description ?? item.description,
+  }))
+
+  const services = c?.services?.length
+    ? c.services.map((s, i) => {
+        const fallback = defaultServices[i]
+        const img =
+          s.image && typeof s.image === 'object' && (s.image as MediaType).url
+            ? (s.image as MediaType).url!
+            : s.imageUrl ?? fallback?.image ?? ''
+        return {
+          id: fallback?.id ?? `service-${i}`,
+          title: s.title,
+          description: s.description,
+          features: s.features?.map((f) => f.text) ?? fallback?.features ?? [],
+          image: img,
+          imageAlt: s.imageAlt ?? fallback?.imageAlt ?? '',
+        }
+      })
+    : defaultServices
+
+  const pricingItems = c?.pricingItems?.length
+    ? c.pricingItems.map((p) => ({ label: p.label, note: p.note }))
+    : [
+        { label: 'Full-Service Management', note: 'Percentage of monthly rent collected' },
+        { label: 'Tenant Placement', note: 'One-time fee per placement' },
+        { label: 'Lease Renewal', note: 'Flat fee per renewal' },
+        { label: 'Maintenance Coordination', note: 'Included with full-service' },
+      ]
+
   const payload = await getPayload({ config })
   const { docs: ownerTestimonials } = await payload.find({
     collection: 'testimonials',
@@ -164,7 +209,11 @@ export default async function OwnersPage() {
       {/* ==================== HERO ==================== */}
       <section className="relative flex min-h-[70vh] items-center overflow-hidden bg-primary">
         <Image
-          src="https://images.unsplash.com/photo-1687451225150-e25d21b013cc?w=1920&q=80"
+          src={
+            c?.heroImage && typeof c.heroImage === 'object' && (c.heroImage as MediaType).url
+              ? (c.heroImage as MediaType).url!
+              : 'https://images.unsplash.com/photo-1687451225150-e25d21b013cc?w=1920&q=80'
+          }
           alt="Central Oregon landscape with mountains and high desert terrain"
           fill
           priority
@@ -181,27 +230,20 @@ export default async function OwnersPage() {
             </div>
 
             <h1 className="font-heading text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Property Management for{' '}
-              <span className="relative">
-                Central Oregon
-                <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-accent opacity-80" />
-              </span>{' '}
-              Owners
+              {c?.heroHeading ?? 'Property Management for Central Oregon Owners'}
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
-              Maximize your rental income and protect your investment with
-              Central Oregon&apos;s most trusted property management team. We
-              deliver peace of mind so you can enjoy the lifestyle you moved here
-              for.
+              {c?.heroSubheading ??
+                "Maximize your rental income and protect your investment with Central Oregon\u2019s most trusted property management team. We deliver peace of mind so you can enjoy the lifestyle you moved here for."}
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <Link
-                href="#get-started"
+                href={c?.heroCTA1Link ?? '#get-started'}
                 className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
               >
-                Get a Free Rental Analysis
+                {c?.heroCTA1Label ?? 'Get a Free Rental Analysis'}
                 <svg aria-hidden="true"
                   className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                   fill="none"
@@ -352,12 +394,7 @@ export default async function OwnersPage() {
 
           <div className="mx-auto mt-12 max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-sm sm:p-12">
             <div className="grid gap-6 sm:grid-cols-2">
-              {[
-                { label: 'Full-Service Management', note: 'Percentage of monthly rent collected' },
-                { label: 'Tenant Placement', note: 'One-time fee per placement' },
-                { label: 'Lease Renewal', note: 'Flat fee per renewal' },
-                { label: 'Maintenance Coordination', note: 'Included with full-service' },
-              ].map((item) => (
+              {pricingItems.map((item) => (
                 <div key={item.label} className="rounded-lg bg-neutral-light p-5">
                   <p className="font-heading text-sm font-bold text-neutral-dark">{item.label}</p>
                   <p className="mt-1 text-xs text-neutral-mid">{item.note}</p>
@@ -457,13 +494,11 @@ export default async function OwnersPage() {
 
         <div className="relative z-10 mx-auto max-w-4xl px-6 text-center sm:px-8">
           <h2 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            Get Your Free Rental Analysis
+            {c?.ctaHeading ?? 'Get Your Free Rental Analysis'}
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
-            Find out how much your Central Oregon property could earn with
-            professional management. Our free, no-obligation analysis includes a
-            market rent estimate, property assessment, and customized management
-            plan.
+            {c?.ctaBody ??
+              'Find out how much your Central Oregon property could earn with professional management. Our free, no-obligation analysis includes a market rent estimate, property assessment, and customized management plan.'}
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
