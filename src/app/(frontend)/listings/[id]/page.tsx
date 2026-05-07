@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getCachedListingById } from '@/lib/appfolio'
 import { listingSchema, breadcrumbSchema } from '@/lib/schema'
+import { isDogFriendlyPolicy, formatAvailableDate } from '@/lib/listing-utils'
 
 // Use dynamic rendering — listing data from AppFolio v0 API is too large to SSG all at build time
 export const dynamic = 'force-dynamic'
@@ -44,16 +45,9 @@ export default async function ListingDetailPage({
   if (!listing) notFound()
 
   const isPetFriendly =
-    listing.CatsAllowed || listing.DogPolicy.toLowerCase() !== 'no dogs'
+    listing.CatsAllowed || isDogFriendlyPolicy(listing.DogPolicy)
 
-  const availableDate = new Date(listing.AvailableOn).toLocaleDateString(
-    'en-US',
-    {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    },
-  )
+  const availableDate = formatAvailableDate(listing.AvailableOn)
 
   const jsonLd = [
     listingSchema(listing),

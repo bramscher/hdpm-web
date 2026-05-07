@@ -5,7 +5,7 @@ import CrmDashboardView from './CrmDashboardView'
 
 export default function CrmDashboardPage(props: AdminViewServerProps) {
   return (
-    <DefaultTemplate {...props}>
+    <DefaultTemplate {...props} visibleEntities={props.initPageResult.visibleEntities}>
       <CrmDashboardView />
     </DefaultTemplate>
   )

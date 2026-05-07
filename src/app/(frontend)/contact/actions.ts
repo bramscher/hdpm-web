@@ -46,7 +46,7 @@ export async function submitContactForm(
       collection: 'leads',
       data: {
         firstName,
-        lastName: lastName || name, // fallback if no last name parsed
+        lastName: lastName || '—', // fallback when only one name was provided
         email,
         phone,
         leadType: leadType as 'tenant' | 'owner' | 'vendor' | 'other' | undefined,

@@ -5,7 +5,7 @@ import AutomationsView from './AutomationsView'
 
 export default function AutomationsPage(props: AdminViewServerProps) {
   return (
-    <DefaultTemplate {...props}>
+    <DefaultTemplate {...props} visibleEntities={props.initPageResult.visibleEntities}>
       <AutomationsView />
     </DefaultTemplate>
   )

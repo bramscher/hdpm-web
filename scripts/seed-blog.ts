@@ -302,7 +302,7 @@ const POSTS: BlogPostData[] = [
       paragraph('Managing a rental property is essentially a part-time job — sometimes a full-time one. Between tenant communications, maintenance calls, lease renewals, inspections, and bookkeeping, the hours add up. Hiring a property manager buys back your time so you can focus on your career, family, or next investment.'),
       heading('8. Protecting Your Asset Long-Term'),
       paragraph('Regular inspections, preventive maintenance, and proactive communication with tenants extend the life of your property and preserve its value. We conduct routine drive-by and interior inspections, address small issues before they become big problems, and ensure tenants are taking care of your property.'),
-      paragraph('High Desert Property Management has been managing rentals across Central Oregon for over a decade. We currently manage approximately 850 doors and bring local expertise that out-of-area management companies cannot match. If you are considering professional management, give us a call for a free rental analysis.'),
+      paragraph('High Desert Property Management has been managing rentals across Central Oregon for over a decade. We currently manage hundreds of doors across Central Oregon and bring local expertise that out-of-area management companies cannot match. If you are considering professional management, give us a call for a free rental analysis.'),
     ]),
   },
   {

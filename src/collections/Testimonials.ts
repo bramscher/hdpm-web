@@ -8,7 +8,7 @@ export const Testimonials: CollectionConfig = {
     group: 'Content',
   },
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => (user ? true : { approved: { equals: true } }),
   },
   fields: [
     {

@@ -5,7 +5,7 @@ import InboxView from './InboxView'
 
 export default function InboxPage(props: AdminViewServerProps) {
   return (
-    <DefaultTemplate {...props}>
+    <DefaultTemplate {...props} visibleEntities={props.initPageResult.visibleEntities}>
       <InboxView />
     </DefaultTemplate>
   )

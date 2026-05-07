@@ -8,7 +8,7 @@ export const Users: CollectionConfig = {
     group: 'Admin',
   },
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => Boolean(user),
   },
   fields: [
     {

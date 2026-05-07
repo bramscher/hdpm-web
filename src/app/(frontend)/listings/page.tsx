@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { getCachedListings } from '@/lib/appfolio'
 import { createMetadata } from '@/lib/seo'
 import { getPageBySlug } from '@/lib/page-content'
+import { isListingPetFriendly } from '@/lib/listing-utils'
 import { ListingFilters } from '@/components/listings/ListingFilters'
 import { ListingGrid } from '@/components/listings/ListingGrid'
 
@@ -70,9 +71,7 @@ export default async function ListingsPage({
   }
 
   if (pets === 'true') {
-    filtered = filtered.filter(
-      (l) => l.CatsAllowed || l.DogPolicy.toLowerCase() !== 'no dogs',
-    )
+    filtered = filtered.filter(isListingPetFriendly)
   }
 
   return (

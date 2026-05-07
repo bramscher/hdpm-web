@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { headers } from 'next/headers'
+import { requireAuth } from '@/lib/api-auth'
 
 const CRON_SECRET = process.env.CRON_SECRET
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
@@ -11,11 +11,9 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
  * with the CRON_SECRET, so the admin UI doesn't need to know it.
  */
 export async function POST() {
-  // Basic check: only allow from admin (cookie-based auth)
-  const headersList = await headers()
-  const cookie = headersList.get('cookie') || ''
-  if (!cookie.includes('payload-token')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const auth = await requireAuth({ roles: ['admin', 'editor'] })
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
 
   if (!CRON_SECRET) {

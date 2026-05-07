@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { headers } from 'next/headers'
+import { requireAuth } from '@/lib/api-auth'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -177,11 +177,9 @@ function deduplicateTopics(topics: TopicSuggestion[]): TopicSuggestion[] {
  *   { focus?: 'owners' | 'tenants' | 'both' }
  */
 export async function POST(request: Request) {
-  // Auth check
-  const headersList = await headers()
-  const cookie = headersList.get('cookie') || ''
-  if (!cookie.includes('payload-token')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const auth = await requireAuth({ roles: ['admin', 'editor'] })
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
 
   let focus: 'owners' | 'tenants' | 'both' = 'both'

@@ -5,7 +5,7 @@ import ImageBrowser from './ImageBrowser'
 
 export default function ImageBrowserPage(props: AdminViewServerProps) {
   return (
-    <DefaultTemplate {...props}>
+    <DefaultTemplate {...props} visibleEntities={props.initPageResult.visibleEntities}>
       <ImageBrowser />
     </DefaultTemplate>
   )

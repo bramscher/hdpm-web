@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getListings, fetchDetailPagePhotos, type AppFolioListing } from '@/lib/appfolio'
+import { isListingPetFriendly } from '@/lib/listing-utils'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300 // 5 minutes — large dataset
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
       description: l.MarketingDescription,
       marketing_title: l.MarketingTitle,
       available_date: l.AvailableOn,
-      pet_friendly: l.CatsAllowed || l.DogPolicy.toLowerCase() !== 'no dogs',
+      pet_friendly: isListingPetFriendly(l),
       cats_allowed: l.CatsAllowed,
       dog_policy: l.DogPolicy,
       photos: l.UnitPhotos,

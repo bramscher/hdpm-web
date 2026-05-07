@@ -51,10 +51,9 @@ export async function GET(req: NextRequest) {
   })
 
   for (const lead of staleNewLeads) {
-    const { totalDocs: openTasks } = await payload.find({
+    const { totalDocs: openTasks } = await payload.count({
       collection: 'lead-tasks',
       where: { lead: { equals: lead.id }, status: { in: ['open', 'in_progress'] } },
-      limit: 0,
     })
 
     if (openTasks === 0) {
@@ -87,10 +86,9 @@ export async function GET(req: NextRequest) {
   })
 
   for (const lead of touredLeads) {
-    const { totalDocs: openTasks } = await payload.find({
+    const { totalDocs: openTasks } = await payload.count({
       collection: 'lead-tasks',
       where: { lead: { equals: lead.id }, status: { in: ['open', 'in_progress'] } },
-      limit: 0,
     })
 
     if (openTasks === 0) {

@@ -4,6 +4,10 @@ import type { NextConfig } from 'next'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://sywffgwizbxisalwmxib.supabase.co'
 
 const nextConfig: NextConfig = {
+  experimental: {
+    workerThreads: false,
+    cpus: 1,
+  },
   async rewrites() {
     return [
       {

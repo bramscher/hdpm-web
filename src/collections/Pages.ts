@@ -16,7 +16,7 @@ const textField = (name: string, label: string, opts?: Partial<Field>): Field =>
   label,
   type: 'text',
   ...opts,
-})
+} as Field)
 
 const textareaField = (name: string, label: string, opts?: Partial<Field>): Field => ({
   name,
@@ -219,7 +219,7 @@ export const Pages: CollectionConfig = {
     group: 'Content',
   },
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
   },
   fields: [
     {

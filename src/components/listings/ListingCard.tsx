@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { AppFolioListing } from '@/lib/appfolio'
+import { isListingPetFriendly } from '@/lib/listing-utils'
 
 // Gradient placeholders when no photo available
 const placeholderGradients = [
@@ -25,10 +26,7 @@ function formatDate(dateStr: string): string {
 }
 
 function isPetFriendly(listing: AppFolioListing): boolean {
-  return (
-    listing.CatsAllowed ||
-    (listing.DogPolicy !== 'No dogs' && listing.DogPolicy !== '')
-  )
+  return isListingPetFriendly(listing)
 }
 
 export default function ListingCard({

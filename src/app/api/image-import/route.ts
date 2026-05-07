@@ -1,8 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { requireAuth } from '@/lib/api-auth'
+
+const ALLOWED_IMPORT_HOSTS = new Set([
+  'images.unsplash.com',
+  'plus.unsplash.com',
+  'unsplash.com',
+  'upload.wikimedia.org',
+  'commons.wikimedia.org',
+])
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth({ roles: ['admin', 'editor'] })
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const body = await req.json()
     const { url, alt, caption, attribution, license, sourceUrl, filename } = body as {
@@ -17,6 +31,16 @@ export async function POST(req: NextRequest) {
 
     if (!url || !alt) {
       return NextResponse.json({ error: 'url and alt are required' }, { status: 400 })
+    }
+
+    let parsedUrl: URL
+    try {
+      parsedUrl = new URL(url)
+    } catch {
+      return NextResponse.json({ error: 'Invalid url' }, { status: 400 })
+    }
+    if (parsedUrl.protocol !== 'https:' || !ALLOWED_IMPORT_HOSTS.has(parsedUrl.hostname)) {
+      return NextResponse.json({ error: 'Source host not allowed' }, { status: 400 })
     }
 
     // Download the image

@@ -8,7 +8,19 @@ import 'dotenv/config'
 import { getPayload } from 'payload'
 import config from '../src/payload.config'
 
-const PAGES = [
+type PageLayout =
+  | 'home'
+  | 'about'
+  | 'owners'
+  | 'tenants'
+  | 'contact'
+  | 'listings'
+  | 'services'
+  | 'residents'
+  | 'privacy'
+  | 'default'
+
+const PAGES: Array<{ title: string; slug: string; layout: PageLayout; [key: string]: unknown }> = [
   {
     title: 'Home',
     slug: 'home',

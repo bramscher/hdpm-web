@@ -8,7 +8,7 @@ export const MarketAreas: CollectionConfig = {
     group: 'Content',
   },
   access: {
-    read: () => true,
+    read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
   },
   fields: [
     {

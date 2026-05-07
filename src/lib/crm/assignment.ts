@@ -22,7 +22,6 @@ export async function assignLeadRoundRobin(
     collection: 'users',
     where: { isAssignable: { equals: true } },
     limit: 100,
-    pagination: false,
   })
 
   if (users.length === 0) return null
@@ -39,26 +38,29 @@ export async function assignLeadRoundRobin(
     // Fall back to all assignable users if no Spanish speakers
   }
 
-  // Count open leads per user
+  // Count open leads per user (in parallel)
   const closedValues = CLOSED_STATUSES.map((s) => s as string)
-  const candidates: Array<{ userId: number; openCount: number; maxLeads: number }> = []
+  const counts = await Promise.all(
+    preferred.map((user) =>
+      payload.count({
+        collection: 'leads',
+        where: {
+          assignedTo: { equals: user.id as number },
+          status: { not_in: closedValues },
+        },
+      }),
+    ),
+  )
 
-  for (const user of preferred) {
+  const candidates: Array<{ userId: number; openCount: number; maxLeads: number }> = []
+  preferred.forEach((user, i) => {
     const userId = user.id as number
     const maxLeads = ((user as unknown as { maxLeads?: number }).maxLeads) || Infinity
-
-    const { totalDocs: openCount } = await payload.count({
-      collection: 'leads',
-      where: {
-        assignedTo: { equals: userId },
-        status: { not_in: closedValues },
-      },
-    })
-
+    const openCount = counts[i].totalDocs
     if (openCount < maxLeads) {
       candidates.push({ userId, openCount, maxLeads })
     }
-  }
+  })
 
   if (candidates.length === 0) return null
 

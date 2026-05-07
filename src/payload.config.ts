@@ -110,6 +110,7 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
+      max: 5,
     },
     schemaName: 'payload_web',
   }),

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { headers } from 'next/headers'
+import { requireAuth } from '@/lib/api-auth'
 import Anthropic from '@anthropic-ai/sdk'
 import { getPayload } from 'payload'
 import config from '@payload-config'
@@ -15,8 +15,8 @@ function heading(text: string, tag: 'h2' | 'h3' = 'h2') {
     type: 'heading',
     tag,
     children: [{ type: 'text', text, format: 0, detail: 0, mode: 'normal', style: '', version: 1 }],
-    direction: 'ltr',
-    format: '',
+    direction: 'ltr' as const,
+    format: '' as const,
     indent: 0,
     version: 1,
   }
@@ -26,8 +26,8 @@ function paragraph(text: string) {
   return {
     type: 'paragraph',
     children: [{ type: 'text', text, format: 0, detail: 0, mode: 'normal', style: '', version: 1 }],
-    direction: 'ltr',
-    format: '',
+    direction: 'ltr' as const,
+    format: '' as const,
     indent: 0,
     version: 1,
     textFormat: 0,
@@ -40,8 +40,8 @@ function richText(blocks: ReturnType<typeof heading | typeof paragraph>[]) {
     root: {
       type: 'root',
       children: blocks,
-      direction: 'ltr',
-      format: '',
+      direction: 'ltr' as const,
+      format: '' as const,
       indent: 0,
       version: 1,
     },
@@ -120,10 +120,9 @@ interface GenerateRequest {
  * then saves it as a draft in the Posts collection.
  */
 export async function POST(request: Request) {
-  const headersList = await headers()
-  const cookie = headersList.get('cookie') || ''
-  if (!cookie.includes('payload-token')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const auth = await requireAuth({ roles: ['admin', 'editor'] })
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
 
   if (!CLAUDE_API_KEY) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { requireAuth } from '@/lib/api-auth'
 
 const GOOGLE_API_KEY = process.env.GOOGLE_PLACES_API_KEY || ''
 const GOOGLE_PLACE_ID = process.env.GOOGLE_PLACE_ID || ''
@@ -34,6 +35,11 @@ interface PlaceDetailsResponse {
  *   GOOGLE_PLACE_ID       — Google Place ID for HDPM
  */
 export async function GET(request: Request) {
+  const auth = await requireAuth({ roles: ['admin', 'editor'] })
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   const { searchParams } = new URL(request.url)
   const dryRun = searchParams.get('dry') === 'true'
 

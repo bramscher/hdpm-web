@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { requireAuth } from '@/lib/api-auth'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyPayload = any
@@ -12,6 +13,11 @@ type AnyPayload = any
  * Returns counts grouped by various dimensions.
  */
 export async function GET() {
+  const auth = await requireAuth({ roles: ['admin', 'editor', 'viewer'] })
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   try {
     const payload: AnyPayload = await getPayload({ config })
 
