@@ -6,6 +6,10 @@
     {
       "path": "/api/cron/sync-listings",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/crm/cron",
+      "schedule": "0 * * * *"
     }
   ]
 }

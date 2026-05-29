@@ -1,6 +1,6 @@
 # HDPM-Web
 
-Public-facing website and content management system for **High Desert Property Management**, built with Next.js 15 and Payload CMS 3. Part of the HDPM platform alongside [hdpm-chatbot](https://github.com/bramscher/hdpm-chatbot) (internal tools) and hdpm-dashboard (planned).
+Public-facing website, CMS, and lead/CRM system for **High Desert Property Management**, built with Next.js 15 and Payload CMS 3. Part of the HDPM platform alongside [hdpm-chatbot](https://github.com/bramscher/hdpm-chatbot) (internal tools) and hdpm-dashboard (planned).
 
 ---
 
@@ -10,9 +10,14 @@ Public-facing website and content management system for **High Desert Property M
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Payload CMS Collections](#payload-cms-collections)
+- [CRM System](#crm-system)
+- [Admin Views](#admin-views)
 - [Frontend Routes](#frontend-routes)
 - [API Routes](#api-routes)
 - [AppFolio Integration](#appfolio-integration)
+- [Media Storage (Supabase)](#media-storage-supabase)
+- [Blog Automation (Claude)](#blog-automation-claude)
+- [Google Reviews Sync](#google-reviews-sync)
 - [Cron Jobs](#cron-jobs)
 - [Supabase (Shared Database)](#supabase-shared-database)
 - [Authentication](#authentication)
@@ -21,6 +26,7 @@ Public-facing website and content management system for **High Desert Property M
 - [Local Development](#local-development)
 - [Deployment (Vercel)](#deployment-vercel)
 - [Scripts](#scripts)
+- [Design System](#design-system)
 
 ---
 
@@ -32,8 +38,8 @@ Public-facing website and content management system for **High Desert Property M
                          │  ┌────────────┐ ┌──────────────┐ │
                          │  │   public    │ │  payload_web │ │
                          │  │  schema     │ │   schema     │ │
-                         │  │ (chatbot +  │ │  (CMS tables │ │
-                         │  │  shared)    │ │  + listings) │ │
+                         │  │ (chatbot +  │ │  (CMS + CRM  │ │
+                         │  │  shared)    │ │   tables)    │ │
                          │  └─────┬──────┘ └──────┬───────┘ │
                          └────────┼───────────────┼─────────┘
                                   │               │
@@ -41,13 +47,14 @@ Public-facing website and content management system for **High Desert Property M
                    │                                             │
           ┌────────┴─────────┐                        ┌──────────┴────────┐
           │   hdpm-chatbot   │                        │     hdpm-web      │
-          │  (Internal Tools)│                        │  (Public Website) │
+          │  (Internal Tools)│                        │  (Public + CRM)   │
           │                  │                        │                   │
           │ - Knowledge Chat │                        │ - Listings        │
           │ - Rent Comps     │                        │ - Blog / Pages    │
           │ - Work Orders    │                        │ - Market Areas    │
-          │ - Invoicing      │                        │ - Contact / Leads │
-          │ - Inspections    │                        │ - Payload Admin   │
+          │ - Invoicing      │                        │ - Lead intake     │
+          │ - Inspections    │                        │ - CRM pipeline    │
+          │                  │                        │ - Payload Admin   │
           └────────┬─────────┘                        └──────────┬────────┘
                    │                                             │
                    └──────────────┐               ┌──────────────┘
@@ -57,7 +64,10 @@ Public-facing website and content management system for **High Desert Property M
                          │                                   │
                          │  - Azure AD (Entra ID) SSO        │
                          │  - AppFolio v0 Database API       │
-                         │  - Vercel Hosting                 │
+                         │  - Supabase Storage (media)       │
+                         │  - Anthropic Claude (blog AI)     │
+                         │  - Google Places (reviews)        │
+                         │  - Vercel Hosting + Cron          │
                          └───────────────────────────────────┘
 ```
 
@@ -67,14 +77,17 @@ Public-facing website and content management system for **High Desert Property M
 
 | Layer          | Technology                                      |
 | -------------- | ----------------------------------------------- |
-| Framework      | Next.js 15.4.11 (App Router)                    |
+| Framework      | Next.js 15.4.11 (App Router, React 19)          |
 | CMS            | Payload CMS 3.80 (embedded in Next.js)          |
 | Database       | PostgreSQL via Supabase (schema: `payload_web`) |
 | Rich Text      | Lexical Editor (@payloadcms/richtext-lexical)   |
-| Styling        | Tailwind CSS 4.2                                |
-| Fonts          | Plus Jakarta Sans (headings), Inter (body)       |
-| Image CDN      | Next.js Image + AppFolio CDN                    |
-| SEO            | @payloadcms/plugin-seo + JSON-LD structured data|
+| Styling        | Tailwind CSS 4.2 + @tailwindcss/typography      |
+| Fonts          | Plus Jakarta Sans (headings), Inter (body)      |
+| Image CDN      | Next.js Image + AppFolio CDN + Supabase Storage |
+| Media Storage  | Custom Supabase Storage adapter (@payloadcms/plugin-cloud-storage) |
+| SEO            | @payloadcms/plugin-seo (tabbed UI) + JSON-LD    |
+| AI             | @anthropic-ai/sdk (blog research + generation)  |
+| Reviews        | Google Places API (New)                         |
 | Deployment     | Vercel (auto-deploy from `main`)                |
 | Cron           | Vercel Cron (every 15 minutes)                  |
 | External APIs  | AppFolio v0 Database API + public page scraping |
@@ -90,6 +103,7 @@ hdpm-web/
 │   ├── app/
 │   │   ├── (frontend)/           # Public-facing pages
 │   │   │   ├── page.tsx          # Home page
+│   │   │   ├── [slug]/           # CMS-managed dynamic pages
 │   │   │   ├── listings/         # Rental listings
 │   │   │   ├── blog/             # Blog posts
 │   │   │   ├── market-areas/     # Market area pages
@@ -103,10 +117,19 @@ hdpm-web/
 │   │       ├── [...slug]/        # Payload REST API (auto-generated)
 │   │       ├── graphql/          # Payload GraphQL endpoint
 │   │       ├── listings/         # Custom listings API
-│   │       │   ├── route.ts      # GET /api/listings
-│   │       │   └── [id]/route.ts # GET /api/listings/:id
+│   │       ├── crm/              # CRM endpoints (leads, reports, cron)
+│   │       ├── automations/      # Blog research + generation + listings sync
+│   │       ├── image-search/     # Wikimedia/Unsplash search
+│   │       ├── image-import/     # Import external images to Media
+│   │       ├── sync-reviews/     # Google Places review sync
 │   │       └── cron/
 │   │           └── sync-listings/# Cron: AppFolio -> Supabase sync
+│   ├── admin/                    # Custom Payload admin views/components
+│   │   └── components/
+│   │       ├── crm/              # CRM dashboard, inbox, reporting
+│   │       ├── AutomationsView   # Blog research + generation UI
+│   │       ├── ImageBrowserView  # Media library browser
+│   │       └── AdminNav, NavGroupIcons
 │   ├── collections/              # Payload CMS collection configs
 │   │   ├── Users.ts
 │   │   ├── Media.ts
@@ -116,23 +139,39 @@ hdpm-web/
 │   │   ├── MarketAreas.ts
 │   │   ├── Testimonials.ts
 │   │   ├── TeamMembers.ts
-│   │   └── Leads.ts
-│   ├── blocks/                   # Payload block definitions
-│   │   ├── hero.ts
-│   │   ├── content.ts
-│   │   └── cta.ts
+│   │   ├── Leads.ts
+│   │   ├── LeadActivities.ts
+│   │   ├── LeadTasks.ts
+│   │   ├── LeadConversations.ts
+│   │   ├── PropertiesInterest.ts
+│   │   ├── AutomationRules.ts
+│   │   └── hooks/                # Lead hooks (assignment, activity log, etc.)
 │   ├── lib/
 │   │   ├── appfolio.ts           # AppFolio API client + scraper
 │   │   ├── supabase.ts           # Supabase admin client
-│   │   ├── market-areas.ts       # Hardcoded market area data
-│   │   └── metadata.ts           # SEO/meta tag utilities
+│   │   ├── supabase-storage-adapter.ts  # Custom Payload storage adapter
+│   │   ├── api-auth.ts           # Role-based API auth helper
+│   │   ├── listing-utils.ts      # Listing normalization helpers
+│   │   ├── page-content.ts       # CMS page rendering helpers
+│   │   ├── schema.ts             # JSON-LD / SEO helpers
+│   │   ├── seo.ts                # SEO metadata utilities
+│   │   └── crm/                  # CRM business logic
+│   │       ├── pipeline.ts
+│   │       ├── assignment.ts
+│   │       ├── dedup.ts
+│   │       ├── normalization.ts
+│   │       ├── automation-engine.ts
+│   │       ├── appfolio-handoff.ts
+│   │       ├── tasks.ts
+│   │       ├── i18n.ts
+│   │       └── types.ts
+│   ├── migrations/               # Payload Postgres migrations
 │   ├── payload.config.ts         # Payload CMS configuration
 │   └── payload-types.ts          # Auto-generated TypeScript types
+├── scripts/                      # tsx-run maintenance/seed scripts
 ├── public/                       # Static assets
 ├── vercel.json                   # Vercel cron configuration
 ├── next.config.ts                # Next.js config
-├── tailwind.config.ts            # Tailwind theme
-├── tsconfig.json
 └── package.json
 ```
 
@@ -140,44 +179,71 @@ hdpm-web/
 
 ## Payload CMS Collections
 
-### Users
-- **Auth enabled** — provides login to `/admin`
-- Roles: `admin`, `editor`, `viewer`, `api`
+### Content
 
-### Media
-- Image uploads with auto-generated sizes:
-  - `thumbnail`: 400x300
-  - `card`: 768x512
-  - `hero`: 1920x1080
+**Pages** — Dynamic block-based layout system (Hero, Content, CTA). Supports arbitrary CMS page creation, rendered via `/[slug]`.
 
-### Posts (Blog)
-- Title, slug, status (draft/published), author, featured image
-- Category relationships, tags array
-- Lexical rich text body
-- SEO fields via plugin
+**Posts (Blog)** — Title, slug, status (draft/published), author, featured image, category, tags, Lexical rich text body. SEO via tabbed plugin UI.
 
-### Pages
-- Dynamic block-based layout system
-- Block types: **Hero**, **Content** (rich text), **CTA**
-- Supports arbitrary page creation from the admin panel
+**Media** — Image uploads via custom Supabase Storage adapter. Auto-generated sizes: `thumbnail` (400×300), `card` (768×512), `hero` (1920×1080). Includes attribution/license fields for Unsplash/Wikimedia imports.
 
-### Categories
-- Simple name + slug taxonomy for blog posts
+**Categories** — Name + slug taxonomy for blog posts.
 
-### Market Areas
-- One entry per service area (Bend, Redmond, Sisters, Prineville, La Pine, Madras)
-- Hero text/image, rich text description, SEO fields
+**Market Areas** — One entry per service area (Bend, Redmond, Sisters, Prineville, La Pine, Madras). Hero text/image, rich text description, status flag, SEO fields.
 
-### Testimonials
-- Author, company, text, rating (1-5), approved flag
+**Testimonials** — Author, company, text, rating (1–5), approved flag. Synced from Google Places reviews.
 
-### Team Members
-- Name, title, bio, photo, display order
+**Team Members** — Name, title, bio, photo, display order.
 
-### Leads
-- Auto-created from contact form submissions
-- **Public access**: allows unauthenticated create
-- Fields: name, email, phone, message, property interest, source
+### CRM
+
+**Leads** — Auto-created from contact form + external intake endpoint. Public-create access. Fields: name, email, phone, source, lead type, preferred language, budget, move-in date, property interest, status, assigned agent.
+
+**LeadActivities** — Activity log entries (note, call, email, status change, automation event).
+
+**LeadTasks** — Follow-up tasks with due dates. Auto-transitioned to `overdue` by the CRM cron.
+
+**LeadConversations** — Inbound/outbound message threads (email, SMS).
+
+**PropertiesInterest** — Lead ↔ property junction with interest level.
+
+**AutomationRules** — Trigger/condition/action rules executed by the automation engine.
+
+### Admin
+
+**Users** — Auth-enabled. Roles: `admin`, `editor`, `viewer`, `api`.
+
+---
+
+## CRM System
+
+The CRM is fully embedded in the Payload admin. Six collections plus dedicated admin views cover the lead lifecycle from intake to AppFolio handoff.
+
+| Component | File |
+| --------- | ---- |
+| Pipeline + status transitions | `src/lib/crm/pipeline.ts` |
+| Round-robin / load-balanced assignment | `src/lib/crm/assignment.ts` |
+| Email/phone normalization | `src/lib/crm/normalization.ts` |
+| Duplicate detection | `src/lib/crm/dedup.ts` |
+| Rule-based automation engine | `src/lib/crm/automation-engine.ts` |
+| AppFolio handoff (push qualified leads) | `src/lib/crm/appfolio-handoff.ts` |
+| Task generation | `src/lib/crm/tasks.ts` |
+
+Public intake at `POST /api/crm/leads` normalizes input, dedupes, and either creates a lead or appends activity to an existing one. The contact form on `/contact` uses the same flow via Payload's auto-create on the Leads collection.
+
+---
+
+## Admin Views
+
+Custom React views are mounted at these admin URLs (defined in `payload.config.ts`):
+
+| Path                  | View                              |
+| --------------------- | --------------------------------- |
+| `/admin/crm`          | CRM dashboard (lead pipeline)     |
+| `/admin/crm/inbox`    | Conversations inbox               |
+| `/admin/crm/reporting`| Aggregated CRM reports            |
+| `/admin/automations`  | Blog research + generation UI     |
+| `/admin/image-browser`| Media library browser             |
 
 ---
 
@@ -186,6 +252,7 @@ hdpm-web/
 | Route                    | Description                                    |
 | ------------------------ | ---------------------------------------------- |
 | `/`                      | Home — hero, services, featured listings, CTAs |
+| `/[slug]`                | CMS-managed dynamic page (Pages collection)    |
 | `/listings`              | All available rentals with filters             |
 | `/listings/[id]`         | Listing detail with photo gallery              |
 | `/blog`                  | Blog post listing                              |
@@ -202,27 +269,49 @@ hdpm-web/
 
 ## API Routes
 
-### `GET /api/listings`
-Returns all cached listings from Supabase. Supports `?city=` filter.
-- Cache: 15-minute ISR + 30-minute stale-while-revalidate
-- Falls back to live AppFolio API if cache is empty
+### Listings
 
-### `GET /api/listings/[id]`
-Returns a single listing by AppFolio ID with detail page photos.
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| GET    | `/api/listings`               | Cached listings from Supabase, `?city=` filter |
+| GET    | `/api/listings/[id]`          | Single listing by AppFolio ID with detail photos |
+| GET    | `/api/cron/sync-listings`     | Vercel Cron: AppFolio → Supabase sync (Bearer `CRON_SECRET`) |
 
-### `GET /api/cron/sync-listings`
-Protected by `Authorization: Bearer $CRON_SECRET`. Called by Vercel Cron every 15 minutes.
-1. Fetches properties + units from AppFolio v0 API
-2. Scrapes public listing page for CDN photo URLs and detail page IDs
-3. Fetches detail page photos per listing
-4. Upserts to Supabase `web_listings` table
-5. Removes delisted properties
+### CRM
 
-### `GET/POST /api/[...slug]`
-Auto-generated Payload REST API for all collections.
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| POST   | `/api/crm/leads`              | Public lead intake (dedupe + normalize) |
+| GET    | `/api/crm/reports`            | Aggregated CRM metrics (auth: admin/editor/viewer) |
+| GET    | `/api/crm/cron`               | Periodic: marks overdue tasks, runs automation rules (Bearer `CRON_SECRET`) |
 
-### `POST /api/graphql`
-Payload GraphQL endpoint.
+### Automations
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| GET    | `/api/automations/blog-research` | Reddit-based topic suggestions for blog posts |
+| POST   | `/api/automations/generate-blog` | Claude-generated blog post draft → Posts collection |
+| GET    | `/api/automations/sync-listings` | On-demand listings sync trigger |
+
+### Media
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| GET    | `/api/image-search`           | Search Wikimedia + Unsplash (no key required for Wikimedia) |
+| POST   | `/api/image-import`           | Import external image URL into Media (allow-listed hosts) |
+
+### Reviews
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| GET    | `/api/sync-reviews`           | Pulls 5-star Google reviews → Testimonials |
+
+### Payload
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| ALL    | `/api/[...slug]`              | Auto-generated Payload REST API |
+| POST   | `/api/graphql`                | Payload GraphQL endpoint |
 
 ---
 
@@ -234,6 +323,7 @@ The AppFolio integration is the backbone of the listings system. It combines two
 - **Endpoints**: `/properties` and `/units` (paginated, 1000/page)
 - **Auth**: Basic auth (client_id:client_secret) + `X-AppFolio-Developer-ID` header
 - **Retry logic**: Handles 533 (data unavailable) and 429 (rate limit) with 3s backoff
+- **Fallback**: When the v0 API is unavailable, falls back to public page scraping for listings data
 
 ### Public Page Scraping
 - **Listings page**: `highdesertpm.appfolio.com/listings` — extracts CDN image URLs, detail page IDs, and addresses
@@ -260,17 +350,49 @@ A unit is considered available if:
 - Status is NOT: occupied, leased, current, notice, eviction
 - Status is vacant OR has an `AvailableOn` date OR `RentReady=true`
 
+### CRM Handoff
+Qualified leads are pushed to AppFolio via `src/lib/crm/appfolio-handoff.ts` so the operations team works them inside AppFolio after initial qualification.
+
+---
+
+## Media Storage (Supabase)
+
+Media uploads go to **Supabase Storage** (bucket: `media`) via a custom adapter at `src/lib/supabase-storage-adapter.ts`, wired through `@payloadcms/plugin-cloud-storage`. This replaced the prior `@payloadcms/storage-s3` plugin to work reliably on Vercel.
+
+- Bucket: `media`
+- Public URL rewrite: `/api/media/file/*` resolves to the Supabase Storage public URL
+- Storage plugin is conditional on `SUPABASE_SERVICE_ROLE_KEY` so local dev works without credentials
+- The Media collection has attribution/license fields populated by `/api/image-import` for Unsplash/Wikimedia imports
+
+---
+
+## Blog Automation (Claude)
+
+Two endpoints power the **Automations** admin view:
+
+1. `GET /api/automations/blog-research` — pulls trending posts from r/Bend, r/CentralOregon, r/RealEstate and surfaces topic ideas with audience targeting.
+2. `POST /api/automations/generate-blog` — uses `@anthropic-ai/sdk` (Claude) to draft a full post, converts to Lexical, and creates a draft in the Posts collection ready for review.
+
+Seed scripts in `scripts/seed-blog.ts` and `scripts/seed-blog-ai.ts` produced the initial 20-post corpus.
+
+---
+
+## Google Reviews Sync
+
+`GET /api/sync-reviews` (or `scripts/sync-google-reviews.ts`) pulls reviews from the **Google Places API (New)** for `GOOGLE_PLACE_ID`, filters to 5-star, and upserts them into the Testimonials collection. The Testimonials block on the public site renders these dynamically.
+
 ---
 
 ## Cron Jobs
 
 Configured in `vercel.json`:
 
-| Schedule        | Endpoint                   | Description                          |
-| --------------- | -------------------------- | ------------------------------------ |
-| Every 15 min    | `/api/cron/sync-listings`  | Sync AppFolio listings to Supabase   |
+| Schedule        | Endpoint                   | Description                                         |
+| --------------- | -------------------------- | --------------------------------------------------- |
+| Every 15 min    | `/api/cron/sync-listings`  | Sync AppFolio listings to Supabase                  |
+| Hourly (`:00`)  | `/api/crm/cron`            | Mark overdue tasks, run CRM automation rules        |
 
-The cron job is protected by `CRON_SECRET` and has a 5-minute max duration on Vercel.
+Both cron endpoints require `Authorization: Bearer $CRON_SECRET` and have a 5-minute Vercel max duration.
 
 ---
 
@@ -281,36 +403,43 @@ Both hdpm-web and hdpm-chatbot share a single Supabase PostgreSQL instance but u
 | Schema         | Used By       | Contains                                          |
 | -------------- | ------------- | ------------------------------------------------- |
 | `public`       | hdpm-chatbot  | conversations, messages, knowledge_chunks, work_orders, invoices, rent_analyses |
-| `payload_web`  | hdpm-web      | All Payload CMS tables (users, posts, pages, media, etc.) |
+| `payload_web`  | hdpm-web      | All Payload CMS + CRM tables (users, posts, pages, media, leads, lead_*, automation_rules, etc.) |
 | `public`       | hdpm-web      | `web_listings` (AppFolio listing cache)            |
 
 The `payload_web` schema is set in `payload.config.ts`:
 ```ts
 db: postgresAdapter({
-  pool: { connectionString: process.env.DATABASE_URL || '' },
+  pool: {
+    connectionString: process.env.DATABASE_URL || '',
+    max: 5,
+  },
   schemaName: 'payload_web',
 })
 ```
+
+`DATABASE_URL` typically points to the Supabase **transaction pooler** in production for Vercel serverless compatibility.
 
 ---
 
 ## Authentication
 
 ### Public Website
-The public-facing site requires **no authentication**. All pages and listings are publicly accessible.
+The public-facing site requires **no authentication**. All pages, listings, and contact forms are publicly accessible.
 
 ### Payload Admin (`/admin`)
 Protected by Payload's built-in auth system (Users collection). Roles:
 - **Admin** — full access
-- **Editor** — content management
+- **Editor** — content management + CRM
 - **Viewer** — read-only
 - **API** — programmatic access
+
+CRM and automation API routes use `requireAuth({ roles: [...] })` from `src/lib/api-auth.ts` for role-gated access.
 
 ### Azure AD (Shared with hdpm-chatbot)
 Both projects share the same Azure AD (Entra ID) tenant for internal team authentication:
 - **Tenant**: High Desert Property Management
 - **Allowed domain**: `@highdesertpm.com`
-- Used by hdpm-chatbot for team login; available to hdpm-web if internal auth is added later
+- Used by hdpm-chatbot for team login; available to hdpm-web if internal SSO is added later
 
 ---
 
@@ -319,11 +448,12 @@ Both projects share the same Azure AD (Entra ID) tenant for internal team authen
 The HDPM platform consists of three applications that share infrastructure but run independently:
 
 ### hdpm-web (this repo)
-**Purpose**: Public-facing website for prospects, tenants, and property owners.
+**Purpose**: Public-facing website + CRM for prospects, tenants, and property owners.
 - Displays available rental listings (synced from AppFolio)
-- Hosts blog content, market area pages, team info
-- Collects leads via contact forms
-- Managed through Payload CMS admin panel
+- Hosts blog content, market area pages, team info, CMS-managed pages
+- Collects leads via contact forms and external intake
+- Runs the lead pipeline: dedupe → assignment → automation → AppFolio handoff
+- Managed through Payload CMS admin panel with custom CRM, inbox, reporting, and automation views
 
 ### hdpm-chatbot
 **Purpose**: Internal tools for the HDPM operations team.
@@ -339,8 +469,9 @@ The HDPM platform consists of three applications that share infrastructure but r
 | Resource              | hdpm-web                  | hdpm-chatbot                  |
 | --------------------- | ------------------------- | ----------------------------- |
 | Supabase Postgres     | `payload_web` schema + `web_listings` | `public` schema tables |
+| Supabase Storage      | `media` bucket            | —                             |
 | Azure AD Tenant       | Available (Payload auth used now) | Active (NextAuth SSO)  |
-| AppFolio API          | Listings sync (properties + units) | Work orders, vendors, properties |
+| AppFolio API          | Listings sync + lead handoff | Work orders, vendors, properties |
 | Vercel Hosting        | Yes                       | Yes                           |
 | NextAuth Secret       | Shared (for future SSO)   | Active                        |
 
@@ -350,6 +481,7 @@ AppFolio (source of truth)
     │
     ├──→ hdpm-web:    Syncs available listings every 15 min → web_listings table
     │                 Serves to public website visitors
+    │                 Pushes qualified leads back to AppFolio (CRM handoff)
     │
     ├──→ hdpm-chatbot: Syncs work orders, vendors, properties
     │                  Used for maintenance management + rent analysis
@@ -363,17 +495,17 @@ The projects do **not** directly call each other's APIs. They communicate indire
 
 ## Environment Variables
 
-### Required for Production
+### Core
 
 | Variable | Description | Shared With |
 | -------- | ----------- | ----------- |
-| `DATABASE_URL` | Supabase Postgres connection string (session mode, port 5432) | hdpm-chatbot |
+| `DATABASE_URL` | Supabase Postgres connection string (transaction pooler recommended for Vercel) | hdpm-chatbot |
 | `PAYLOAD_SECRET` | Payload CMS encryption secret (min 32 chars) | — |
 | `NEXT_PUBLIC_SITE_URL` | Production URL (e.g. `https://highdesertpm.com`) | — |
-| `NEXTAUTH_URL` | Same as site URL | hdpm-chatbot |
+| `NEXTAUTH_URL` | Same as site URL (reserved for future SSO) | hdpm-chatbot |
 | `NEXTAUTH_SECRET` | JWT signing secret | hdpm-chatbot |
 | `REVALIDATION_SECRET` | ISR revalidation token | — |
-| `CRON_SECRET` | Protects `/api/cron/*` endpoints | — |
+| `CRON_SECRET` | Protects `/api/cron/*` and `/api/crm/cron` | — |
 
 ### Supabase
 
@@ -381,15 +513,7 @@ The projects do **not** directly call each other's APIs. They communicate indire
 | -------- | ----------- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase anon/publishable key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (admin access, server-side only) |
-
-### Azure AD
-
-| Variable | Description |
-| -------- | ----------- |
-| `AZURE_AD_CLIENT_ID` | Azure app registration client ID |
-| `AZURE_AD_CLIENT_SECRET` | Azure app registration secret |
-| `AZURE_AD_TENANT_ID` | Azure AD tenant ID |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (admin access, server-side only — also gates the storage plugin) |
 
 ### AppFolio
 
@@ -399,6 +523,28 @@ The projects do **not** directly call each other's APIs. They communicate indire
 | `APPFOLIO_CLIENT_ID` | AppFolio API client ID |
 | `APPFOLIO_CLIENT_SECRET` | AppFolio API client secret |
 | `APPFOLIO_DEVELOPER_ID` | AppFolio developer ID |
+
+### AI + Reviews
+
+| Variable | Description |
+| -------- | ----------- |
+| `CLAUDE_API_KEY` (a.k.a. `ANTHROPIC_API_KEY`) | Anthropic API key for blog generation |
+| `GOOGLE_PLACES_API_KEY` | Google Places API (New) key for review sync |
+| `GOOGLE_PLACE_ID` | Place ID for HDPM Google Business listing |
+
+### Email / Misc
+
+| Variable | Description |
+| -------- | ----------- |
+| `RESEND_API_KEY` | Resend transactional email (lead notifications) |
+
+### Azure AD (reserved for future SSO)
+
+| Variable | Description |
+| -------- | ----------- |
+| `AZURE_AD_CLIENT_ID` | Azure app registration client ID |
+| `AZURE_AD_CLIENT_SECRET` | Azure app registration secret |
+| `AZURE_AD_TENANT_ID` | Azure AD tenant ID |
 
 ---
 
@@ -432,10 +578,18 @@ npm run dev
 The app runs at `http://localhost:3000` with:
 - Public site at `/`
 - Payload admin at `/admin`
+- CRM dashboard at `/admin/crm`
 - API at `/api/*`
 
 ### Creating the First Admin User
 On first run, navigate to `/admin` and Payload will prompt you to create an initial admin user.
+
+### Database Migrations
+Payload migrations live in `src/migrations/`. Run via:
+
+```bash
+npm run payload migrate
+```
 
 ---
 
@@ -444,20 +598,21 @@ On first run, navigate to `/admin` and Payload will prompt you to create an init
 ### Setup
 1. Import the GitHub repo at [vercel.com/new](https://vercel.com/new)
 2. Add all environment variables from `.env.production` (with production values)
-3. Deploy — Vercel auto-detects Next.js
+3. Deploy — Vercel auto-detects Next.js (also enforced via `vercel.json`)
 
 ### Key Configuration
-- **Framework**: Next.js (auto-detected)
+- **Framework**: Next.js (set explicitly in `vercel.json`)
 - **Build Command**: `next build`
 - **Output Directory**: `.next`
 - **Node.js Version**: 20.x
-- **Cron Jobs**: Defined in `vercel.json`, requires Vercel Pro plan for < 1 day intervals
+- **Cron Jobs**: Defined in `vercel.json` — requires Vercel Pro plan for sub-day intervals
 
 ### Required Vercel Environment Variables
 All variables listed in [Environment Variables](#environment-variables) must be set in Vercel project settings. Critical ones that will cause build failures if missing:
 - `DATABASE_URL`
 - `PAYLOAD_SECRET`
 - `NEXT_PUBLIC_SITE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY` (required for media uploads in production)
 
 ### Auto-Deploy
 Pushes to `main` trigger automatic production deployments. PRs create preview deployments.
@@ -466,14 +621,31 @@ Pushes to `main` trigger automatic production deployments. PRs create preview de
 
 ## Scripts
 
+### Package scripts (`npm run …`)
+
 | Script              | Command                  | Description                        |
 | ------------------- | ------------------------ | ---------------------------------- |
-| `npm run dev`       | `next dev`               | Start dev server on port 3000      |
-| `npm run build`     | `next build`             | Production build                   |
-| `npm run start`     | `next start`             | Start production server            |
-| `npm run lint`      | `next lint`              | Run ESLint                         |
-| `npm run payload`   | `payload`                | Run Payload CLI (migrations, etc.) |
-| `npm run generate:types` | `payload generate:types` | Regenerate TypeScript types from Payload schema |
+| `dev`               | `next dev`               | Start dev server on port 3000      |
+| `build`             | `next build`             | Production build                   |
+| `start`             | `next start`             | Start production server            |
+| `lint`              | `next lint`              | Run ESLint                         |
+| `payload`           | `payload` (via cross-env) | Payload CLI (migrations, etc.)   |
+| `generate:types`    | `payload generate:types` | Regenerate TypeScript types from Payload schema |
+| `seed:blog`         | `tsx scripts/seed-blog.ts` | Seed initial blog posts          |
+| `seed:blog-ai`      | `tsx scripts/seed-blog-ai.ts` | Seed AI/tech-themed blog posts |
+
+### `scripts/` directory (run with `npx tsx scripts/<file>.ts`)
+
+| Script | Purpose |
+| ------ | ------- |
+| `seed-team.ts`, `update-team.ts`, `import-team-photos.ts` | Seed/update team members + headshots |
+| `seed-market-areas.ts` | Seed Central Oregon market areas |
+| `seed-pages.ts` | Seed CMS pages |
+| `seed-blog.ts`, `seed-blog-ai.ts`, `humanize-blogs.ts`, `redate-blogs.ts` | Blog content seeding + post-processing |
+| `fix-blog-images.ts`, `fix-single-image.ts`, `upload-missing-media.ts`, `regenerate-thumbnails.ts` | Media maintenance |
+| `migrate-media-to-supabase.ts` | One-time migration from S3 to Supabase Storage |
+| `migrate-seo-plugin.ts`, `migrate-testimonials.ts`, `migrate-web-listings.mjs` | Data migrations |
+| `sync-google-reviews.ts` | Manual Google reviews pull |
 
 ---
 
