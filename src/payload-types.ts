@@ -593,6 +593,43 @@ export interface Lead {
   desiredMoveInDate?: string | null;
   monthlyBudgetMin?: number | null;
   monthlyBudgetMax?: number | null;
+  subjectProperty?: {
+    address?: string | null;
+    town?: ('Bend' | 'Redmond' | 'Sisters' | 'Prineville' | 'Culver' | 'Other') | null;
+    zipCode?: string | null;
+    bedrooms?: number | null;
+    bathrooms?: number | null;
+    sqft?: number | null;
+    propertyType?: ('SFR' | 'Apartment' | 'Townhouse' | 'Duplex' | 'Condo' | 'Manufactured' | 'Other') | null;
+    currentRent?: number | null;
+    amenities?:
+      | (
+          | 'garage'
+          | 'pool'
+          | 'ac'
+          | 'washer_dryer'
+          | 'dishwasher'
+          | 'fenced_yard'
+          | 'pet_friendly'
+          | 'fireplace'
+          | 'updated_kitchen'
+          | 'new_flooring'
+        )[]
+      | null;
+    /**
+     * Data sources used to populate the subject property (Google Geocoding, RentCast, etc.)
+     */
+    lookupSources?: string[] | null;
+  };
+  rentAnalysisStatus?: ('none' | 'requested' | 'in_review' | 'delivered' | 'declined') | null;
+  /**
+   * UUID from hdpm-chatbot rent_analyses table
+   */
+  rentAnalysisId?: string | null;
+  /**
+   * Shareable PDF link populated by hdpm-chatbot when the analysis is delivered
+   */
+  rentAnalysisShortUrl?: string | null;
   lastContactedAt?: string | null;
   lastInboundAt?: string | null;
   lastOutboundAt?: string | null;
@@ -1289,6 +1326,23 @@ export interface LeadsSelect<T extends boolean = true> {
   desiredMoveInDate?: T;
   monthlyBudgetMin?: T;
   monthlyBudgetMax?: T;
+  subjectProperty?:
+    | T
+    | {
+        address?: T;
+        town?: T;
+        zipCode?: T;
+        bedrooms?: T;
+        bathrooms?: T;
+        sqft?: T;
+        propertyType?: T;
+        currentRent?: T;
+        amenities?: T;
+        lookupSources?: T;
+      };
+  rentAnalysisStatus?: T;
+  rentAnalysisId?: T;
+  rentAnalysisShortUrl?: T;
   lastContactedAt?: T;
   lastInboundAt?: T;
   lastOutboundAt?: T;

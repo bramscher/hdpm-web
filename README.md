@@ -282,8 +282,16 @@ Custom React views are mounted at these admin URLs (defined in `payload.config.t
 | Method | Path | Description |
 | ------ | ---- | ----------- |
 | POST   | `/api/crm/leads`              | Public lead intake (dedupe + normalize) |
+| POST   | `/api/crm/rental-analysis`    | Public owner rental-analysis intake — creates owner Lead + forwards to hdpm-chatbot |
+| POST   | `/api/crm/rental-analysis/status` | Service-to-service callback from hdpm-chatbot (Bearer `HDPM_SERVICE_TOKEN`) |
 | GET    | `/api/crm/reports`            | Aggregated CRM metrics (auth: admin/editor/viewer) |
 | GET    | `/api/crm/cron`               | Periodic: marks overdue tasks, runs automation rules (Bearer `CRON_SECRET`) |
+
+### Owner Intake
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| GET    | `/api/owner-intake/address-lookup` | Public address autocomplete (Google Geocoding + RentCast) — same shape as the sister app's `/api/comps/address-lookup` |
 
 ### Automations
 
@@ -363,6 +371,34 @@ Media uploads go to **Supabase Storage** (bucket: `media`) via a custom adapter 
 - Public URL rewrite: `/api/media/file/*` resolves to the Supabase Storage public URL
 - Storage plugin is conditional on `SUPABASE_SERVICE_ROLE_KEY` so local dev works without credentials
 - The Media collection has attribution/license fields populated by `/api/image-import` for Unsplash/Wikimedia imports
+
+---
+
+## Owner Rental Analysis Flow
+
+The `/owners` page features a 3-step rental analysis intake form. The flow ties hdpm-web (intake) to hdpm-chatbot (analysis engine):
+
+```
+Owner fills form on /owners
+        ↓
+/api/owner-intake/address-lookup  (Google Geocoding + RentCast)
+        ↓ subject property auto-filled, owner confirms
+POST /api/crm/rental-analysis
+        ├──→ creates owner Lead (leadType=owner) with subjectProperty + rentAnalysisStatus="requested"
+        └──→ forwards to hdpm-chatbot: POST /api/intake/rental-analysis-request (Bearer HDPM_SERVICE_TOKEN)
+                  ↓
+        hdpm-chatbot inserts a draft rent_analyses row (status="requested")
+                  ↓
+        Operator opens it in the Comps dashboard, runs the analysis, reviews
+                  ↓
+        Operator delivers (PDF + email)
+                  ↓
+POST /api/crm/rental-analysis/status  (chatbot → web, Bearer HDPM_SERVICE_TOKEN)
+        ↓
+Lead's rentAnalysisStatus and rentAnalysisShortUrl update in the CRM
+```
+
+Address-lookup data shape is intentionally identical to `hdpm-chatbot/lib/address-lookup.ts` so the `SubjectProperty` passed across services maps 1:1 to the analysis engine input.
 
 ---
 
@@ -529,8 +565,16 @@ The projects do **not** directly call each other's APIs. They communicate indire
 | Variable | Description |
 | -------- | ----------- |
 | `CLAUDE_API_KEY` (a.k.a. `ANTHROPIC_API_KEY`) | Anthropic API key for blog generation |
-| `GOOGLE_PLACES_API_KEY` | Google Places API (New) key for review sync |
+| `GOOGLE_PLACES_API_KEY` | Google Places API (New) — used for review sync **and** the owner rental-analysis address lookup |
 | `GOOGLE_PLACE_ID` | Place ID for HDPM Google Business listing |
+| `RENTCAST_API_KEY` | Optional — RentCast property record enrichment for the owner rental-analysis form |
+
+### Service-to-service (hdpm-chatbot)
+
+| Variable | Description |
+| -------- | ----------- |
+| `HDPM_CHATBOT_BASE_URL` | Base URL of hdpm-chatbot (e.g. `https://chatbot.highdesertpm.com`) |
+| `HDPM_SERVICE_TOKEN` | Shared bearer token; must match the value set on hdpm-chatbot |
 
 ### Email / Misc
 

@@ -234,6 +234,126 @@ export const Leads: CollectionConfig = {
           ],
         },
         {
+          label: 'Rental Analysis',
+          admin: {
+            description: 'For owner leads requesting a free rental analysis. Subject property + analysis status synced with hdpm-chatbot.',
+          },
+          fields: [
+            {
+              name: 'subjectProperty',
+              type: 'group',
+              fields: [
+                { name: 'address', type: 'text' },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'town',
+                      type: 'select',
+                      options: [
+                        { label: 'Bend', value: 'Bend' },
+                        { label: 'Redmond', value: 'Redmond' },
+                        { label: 'Sisters', value: 'Sisters' },
+                        { label: 'Prineville', value: 'Prineville' },
+                        { label: 'Culver', value: 'Culver' },
+                        { label: 'Other', value: 'Other' },
+                      ],
+                    },
+                    { name: 'zipCode', type: 'text' },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'bedrooms', type: 'number', min: 0 },
+                    { name: 'bathrooms', type: 'number', min: 0 },
+                    { name: 'sqft', type: 'number', min: 0 },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'propertyType',
+                      type: 'select',
+                      options: [
+                        { label: 'Single Family', value: 'SFR' },
+                        { label: 'Apartment', value: 'Apartment' },
+                        { label: 'Townhouse', value: 'Townhouse' },
+                        { label: 'Duplex', value: 'Duplex' },
+                        { label: 'Condo', value: 'Condo' },
+                        { label: 'Manufactured', value: 'Manufactured' },
+                        { label: 'Other', value: 'Other' },
+                      ],
+                    },
+                    { name: 'currentRent', type: 'number', min: 0 },
+                  ],
+                },
+                {
+                  name: 'amenities',
+                  type: 'select',
+                  hasMany: true,
+                  options: [
+                    { label: 'Garage', value: 'garage' },
+                    { label: 'Pool', value: 'pool' },
+                    { label: 'A/C', value: 'ac' },
+                    { label: 'Washer/Dryer', value: 'washer_dryer' },
+                    { label: 'Dishwasher', value: 'dishwasher' },
+                    { label: 'Fenced Yard', value: 'fenced_yard' },
+                    { label: 'Pet Friendly', value: 'pet_friendly' },
+                    { label: 'Fireplace', value: 'fireplace' },
+                    { label: 'Updated Kitchen', value: 'updated_kitchen' },
+                    { label: 'New Flooring', value: 'new_flooring' },
+                  ],
+                },
+                {
+                  name: 'lookupSources',
+                  type: 'text',
+                  hasMany: true,
+                  admin: {
+                    readOnly: true,
+                    description: 'Data sources used to populate the subject property (Google Geocoding, RentCast, etc.)',
+                  },
+                },
+              ],
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'rentAnalysisStatus',
+                  type: 'select',
+                  options: [
+                    { label: 'Not requested', value: 'none' },
+                    { label: 'Requested', value: 'requested' },
+                    { label: 'In review', value: 'in_review' },
+                    { label: 'Delivered', value: 'delivered' },
+                    { label: 'Declined', value: 'declined' },
+                  ],
+                  defaultValue: 'none',
+                  index: true,
+                },
+                {
+                  name: 'rentAnalysisId',
+                  type: 'text',
+                  admin: {
+                    description: 'UUID from hdpm-chatbot rent_analyses table',
+                    readOnly: true,
+                  },
+                },
+              ],
+            },
+            {
+              name: 'rentAnalysisShortUrl',
+              type: 'text',
+              admin: {
+                readOnly: true,
+                description: 'Shareable PDF link populated by hdpm-chatbot when the analysis is delivered',
+              },
+            },
+          ],
+        },
+        {
           label: 'Tracking',
           fields: [
             {
