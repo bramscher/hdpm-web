@@ -60,9 +60,9 @@ function getSupabaseClient(): SupabaseClient {
 // ---------------------------------------------------------------------------
 // handleUpload – uploads the file buffer to Supabase Storage
 // ---------------------------------------------------------------------------
-function getHandleUpload(bucket: string): HandleUpload {
+function getHandleUpload(bucket: string, collectionPrefix = ''): HandleUpload {
   return async ({ data, file }) => {
-    const prefix = data?.prefix || ''
+    const prefix = data?.prefix || collectionPrefix
     const fileKey = path.posix.join(prefix, file.filename)
 
     const client = getSupabaseClient()
@@ -83,9 +83,9 @@ function getHandleUpload(bucket: string): HandleUpload {
 // ---------------------------------------------------------------------------
 // handleDelete – removes the file from Supabase Storage
 // ---------------------------------------------------------------------------
-function getHandleDelete(bucket: string): HandleDelete {
+function getHandleDelete(bucket: string, collectionPrefix = ''): HandleDelete {
   return async ({ doc: { prefix = '' }, filename }) => {
-    const fileKey = path.posix.join(prefix, filename)
+    const fileKey = path.posix.join(prefix || collectionPrefix, filename)
     const client = getSupabaseClient()
 
     const { error } = await client.storage.from(bucket).remove([fileKey])
@@ -99,9 +99,9 @@ function getHandleDelete(bucket: string): HandleDelete {
 // ---------------------------------------------------------------------------
 // generateURL – returns the path that next.config.ts rewrites to Supabase
 // ---------------------------------------------------------------------------
-function getGenerateURL(): GenerateURL {
+function getGenerateURL(collectionPrefix = ''): GenerateURL {
   return ({ filename, prefix = '' }) => {
-    const filePath = path.posix.join(prefix, filename)
+    const filePath = path.posix.join(prefix || collectionPrefix, filename)
     // This path is rewritten by next.config.ts:
     //   /api/media/file/:path* → {SUPABASE_URL}/storage/v1/object/public/media/:path*
     return `/api/media/file/${filePath}`
@@ -154,9 +154,9 @@ function supabaseAdapter(bucket: string): Adapter {
   return ({ collection, prefix }) => {
     return {
       name: 'supabase',
-      generateURL: getGenerateURL(),
-      handleDelete: getHandleDelete(bucket),
-      handleUpload: getHandleUpload(bucket),
+      generateURL: getGenerateURL(prefix),
+      handleDelete: getHandleDelete(bucket, prefix),
+      handleUpload: getHandleUpload(bucket, prefix),
       staticHandler: getStaticHandler(bucket, collection),
     } satisfies GeneratedAdapter
   }

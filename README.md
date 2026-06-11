@@ -229,7 +229,7 @@ The CRM is fully embedded in the Payload admin. Six collections plus dedicated a
 | AppFolio handoff (push qualified leads) | `src/lib/crm/appfolio-handoff.ts` |
 | Task generation | `src/lib/crm/tasks.ts` |
 
-Public intake at `POST /api/crm/leads` normalizes input, dedupes, and either creates a lead or appends activity to an existing one. The contact form on `/contact` uses the same flow via Payload's auto-create on the Leads collection.
+Public intake at `POST /api/crm/leads` normalizes input, dedupes, and either creates a lead or appends activity to an existing one. The contact form on `/contact` runs the same path in its server action (`actions.ts`): it normalizes email/phone, calls `findDuplicateLead`, and either logs an inbound `lead-activities` note against the existing lead (updating `lastInboundAt`) or creates a new lead.
 
 ---
 
@@ -356,7 +356,9 @@ Public listings page (photos + detail IDs)
 A unit is considered available if:
 - Rent amount > 0
 - Status is NOT: occupied, leased, current, notice, eviction
-- Status is vacant OR has an `AvailableOn` date OR `RentReady=true`
+- Status carries an explicit availability signal (`available`, `vacant`, `rent ready`) OR it has a valid `AvailableOn` date (`now` or a parseable date)
+
+Blank statuses are no longer treated as available on their own — an explicit signal or a valid `AvailableOn` date is required.
 
 ### CRM Handoff
 Qualified leads are pushed to AppFolio via `src/lib/crm/appfolio-handoff.ts` so the operations team works them inside AppFolio after initial qualification.

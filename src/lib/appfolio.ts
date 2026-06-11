@@ -91,6 +91,26 @@ function addressesMatch(a: string, b: string): boolean {
   return normA.includes(normB) || normB.includes(normA)
 }
 
+interface PositionedMatch {
+  value: string
+  index: number
+}
+
+function closestMatch(
+  matches: PositionedMatch[],
+  targetIndex: number,
+  maxDistance?: number,
+): PositionedMatch | null {
+  if (matches.length === 0) return null
+  const closest = matches.reduce((nearest, match) =>
+    Math.abs(match.index - targetIndex) < Math.abs(nearest.index - targetIndex) ? match : nearest,
+  )
+  if (maxDistance !== undefined && Math.abs(closest.index - targetIndex) > maxDistance) {
+    return null
+  }
+  return closest
+}
+
 // ============================================
 // Public page scraping: CDN image URLs
 // ============================================
@@ -131,47 +151,53 @@ export async function fetchPublicListingPhotos(): Promise<Map<string, PublicList
     // The page contains JSON-like data with addresses, image URLs, and detail page links.
     // Pattern: each listing has an address, a detail link, and an image URL.
 
-    // Extract all detail page IDs and their associated data
+    // Extract all detail page IDs and their positions. Positions let us pair
+    // each detail link with nearby address/image data instead of assuming
+    // independent regex result arrays share the same order.
     // Detail links look like: /listings/detail/{uuid}
     const detailLinkRegex = /\/listings\/detail\/([a-f0-9-]+)/g
     const detailIds: string[] = []
+    const detailMatches: PositionedMatch[] = []
     let detailMatch
     while ((detailMatch = detailLinkRegex.exec(html)) !== null) {
       if (!detailIds.includes(detailMatch[1])) {
         detailIds.push(detailMatch[1])
+        detailMatches.push({ value: detailMatch[1], index: detailMatch.index })
       }
     }
 
     // Extract addresses - they appear in the format "address":"424 NE Chestnut St. , Madras, OR 97741"
     // or as text content near listing cards
     const addressRegex = /"address"\s*:\s*"([^"]+)"/g
-    const addresses: string[] = []
+    const addresses: PositionedMatch[] = []
     let addrMatch
     while ((addrMatch = addressRegex.exec(html)) !== null) {
-      addresses.push(addrMatch[1])
+      addresses.push({ value: addrMatch[1], index: addrMatch.index })
     }
 
     // Extract CDN image URLs in order of appearance
-    const imageUrls: string[] = []
-    let imgMatch
+    const imageUrls: PositionedMatch[] = []
+    let imgMatch: RegExpExecArray | null
     // Reset regex state
     CDN_IMAGE_REGEX.lastIndex = 0
     while ((imgMatch = CDN_IMAGE_REGEX.exec(html)) !== null) {
-      if (!imageUrls.includes(imgMatch[0])) {
-        imageUrls.push(imgMatch[0])
+      const imageUrl = imgMatch[0]
+      const imageIndex = imgMatch.index
+      if (!imageUrls.some((image) => image.value === imageUrl)) {
+        imageUrls.push({ value: imageUrl, index: imageIndex })
       }
     }
 
-    // If we got structured JSON data with addresses, pair them with detail IDs and images
-    if (addresses.length > 0 && detailIds.length > 0) {
-      for (let i = 0; i < addresses.length; i++) {
-        const address = addresses[i]
-        const detailId = detailIds[i] || detailIds[0]
-        const primaryImage = imageUrls[i] || null
+    // Pair each detail link with the nearest address/image from the surrounding page data.
+    if (addresses.length > 0 && detailMatches.length > 0) {
+      for (const detail of detailMatches) {
+        const address = closestMatch(addresses, detail.index, 6000)
+        if (!address) continue
 
-        result.set(address, {
-          primaryImageUrl: primaryImage,
-          detailPageId: detailId,
+        const primaryImage = closestMatch(imageUrls, detail.index, 6000)
+        result.set(address.value, {
+          primaryImageUrl: primaryImage?.value || null,
+          detailPageId: detail.value,
         })
       }
     }
@@ -384,8 +410,8 @@ function parseNumber(val: unknown): number {
 /**
  * Determine if a unit is available for rent.
  * A unit is considered available if:
- * - Status contains "Vacant" or is empty/undefined
- * - OR it has an AvailableOn date (indicating it will be available)
+ * - Status contains an explicit availability signal
+ * - OR it has an AvailableOn date / RentReady flag
  * - AND it has a listed rent > 0
  *
  * Excludes units that are clearly occupied:
@@ -409,13 +435,23 @@ function isUnitAvailable(unit: V0Unit): boolean {
     return false
   }
 
-  // Vacant units are available
-  if (status.includes('vacant') || status === '' || !status) {
+  // Explicitly available units are available.
+  if (
+    status.includes('available') ||
+    status.includes('vacant') ||
+    status.includes('rent ready') ||
+    status.includes('rentready')
+  ) {
     return true
   }
 
-  // Units with an AvailableOn date are available (future availability)
-  if (unit.AvailableOn) {
+  // Units with an AvailableOn date are available (future availability).
+  // Blank statuses are common in the API, but should not be enough by themselves.
+  if (
+    unit.AvailableOn &&
+    (/^now$/i.test(unit.AvailableOn.trim()) ||
+      !Number.isNaN(new Date(unit.AvailableOn).getTime()))
+  ) {
     return true
   }
 

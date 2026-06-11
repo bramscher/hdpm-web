@@ -18,9 +18,6 @@ const RESERVED_SLUGS = [
   'listings',
   'market-areas',
   'owners',
-  'privacy',
-  'residents',
-  'services',
   'tenants',
 ]
 

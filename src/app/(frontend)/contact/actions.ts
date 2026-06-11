@@ -2,7 +2,11 @@
 
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { splitName } from '../../../lib/crm/normalization'
+import { findDuplicateLead } from '@/lib/crm/dedup'
+import { normalizeEmail, normalizePhone, splitName } from '../../../lib/crm/normalization'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyPayload = any
 
 export type ContactFormState = {
   success: boolean
@@ -30,9 +34,11 @@ export async function submitContactForm(
   }
 
   try {
-    const payload = await getPayload({ config })
+    const payload: AnyPayload = await getPayload({ config })
 
     const { firstName, lastName } = splitName(name)
+    const normalizedEmail = normalizeEmail(email)
+    const normalizedPhone = phone ? normalizePhone(phone) : undefined
 
     // Map propertyInterest to leadType
     const leadTypeMap: Record<string, string> = {
@@ -41,17 +47,43 @@ export async function submitContactForm(
       general: 'other',
     }
     const leadType = propertyInterest ? leadTypeMap[propertyInterest] || 'other' : undefined
+    const existingLeadId = await findDuplicateLead(payload, normalizedEmail, normalizedPhone)
+
+    if (existingLeadId) {
+      await payload.create({
+        collection: 'lead-activities',
+        data: {
+          lead: existingLeadId,
+          type: 'note' as const,
+          direction: 'inbound' as const,
+          body: `Website contact form inquiry${message ? `: ${message}` : ''}`,
+          metadata: {
+            source: 'website',
+            propertyInterest: propertyInterest || undefined,
+          },
+        },
+      })
+
+      await payload.update({
+        collection: 'leads',
+        id: existingLeadId,
+        data: { lastInboundAt: new Date().toISOString() },
+      })
+
+      return { success: true, error: null }
+    }
 
     await payload.create({
       collection: 'leads',
       data: {
         firstName,
         lastName: lastName || '—', // fallback when only one name was provided
-        email,
-        phone,
+        email: normalizedEmail,
+        phone: normalizedPhone,
         leadType: leadType as 'tenant' | 'owner' | 'vendor' | 'other' | undefined,
         message,
         source: 'website' as const,
+        lastInboundAt: new Date().toISOString(),
       },
     })
 
