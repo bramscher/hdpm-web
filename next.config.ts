@@ -16,6 +16,65 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  // 301 map for every URL in the live WordPress-era sitemap (see
+  // docs/hdpm-web-fix-brief.md P0-6). Verified by scripts/verify-cutover.sh.
+  async redirects() {
+    return [
+      { source: '/about-us', destination: '/about', permanent: true },
+      { source: '/availability', destination: '/listings', permanent: true },
+      {
+        source: '/bend-property-management',
+        destination: '/market-areas/bend',
+        permanent: true,
+      },
+      {
+        source: '/sisters-property-management',
+        destination: '/market-areas/sisters',
+        permanent: true,
+      },
+      {
+        source: '/prineville-property-management',
+        destination: '/market-areas/prineville',
+        permanent: true,
+      },
+      { source: '/privacy-policy', destination: '/privacy', permanent: true },
+      { source: '/cookie-policy', destination: '/privacy', permanent: true },
+      { source: '/services', destination: '/owners', permanent: true },
+      { source: '/residents', destination: '/tenants', permanent: true },
+      {
+        source: '/free-property-management-consultation',
+        destination: '/owners#get-started',
+        permanent: true,
+      },
+      // Live Redmond blog posts — temporary target until the posts are
+      // ported to /blog (P1-15), then flip these to the ported slugs.
+      {
+        source: '/how-to-rent-redmond',
+        destination: '/market-areas/redmond',
+        permanent: true,
+      },
+      {
+        source: '/real-estate-investing-redmond',
+        destination: '/market-areas/redmond',
+        permanent: true,
+      },
+      {
+        source: '/buying-investment-property-redmond',
+        destination: '/market-areas/redmond',
+        permanent: true,
+      },
+      { source: '/sitemap', destination: '/', permanent: true },
+      // The CMS "home" doc would otherwise render at /home as a thin
+      // duplicate of the homepage
+      { source: '/home', destination: '/', permanent: true },
+      // Old AppFolio-hosted listing detail URLs (17 UUIDs on the live site)
+      {
+        source: '/listings/detail/:uuid*',
+        destination: '/listings',
+        permanent: true,
+      },
+    ]
+  },
   images: {
     remotePatterns: [
       {

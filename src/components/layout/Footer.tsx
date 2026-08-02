@@ -129,6 +129,29 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Fair Housing */}
+      <div className="border-t border-white/10">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <p className="text-sm leading-relaxed text-gray-500">
+            <span className="font-semibold text-gray-400">
+              Equal Housing Opportunity.
+            </span>{' '}
+            We do business in accordance with the federal{' '}
+            <a
+              href="https://www.hud.gov/program_offices/fair_housing_equal_opp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline transition-colors hover:text-accent"
+            >
+              Fair Housing Act
+            </a>{' '}
+            and Oregon fair housing laws. We do not discriminate on the basis
+            of race, color, religion, sex, disability, familial status,
+            national origin, or any other protected class.
+          </p>
+        </div>
+      </div>
+
       {/* Bottom Bar */}
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row sm:px-6 lg:px-8">

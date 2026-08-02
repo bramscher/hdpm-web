@@ -17,7 +17,7 @@ const staticRoutes: Array<{
   { path: '/about', changeFrequency: 'monthly', priority: 0.7 },
   { path: '/blog', changeFrequency: 'weekly', priority: 0.7 },
   { path: '/contact', changeFrequency: 'yearly', priority: 0.6 },
-  { path: '/privacy', changeFrequency: 'yearly', priority: 0.3 },
+  // /privacy, /terms, /accessibility come from the pages collection below
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -68,6 +68,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Payload unavailable at build time — skip blog entries
   }
 
+  // CMS page docs that back dedicated routes (or redirects) — already
+  // covered by staticRoutes above, so exclude them from the pages loop.
+  const excludedPageSlugs = new Set([
+    'home',
+    'about',
+    'blog',
+    'contact',
+    'listings',
+    'market-areas',
+    'owners',
+    'tenants',
+    'services',
+    'residents',
+  ])
+
   let pageEntries: MetadataRoute.Sitemap = []
   try {
     const payload = await getPayload({ config })
@@ -77,7 +92,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       limit: 1000,
       depth: 0,
     })
-    pageEntries = docs.map((page) => ({
+    pageEntries = docs
+      .filter((page) => !excludedPageSlugs.has(page.slug))
+      .map((page) => ({
       url: `${SITE_URL}/${page.slug}`,
       lastModified: page.updatedAt ? new Date(page.updatedAt) : now,
       changeFrequency: 'monthly',
