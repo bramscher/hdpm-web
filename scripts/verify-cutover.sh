@@ -42,8 +42,9 @@ declare -a REDIRECTS=(
   "/buying-investment-property-redmond|/blog/buying-investment-property-redmond"
   "/sitemap|/"
   "/home|/"
-  "/listings/detail/37e083e0-4b40-45fd-b65c-a81c784b7efc|/listings"
-  "/listings/detail/e7ff2344-1713-44cf-8d5e-71957c46a348|/listings"
+  "/listings/detail/37e083e0-4b40-45fd-b65c-a81c784b7efc|/listings?notice=unavailable"
+  "/listings/detail/e7ff2344-1713-44cf-8d5e-71957c46a348|/listings?notice=unavailable"
+  "/mckenzie-meadows-village|/listings"
 )
 for pair in "${REDIRECTS[@]}"; do
   path="${pair%%|*}"; want="${pair##*|}"

@@ -74,8 +74,23 @@ export default async function ListingsPage({
     filtered = filtered.filter(isListingPetFriendly)
   }
 
+  const showUnavailableNotice = params.notice === 'unavailable'
+
   return (
     <div className="min-h-screen bg-neutral-light">
+      {/* Expired-listing notice */}
+      {showUnavailableNotice && (
+        <div className="border-b border-amber-200 bg-amber-50 px-4 py-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <p className="text-sm font-medium text-amber-900">
+              That property is no longer available — it may have just been
+              rented. Here are our current listings, updated throughout the
+              day.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <section className="bg-primary px-4 pb-10 pt-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
