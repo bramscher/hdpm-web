@@ -22,6 +22,7 @@ import { LeadTasks } from './collections/LeadTasks'
 import { PropertiesInterest } from './collections/PropertiesInterest'
 import { LeadConversations } from './collections/LeadConversations'
 import { AutomationRules } from './collections/AutomationRules'
+import { SeoSuggestions } from './collections/SeoSuggestions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -79,6 +80,7 @@ export default buildConfig({
     LeadConversations,
     PropertiesInterest,
     AutomationRules,
+    SeoSuggestions,
     // Admin
     Users,
   ],

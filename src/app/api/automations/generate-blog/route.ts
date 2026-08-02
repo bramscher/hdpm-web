@@ -179,7 +179,8 @@ Output format — return ONLY a JSON object with these fields (no markdown code 
 }`
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      // claude-sonnet-4-20250514 is deprecated (retires June 2026)
+      model: 'claude-sonnet-5',
       max_tokens: 4000,
       messages: [{ role: 'user', content: prompt }],
     })

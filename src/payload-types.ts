@@ -80,6 +80,7 @@ export interface Config {
     'lead-conversations': LeadConversation;
     'properties-interest': PropertiesInterest;
     'automation-rules': AutomationRule;
+    'seo-suggestions': SeoSuggestion;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -101,6 +102,7 @@ export interface Config {
     'lead-conversations': LeadConversationsSelect<false> | LeadConversationsSelect<true>;
     'properties-interest': PropertiesInterestSelect<false> | PropertiesInterestSelect<true>;
     'automation-rules': AutomationRulesSelect<false> | AutomationRulesSelect<true>;
+    'seo-suggestions': SeoSuggestionsSelect<false> | SeoSuggestionsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -877,6 +879,59 @@ export interface AutomationRule {
   createdAt: string;
 }
 /**
+ * Approve a suggestion to apply it to the page. Outcomes are measured automatically ~4 weeks after applying.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo-suggestions".
+ */
+export interface SeoSuggestion {
+  id: number;
+  pagePath: string;
+  /**
+   * Which CMS document this suggestion edits
+   */
+  target?: {
+    collection?: ('pages' | 'posts' | 'market-areas') | null;
+    docId?: string | null;
+  };
+  field: 'seoTitle' | 'seoDescription' | 'content';
+  currentValue?: string | null;
+  suggestedValue: string;
+  /**
+   * Why the agent believes this will improve rankings
+   */
+  rationale?: string | null;
+  targetQueries?:
+    | {
+        query: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * 28-day GSC metrics at suggestion time
+   */
+  metricsBefore?: {
+    clicks?: number | null;
+    impressions?: number | null;
+    ctr?: number | null;
+    position?: number | null;
+  };
+  status?: ('pending' | 'approved' | 'applied' | 'rejected') | null;
+  appliedAt?: string | null;
+  /**
+   * 28-day GSC metrics measured after applying
+   */
+  metricsAfter?: {
+    clicks?: number | null;
+    impressions?: number | null;
+    ctr?: number | null;
+    position?: number | null;
+  };
+  outcome?: ('improved' | 'no_change' | 'worse') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -951,6 +1006,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'automation-rules';
         value: number | AutomationRule;
+      } | null)
+    | ({
+        relationTo: 'seo-suggestions';
+        value: number | SeoSuggestion;
       } | null)
     | ({
         relationTo: 'users';
@@ -1492,6 +1551,50 @@ export interface AutomationRulesSelect<T extends boolean = true> {
   actionType?: T;
   actionConfig?: T;
   priority?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo-suggestions_select".
+ */
+export interface SeoSuggestionsSelect<T extends boolean = true> {
+  pagePath?: T;
+  target?:
+    | T
+    | {
+        collection?: T;
+        docId?: T;
+      };
+  field?: T;
+  currentValue?: T;
+  suggestedValue?: T;
+  rationale?: T;
+  targetQueries?:
+    | T
+    | {
+        query?: T;
+        id?: T;
+      };
+  metricsBefore?:
+    | T
+    | {
+        clicks?: T;
+        impressions?: T;
+        ctr?: T;
+        position?: T;
+      };
+  status?: T;
+  appliedAt?: T;
+  metricsAfter?:
+    | T
+    | {
+        clicks?: T;
+        impressions?: T;
+        ctr?: T;
+        position?: T;
+      };
+  outcome?: T;
   updatedAt?: T;
   createdAt?: T;
 }
