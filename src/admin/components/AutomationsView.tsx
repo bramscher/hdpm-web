@@ -250,6 +250,7 @@ export default function AutomationsView() {
   const [researchTopics, setResearchTopics] = useState<Array<{ title: string; angle: string; audience: string; source: string; sourceUrl?: string; upvotes?: number; comments?: number }>>([])
   const [creatingPosts, setCreatingPosts] = useState<Record<number, boolean>>({})
   const [createdPosts, setCreatedPosts] = useState<Record<number, { id: number; slug: string; adminUrl: string }>>({})
+  const [blogAgentResult, setBlogAgentResult] = useState<ActionResult>({ status: 'idle' })
 
   async function syncReviews() {
     setReviewResult({ status: 'loading' })
@@ -322,6 +323,29 @@ export default function AutomationsView() {
       alert(`Failed to create post: ${String(err)}`)
     } finally {
       setCreatingPosts((prev) => ({ ...prev, [index]: false }))
+    }
+  }
+
+  async function runBlogAgent() {
+    setBlogAgentResult({ status: 'loading' })
+    try {
+      const res = await fetch('/api/automations/blog-agent', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok || data.ok === false) {
+        setBlogAgentResult({
+          status: 'error',
+          message: data.error || data.skipped || 'Request failed',
+          data,
+        })
+      } else {
+        setBlogAgentResult({
+          status: 'success',
+          message: data.post ? `Draft created: ${data.post.title}` : 'Done',
+          data: { post: data.post, image: data.image, topic: data.topic },
+        })
+      }
+    } catch (err) {
+      setBlogAgentResult({ status: 'error', message: String(err) })
     }
   }
 
@@ -462,6 +486,20 @@ export default function AutomationsView() {
             </div>
           )}
         </ActionCard>
+
+        {/* Blog Agent — full pipeline */}
+        <ActionCard
+          title="Blog Agent (full pipeline)"
+          description="Runs the complete pipeline the twice-weekly cron uses: research Reddit + web, write a draft with Claude, attach a license-safe featured image, and email the digest with social media copy to the inbox. Takes a few minutes."
+          buttonLabel="Run Blog Agent"
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+            </svg>
+          }
+          onRun={runBlogAgent}
+          result={blogAgentResult}
+        />
 
         {/* Listings Sync */}
         <ActionCard

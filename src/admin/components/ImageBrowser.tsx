@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useRef } from 'react'
-import type { SearchResult } from '../../app/api/image-search/route'
+import type { SearchResult } from '@/lib/image-search'
 
 export default function ImageBrowser() {
   const [query, setQuery] = useState('Central Oregon')
