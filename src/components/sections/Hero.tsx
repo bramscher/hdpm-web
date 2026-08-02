@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useEffect, useCallback } from 'react'
+import { SERVING_SINCE } from '@/lib/constants'
 
 const heroImages = [
   {
@@ -105,7 +106,7 @@ export default function Hero({ content }: { content?: HeroContent | null }) {
           {/* Badge */}
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium tracking-wide text-white/90 backdrop-blur-sm">
             <span className="inline-block h-2 w-2 rounded-full bg-accent-light animate-pulse" />
-            {content?.heroBadge ?? 'Serving Central Oregon Since 2011'}
+            {content?.heroBadge ?? SERVING_SINCE}
           </div>
 
           <h1 className="font-heading text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">

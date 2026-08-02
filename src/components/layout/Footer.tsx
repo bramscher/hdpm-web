@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { FOUNDED_YEAR } from '@/lib/constants'
 
 const quickLinks = [
   { href: '/owners', label: 'Property Owners' },
@@ -39,7 +40,7 @@ export default function Footer() {
             </div>
             <p className="mb-5 max-w-xs text-sm leading-relaxed text-gray-400">
               Professional property management across Central Oregon. Maximizing
-              your investment while keeping tenants happy since 2003.
+              your investment while keeping tenants happy since {FOUNDED_YEAR}.
             </p>
             <address className="space-y-2 text-sm not-italic text-gray-400">
               <p>1515 SW Reindeer Ave</p>
