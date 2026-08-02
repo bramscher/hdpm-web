@@ -2,8 +2,7 @@ import type { MetadataRoute } from 'next'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getCachedListings } from '@/lib/appfolio'
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://highdesertpm.com'
+import { SITE_URL } from '@/lib/site-url'
 
 const staticRoutes: Array<{
   path: string
@@ -16,8 +15,6 @@ const staticRoutes: Array<{
   { path: '/listings', changeFrequency: 'daily', priority: 0.9 },
   { path: '/market-areas', changeFrequency: 'monthly', priority: 0.8 },
   { path: '/about', changeFrequency: 'monthly', priority: 0.7 },
-  { path: '/services', changeFrequency: 'monthly', priority: 0.7 },
-  { path: '/residents', changeFrequency: 'monthly', priority: 0.6 },
   { path: '/blog', changeFrequency: 'weekly', priority: 0.7 },
   { path: '/contact', changeFrequency: 'yearly', priority: 0.6 },
   { path: '/privacy', changeFrequency: 'yearly', priority: 0.3 },

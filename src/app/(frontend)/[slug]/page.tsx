@@ -7,8 +7,7 @@ import config from '@payload-config'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { breadcrumbSchema } from '@/lib/schema'
 import type { Page, Media } from '@/payload-types'
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://highdesertpm.com'
+import { SITE_URL } from '@/lib/site-url'
 
 // Slugs that are handled by dedicated routes — skip them here
 const RESERVED_SLUGS = [

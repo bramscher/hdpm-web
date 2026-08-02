@@ -8,8 +8,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import { breadcrumbSchema } from '@/lib/schema'
 import BlogPostCard from '@/components/blog/BlogPostCard'
 import type { Post, Category, Media } from '@/payload-types'
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://highdesertpm.com'
+import { SITE_URL } from '@/lib/site-url'
 
 // ---------- Static params ----------
 export async function generateStaticParams() {
