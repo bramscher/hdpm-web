@@ -7,6 +7,7 @@ import config from '@payload-config'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { breadcrumbSchema } from '@/lib/schema'
 import BlogPostCard from '@/components/blog/BlogPostCard'
+import LeadForm from '@/components/forms/LeadForm'
 import type { Post, Category, Media } from '@/payload-types'
 import { SITE_URL } from '@/lib/site-url'
 
@@ -176,7 +177,7 @@ export default async function BlogPostPage({
   // JSON-LD
   const articleSchema = {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': 'BlogPosting',
     headline: post.title,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt,
@@ -405,6 +406,16 @@ export default async function BlogPostPage({
               </svg>
               Back to Blog
             </Link>
+          </div>
+
+          {/* Lead capture */}
+          <div className="mt-12 rounded-2xl border border-gray-200 bg-neutral-light p-8 sm:p-10">
+            <LeadForm
+              sourceDetail={`Blog post: ${post.slug}`}
+              analyticsTag="blog_post"
+              heading="Own a rental in Central Oregon?"
+              subheading="Find out what your property could earn with professional management — free rent analysis, emailed within one business day."
+            />
           </div>
         </article>
 

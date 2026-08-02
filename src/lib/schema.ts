@@ -33,7 +33,7 @@ export function localBusinessSchema() {
       { '@type': 'City', name: 'Metolius, OR' },
       { '@type': 'City', name: 'Madras, OR' },
     ],
-    openingHours: 'Mo-Fr 09:00-17:00',
+    openingHours: 'Mo-Fr 09:00-16:00',
     sameAs: [],
   }
 }
@@ -65,6 +65,42 @@ export function listingSchema(listing: AppFolioListing) {
       value: listing.SquareFeet,
       unitCode: 'FTK',
     },
+  }
+}
+
+export function serviceSchema(city: string, slug: string, description: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    serviceType: 'Property Management',
+    name: `${city} Property Management`,
+    description,
+    url: `${SITE_URL}/market-areas/${slug}`,
+    provider: {
+      '@type': 'LocalBusiness',
+      '@id': SITE_URL,
+      name: 'High Desert Property Management',
+      telephone: '(541) 548-0383',
+    },
+    areaServed: {
+      '@type': 'City',
+      name: `${city}, OR`,
+    },
+  }
+}
+
+export function faqSchema(items: { question: string; answer: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.answer,
+      },
+    })),
   }
 }
 

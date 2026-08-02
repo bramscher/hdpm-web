@@ -106,7 +106,7 @@ export default function Footer() {
             <dl className="space-y-2.5 text-sm text-gray-400">
               <div>
                 <dt className="font-medium text-gray-300">Monday - Friday</dt>
-                <dd>9:00 AM - 5:00 PM</dd>
+                <dd>9:00 AM - 4:00 PM</dd>
               </div>
               <div>
                 <dt className="font-medium text-gray-300">Saturday - Sunday</dt>

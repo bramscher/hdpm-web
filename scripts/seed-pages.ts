@@ -280,7 +280,7 @@ const PAGES: Array<{ title: string; slug: string; layout: PageLayout; [key: stri
       officeAddress: '1515 SW Reindeer Ave, Redmond, OR 97756',
       officePhone: '(541) 548-0383',
       officeEmail: 'info@highdesertpm.com',
-      officeHours: 'Monday – Friday, 9:00 AM – 5:00 PM',
+      officeHours: 'Monday – Friday, 9:00 AM – 4:00 PM',
     },
   },
   {
