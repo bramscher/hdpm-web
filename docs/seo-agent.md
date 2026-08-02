@@ -26,8 +26,8 @@ exact door counts, hours 9–4, "since 2011".
 
 ## Setup (one time)
 
-1. **Verify Search Console** for `https://www.highdesertpm.com` (or the
-   `highdesertpm.com` domain property).
+1. **Search Console**: already verified — the existing property is the
+   URL-prefix property `https://www.highdesertpm.com/`.
 2. **Google Cloud console** → create/select a project → enable the
    **Google Search Console API** → create a **service account** → create a
    JSON key for it.
@@ -36,8 +36,8 @@ exact door counts, hours 9–4, "since 2011".
 4. **Vercel env vars** (Production):
    - `GSC_CLIENT_EMAIL` — the service account email
    - `GSC_PRIVATE_KEY` — the `private_key` from the JSON key (keep the `\n`s)
-   - `GSC_SITE_URL` — `sc-domain:highdesertpm.com` for a domain property, or
-     `https://www.highdesertpm.com/` for a URL-prefix property
+   - `GSC_SITE_URL` — `https://www.highdesertpm.com/` (must match the
+     existing URL-prefix property exactly, trailing slash included)
 5. `ANTHROPIC_API_KEY` or the existing `CLAUDE_API_KEY` must be set.
 
 Until the GSC vars are set, the cron runs and exits with
