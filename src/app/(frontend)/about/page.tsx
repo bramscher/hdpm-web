@@ -5,6 +5,7 @@ import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 import { getPageBySlug } from '@/lib/page-content'
+import { FOUNDED_YEAR, SERVING_SINCE } from '@/lib/constants'
 import type { Media as MediaType } from '@/payload-types'
 
 export async function generateMetadata() {
@@ -13,7 +14,7 @@ export async function generateMetadata() {
     title: page?.meta?.title ?? page?.title ?? 'About Us',
     description:
       page?.meta?.description ??
-      'Learn about High Desert Property Management — serving Central Oregon property owners since 2011. Local expertise in Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras.',
+      `Learn about High Desert Property Management — serving Central Oregon property owners since ${FOUNDED_YEAR}. Local expertise in Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras.`,
     path: '/about',
   })
 }
@@ -134,7 +135,7 @@ export default async function AboutPage() {
               {c?.storyLabel ?? 'Our Story'}
             </p>
             <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
-              {c?.storyHeading ?? 'Serving Central Oregon Since 2011'}
+              {c?.storyHeading ?? SERVING_SINCE}
             </h2>
             <div className="mt-8 space-y-6 text-lg leading-relaxed text-neutral-mid">
               {c?.storyParagraphs && c.storyParagraphs.length > 0 ? (

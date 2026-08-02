@@ -1,8 +1,10 @@
 import { Plus_Jakarta_Sans, Inter } from 'next/font/google'
 import '../globals.css'
 
+import { GoogleAnalytics } from '@next/third-parties/google'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import AttributionCapture from '@/components/AttributionCapture'
 import { localBusinessSchema } from '@/lib/schema'
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -40,11 +42,15 @@ export default function FrontendLayout({
         >
           Skip to main content
         </a>
+        <AttributionCapture />
         <Header />
         <main id="main-content" className="flex-1">
           {children}
         </main>
         <Footer />
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        )}
       </body>
     </html>
   )

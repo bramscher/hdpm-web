@@ -61,6 +61,12 @@ export default function Header() {
             </Link>
           ))}
           <Link
+            href="/owner-portal"
+            className="ml-3 rounded-lg border border-white/30 px-4 py-2 text-sm font-semibold text-white/90 transition-all hover:border-accent hover:text-accent"
+          >
+            Owner Login
+          </Link>
+          <Link
             href="/owners#get-started"
             className="ml-3 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-accent-dark hover:shadow-md"
           >
@@ -124,13 +130,20 @@ export default function Header() {
               </Link>
             ))}
           </div>
-          <div className="mt-6 border-t border-white/10 pt-6">
+          <div className="mt-6 space-y-3 border-t border-white/10 pt-6">
             <Link
               href="/owners#get-started"
               onClick={() => setMobileOpen(false)}
               className="block rounded-lg bg-accent px-5 py-3 text-center text-sm font-semibold text-white shadow-sm transition-all hover:bg-accent-dark"
             >
               Free Rental Analysis
+            </Link>
+            <Link
+              href="/owner-portal"
+              onClick={() => setMobileOpen(false)}
+              className="block rounded-lg border border-white/30 px-5 py-3 text-center text-sm font-semibold text-white/90 transition-all hover:border-accent hover:text-accent"
+            >
+              Owner Login
             </Link>
           </div>
           <div className="mt-8 space-y-3 text-sm text-white/60">

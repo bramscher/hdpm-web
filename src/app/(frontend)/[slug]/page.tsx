@@ -11,11 +11,13 @@ import { SITE_URL } from '@/lib/site-url'
 
 // Slugs that are handled by dedicated routes — skip them here
 const RESERVED_SLUGS = [
+  'home', // redirected to / in next.config — never render as a page
   'about',
   'blog',
   'contact',
   'listings',
   'market-areas',
+  'owner-portal',
   'owners',
   'tenants',
 ]
@@ -139,13 +141,54 @@ export default async function CMSPage({
         }
       })}
 
-      {/* Fallback if no sections */}
-      {(!page.sections || page.sections.length === 0) && (
+      {/* Rich-text layouts (services/residents/privacy) store content in
+          the richContent group rather than sections */}
+      {(!page.sections || page.sections.length === 0) && hasRichContent(page) && (
+        <RichContentPage page={page} />
+      )}
+
+      {/* Fallback if no sections and no rich content */}
+      {(!page.sections || page.sections.length === 0) && !hasRichContent(page) && (
         <section className="bg-primary px-4 pb-16 pt-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
               {page.title}
             </h1>
+          </div>
+        </section>
+      )}
+    </>
+  )
+}
+
+// ---------- Rich-text layout (services/residents/privacy) ----------
+
+function hasRichContent(page: Page): boolean {
+  return Boolean(page.richContent?.heroHeading || page.richContent?.body)
+}
+
+function RichContentPage({ page }: { page: Page }) {
+  const rc = page.richContent
+  return (
+    <>
+      <section className="bg-primary px-4 pb-16 pt-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            {rc?.heroHeading || page.title}
+          </h1>
+          {rc?.heroSubheading && (
+            <p className="mt-4 max-w-2xl text-lg text-white/80">
+              {rc.heroSubheading}
+            </p>
+          )}
+        </div>
+      </section>
+      {rc?.body && (
+        <section className="bg-white py-16">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div className="prose prose-lg max-w-none font-body prose-headings:font-heading prose-headings:text-neutral-dark prose-p:text-neutral-mid prose-p:leading-relaxed prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-neutral-dark prose-li:text-neutral-mid prose-hr:border-gray-200">
+              <RichText data={rc.body} />
+            </div>
           </div>
         </section>
       )}

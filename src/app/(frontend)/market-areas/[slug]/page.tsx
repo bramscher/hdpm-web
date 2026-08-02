@@ -7,6 +7,7 @@ import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema, localBusinessSchema } from '@/lib/schema'
 import { getCachedListingsByCity } from '@/lib/appfolio'
+import { FOUNDED_YEAR } from '@/lib/constants'
 import ListingCard from '@/components/listings/ListingCard'
 import type { MarketArea, Media } from '@/payload-types'
 
@@ -444,7 +445,7 @@ export default async function MarketAreaPage({
           </div>
 
           <p className="mt-8 text-sm text-white/50">
-            Serving {area.city} and all of Central Oregon since 2011
+            Serving {area.city} and all of Central Oregon since {FOUNDED_YEAR}
           </p>
         </div>
       </section>

@@ -202,6 +202,32 @@ export const Leads: CollectionConfig = {
                 description: 'Initial inquiry message (from contact form)',
               },
             },
+            {
+              name: 'attribution',
+              type: 'group',
+              admin: {
+                description: 'Marketing attribution captured at website intake',
+              },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'utmSource', type: 'text' },
+                    { name: 'utmMedium', type: 'text' },
+                    { name: 'utmCampaign', type: 'text' },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'utmTerm', type: 'text' },
+                    { name: 'utmContent', type: 'text' },
+                  ],
+                },
+                { name: 'referrer', type: 'text' },
+                { name: 'landingPage', type: 'text' },
+              ],
+            },
           ],
         },
         {

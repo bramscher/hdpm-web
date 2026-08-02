@@ -590,6 +590,18 @@ export interface Lead {
    * Initial inquiry message (from contact form)
    */
   message?: string | null;
+  /**
+   * Marketing attribution captured at website intake
+   */
+  attribution?: {
+    utmSource?: string | null;
+    utmMedium?: string | null;
+    utmCampaign?: string | null;
+    utmTerm?: string | null;
+    utmContent?: string | null;
+    referrer?: string | null;
+    landingPage?: string | null;
+  };
   desiredMoveInDate?: string | null;
   monthlyBudgetMin?: number | null;
   monthlyBudgetMax?: number | null;
@@ -1323,6 +1335,17 @@ export interface LeadsSelect<T extends boolean = true> {
   stageReason?: T;
   notesSummary?: T;
   message?: T;
+  attribution?:
+    | T
+    | {
+        utmSource?: T;
+        utmMedium?: T;
+        utmCampaign?: T;
+        utmTerm?: T;
+        utmContent?: T;
+        referrer?: T;
+        landingPage?: T;
+      };
   desiredMoveInDate?: T;
   monthlyBudgetMin?: T;
   monthlyBudgetMax?: T;

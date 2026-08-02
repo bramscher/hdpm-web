@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { getAttribution } from '@/lib/attribution'
+import { trackLead } from '@/lib/analytics'
 
 type Town = 'Bend' | 'Redmond' | 'Sisters' | 'Prineville' | 'Culver' | 'Other'
 
@@ -64,6 +66,7 @@ export default function OwnerRentalAnalysisForm() {
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [message, setMessage] = useState('')
+  const [honeypot, setHoneypot] = useState('')
 
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [submitting, setSubmitting] = useState(false)
@@ -115,8 +118,8 @@ export default function OwnerRentalAnalysisForm() {
     e.preventDefault()
     setSubmitError(null)
 
-    if (!firstName.trim() || !email.trim() || !address.trim()) {
-      setSubmitError('Name, email, and property address are required.')
+    if (!firstName.trim() || !email.trim() || !phone.trim() || !address.trim()) {
+      setSubmitError('Name, email, phone, and property address are required.')
       return
     }
 
@@ -129,8 +132,10 @@ export default function OwnerRentalAnalysisForm() {
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           email: email.trim(),
-          phone: phone.trim() || undefined,
+          phone: phone.trim(),
           message: message.trim() || undefined,
+          company: honeypot || undefined,
+          attribution: getAttribution(),
           subject: {
             address: address.trim(),
             town,
@@ -146,6 +151,7 @@ export default function OwnerRentalAnalysisForm() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Submission failed')
+      trackLead('rental_analysis')
       setSubmitted(true)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Submission failed')
@@ -440,15 +446,29 @@ export default function OwnerRentalAnalysisForm() {
             />
           </Field>
 
-          <Field label="Phone">
+          <Field label="Phone" required>
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              required
               placeholder="(541) 555-0123"
               className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
             />
           </Field>
+
+          {/* Honeypot — hidden from real users, bots fill it */}
+          <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+            <label htmlFor="ra-company">Company</label>
+            <input
+              id="ra-company"
+              type="text"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
 
           <Field label="Anything else we should know?">
             <textarea

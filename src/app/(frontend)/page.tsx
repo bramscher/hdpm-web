@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { createMetadata } from '@/lib/seo'
+import { FOUNDED_YEAR } from '@/lib/constants'
 import { getPageBySlug } from '@/lib/page-content'
 import { getCachedListings } from '@/lib/appfolio'
 import Hero from '@/components/sections/Hero'
@@ -18,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Central Oregon Property Management',
     description:
       page?.meta?.description ||
-      'High Desert Property Management provides full-service property management in Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras. Trusted by Central Oregon property owners since 2011.',
+      `High Desert Property Management provides full-service property management in Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras. Trusted by Central Oregon property owners since ${FOUNDED_YEAR}.`,
     path: '/',
   })
 }
