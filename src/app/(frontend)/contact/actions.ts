@@ -25,7 +25,7 @@ export async function submitContactForm(
   const message = formData.get('message') as string
 
   // Honeypot: bots fill every field. Pretend success, create nothing.
-  if (formData.get('company')) {
+  if (formData.get('hp_check')) {
     return { success: true, error: null }
   }
 

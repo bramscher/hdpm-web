@@ -21,16 +21,30 @@ export function captureAttribution(): void {
   try {
     if (sessionStorage.getItem(STORAGE_KEY)) return
     const params = new URLSearchParams(window.location.search)
+    // Compare hostnames, not substrings: an external URL that merely
+    // contains our host in its query string must still count as a referrer,
+    // and apex<->www navigation must count as internal.
+    const internalHosts = new Set([
+      window.location.hostname,
+      'www.highdesertpm.com',
+      'highdesertpm.com',
+    ])
+    let referrer: string | undefined
+    if (document.referrer) {
+      try {
+        const refHost = new URL(document.referrer).hostname
+        if (!internalHosts.has(refHost)) referrer = document.referrer
+      } catch {
+        referrer = document.referrer
+      }
+    }
     const attribution: Attribution = {
       utmSource: params.get('utm_source') || undefined,
       utmMedium: params.get('utm_medium') || undefined,
       utmCampaign: params.get('utm_campaign') || undefined,
       utmTerm: params.get('utm_term') || undefined,
       utmContent: params.get('utm_content') || undefined,
-      referrer:
-        document.referrer && !document.referrer.includes(window.location.host)
-          ? document.referrer
-          : undefined,
+      referrer,
       landingPage: window.location.pathname + window.location.search,
     }
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(attribution))

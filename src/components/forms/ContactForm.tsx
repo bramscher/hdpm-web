@@ -13,13 +13,16 @@ const initialState: ContactFormState = {
 export default function ContactForm() {
   const [state, formAction, isPending] = useActionState(submitContactForm, initialState)
   const [attribution, setAttribution] = useState<Attribution>({})
+  const [honeypot, setHoneypot] = useState('')
 
   useEffect(() => {
     setAttribution(getAttribution())
   }, [])
 
   useEffect(() => {
-    if (state.success) trackLead('contact')
+    // Don't count honeypot-caught (pretend-success) submissions as conversions
+    if (state.success && !honeypot) trackLead('contact')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.success])
 
   if (state.success) {
@@ -40,10 +43,19 @@ export default function ContactForm() {
 
   return (
     <form action={formAction} className="space-y-6">
-      {/* Honeypot — hidden from real users, bots fill it */}
+      {/* Honeypot — hidden from real users, bots fill it. Neutral naming so
+          browser address-autofill never populates it. */}
       <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
-        <label htmlFor="contact-company">Company</label>
-        <input id="contact-company" type="text" name="company" tabIndex={-1} autoComplete="off" />
+        <label htmlFor="contact-hp-check">Leave this field empty</label>
+        <input
+          id="contact-hp-check"
+          type="text"
+          name="hp_check"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+        />
       </div>
 
       {/* Attribution (first-touch UTM/referrer, captured client-side) */}

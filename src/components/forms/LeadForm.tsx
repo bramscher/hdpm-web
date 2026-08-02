@@ -60,7 +60,7 @@ export default function LeadForm({
           name: name.trim(),
           email: email.trim(),
           phone: phone.trim(),
-          company: honeypot || undefined,
+          hp: honeypot || undefined,
           source_detail: sourceDetail,
           attribution: getAttribution(),
           subject: {
@@ -69,9 +69,14 @@ export default function LeadForm({
           },
         }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Submission failed')
-      trackLead(analyticsTag)
+      const data = await res.json().catch(() => null)
+      if (!res.ok) {
+        throw new Error(
+          (data && typeof data.error === 'string' && data.error) ||
+            'Submission failed. Please try again or call us.',
+        )
+      }
+      if (!honeypot) trackLead(analyticsTag)
       setSubmitted(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Submission failed')
@@ -107,11 +112,12 @@ export default function LeadForm({
         </p>
       </div>
 
-      {/* Honeypot — hidden from real users, bots fill it */}
+      {/* Honeypot — hidden from real users, bots fill it. Neutral naming so
+          browser address-autofill never populates it. */}
       <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
-        <label htmlFor={`lf-company-${analyticsTag}`}>Company</label>
+        <label htmlFor={`hp-check-${analyticsTag}`}>Leave this field empty</label>
         <input
-          id={`lf-company-${analyticsTag}`}
+          id={`hp-check-${analyticsTag}`}
           type="text"
           value={honeypot}
           onChange={(e) => setHoneypot(e.target.value)}
