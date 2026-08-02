@@ -66,12 +66,15 @@ const nextConfig: NextConfig = {
       // The CMS "home" doc would otherwise render at /home as a thin
       // duplicate of the homepage
       { source: '/home', destination: '/', permanent: true },
-      // Old AppFolio-hosted listing detail URLs (17 UUIDs on the live site)
+      // Old AppFolio-hosted listing detail URLs — expired listings land on
+      // the listings page with a "no longer available" notice
       {
         source: '/listings/detail/:uuid*',
-        destination: '/listings',
+        destination: '/listings?notice=unavailable',
         permanent: true,
       },
+      // Old community page on the AppFolio site (60 GSC-known 404s audit)
+      { source: '/mckenzie-meadows-village', destination: '/listings', permanent: true },
     ]
   },
   images: {

@@ -1,4 +1,5 @@
-import { notFound } from 'next/navigation'
+import { permanentRedirect } from 'next/navigation'
+import { SITE_URL } from '@/lib/site-url'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -29,7 +30,7 @@ export async function generateMetadata({
       title,
       description,
       type: 'website',
-      url: `https://highdesertpm.com/listings/${listing.Id}`,
+      url: `${SITE_URL}/listings/${listing.Id}`,
     },
   }
 }
@@ -42,7 +43,9 @@ export default async function ListingDetailPage({
 }) {
   const { id } = await params
   const listing = await getCachedListingById(id)
-  if (!listing) notFound()
+  // Expired/rented listings never 404 — visitors land on the listings page
+  // with a "no longer available" notice instead
+  if (!listing) permanentRedirect('/listings?notice=unavailable')
 
   const isPetFriendly =
     listing.CatsAllowed || isDogFriendlyPolicy(listing.DogPolicy)
