@@ -46,21 +46,20 @@ const nextConfig: NextConfig = {
         destination: '/owners#get-started',
         permanent: true,
       },
-      // Live Redmond blog posts — temporary target until the posts are
-      // ported to /blog (P1-15), then flip these to the ported slugs.
+      // Live Redmond blog posts, ported to /blog at their original slugs
       {
         source: '/how-to-rent-redmond',
-        destination: '/market-areas/redmond',
+        destination: '/blog/how-to-rent-redmond',
         permanent: true,
       },
       {
         source: '/real-estate-investing-redmond',
-        destination: '/market-areas/redmond',
+        destination: '/blog/real-estate-investing-redmond',
         permanent: true,
       },
       {
         source: '/buying-investment-property-redmond',
-        destination: '/market-areas/redmond',
+        destination: '/blog/buying-investment-property-redmond',
         permanent: true,
       },
       { source: '/sitemap', destination: '/', permanent: true },

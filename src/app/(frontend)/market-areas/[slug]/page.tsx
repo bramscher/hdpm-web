@@ -5,11 +5,21 @@ import type { Metadata } from 'next'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
-import { breadcrumbSchema, localBusinessSchema } from '@/lib/schema'
+import { breadcrumbSchema, localBusinessSchema, serviceSchema } from '@/lib/schema'
 import { getCachedListingsByCity } from '@/lib/appfolio'
 import { FOUNDED_YEAR } from '@/lib/constants'
 import ListingCard from '@/components/listings/ListingCard'
+import LeadForm from '@/components/forms/LeadForm'
 import type { MarketArea, Media } from '@/payload-types'
+
+// Towns the rental-analysis intake recognizes; others map to 'Other'
+const TOWN_BY_SLUG: Record<string, string> = {
+  bend: 'Bend',
+  redmond: 'Redmond',
+  sisters: 'Sisters',
+  prineville: 'Prineville',
+  culver: 'Culver',
+}
 
 function getAreaImage(area: MarketArea): string {
   const heroImage = typeof area.heroImage === 'object' ? (area.heroImage as Media) : null
@@ -93,6 +103,12 @@ export default async function MarketAreaPage({
       { name: area.city, url: `/market-areas/${area.slug}` },
     ]),
     localBusinessSchema(),
+    serviceSchema(
+      area.city,
+      area.slug,
+      area.seoDescription ||
+        `Full-service property management for rental owners in ${area.city}, Oregon.`,
+    ),
   ]
 
   return (
@@ -237,6 +253,68 @@ export default async function MarketAreaPage({
           </div>
         </section>
       )}
+
+      {/* Long-form content sections */}
+      {(area.contentSections?.length ?? 0) > 0 && (
+        <section className="bg-white py-20 sm:py-24">
+          <div className="mx-auto max-w-3xl px-6 sm:px-8 lg:px-12">
+            <div className="space-y-16">
+              {area.contentSections!.map((section, i) => (
+                <div key={section.id || i}>
+                  <h2 className="font-heading text-2xl font-extrabold tracking-tight text-neutral-dark sm:text-3xl">
+                    {section.heading}
+                  </h2>
+                  <div className="mt-5 space-y-4">
+                    {section.paragraphs?.map((p, j) => (
+                      <p key={j} className="leading-relaxed text-neutral-mid">
+                        {p.paragraph}
+                      </p>
+                    ))}
+                  </div>
+                  {(section.bullets?.length ?? 0) > 0 && (
+                    <ul className="mt-5 space-y-3">
+                      {section.bullets!.map((b, j) => (
+                        <li key={j} className="flex items-start gap-3">
+                          <svg
+                            aria-hidden="true"
+                            className="mt-0.5 h-5 w-5 flex-shrink-0 text-accent"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2.5}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M4.5 12.75l6 6 9-13.5"
+                            />
+                          </svg>
+                          <span className="text-neutral-mid">{b.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Lead form */}
+      <section id="get-started" className="bg-neutral-light py-20 sm:py-24">
+        <div className="mx-auto max-w-2xl px-6 sm:px-8">
+          <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm sm:p-10">
+            <LeadForm
+              town={TOWN_BY_SLUG[area.slug] ?? 'Other'}
+              sourceDetail={`Market page: ${area.city}`}
+              analyticsTag={`market_${area.slug}`}
+              heading={`Get a Free ${area.city} Rental Analysis`}
+              subheading={`Find out what your ${area.city} property could earn with professional management. We'll email you a full rent analysis within one business day.`}
+            />
+          </div>
+        </div>
+      </section>
 
       {/* Featured Listings */}
       {featuredListings.length > 0 && (

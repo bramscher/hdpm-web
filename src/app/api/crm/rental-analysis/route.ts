@@ -34,6 +34,8 @@ interface RentalAnalysisRequestBody {
   message?: string
   subject: SubjectPropertyInput
   attribution?: Attribution
+  /** where on the site the lead came from, e.g. "Market page: Bend" */
+  source_detail?: string
   /** honeypot — real users never fill this */
   company?: string
 }
@@ -114,7 +116,7 @@ export async function POST(req: NextRequest) {
           phone,
           leadType: 'owner',
           source: 'website',
-          sourceDetail: 'Rental Analysis form',
+          sourceDetail: body.source_detail || 'Rental Analysis form',
           subjectProperty,
           rentAnalysisStatus: 'requested',
           message: body.message || undefined,
@@ -132,7 +134,7 @@ export async function POST(req: NextRequest) {
           phone,
           leadType: 'owner',
           source: 'website',
-          sourceDetail: 'Rental Analysis form',
+          sourceDetail: body.source_detail || 'Rental Analysis form',
           status: 'new',
           subjectProperty,
           rentAnalysisStatus: 'requested',

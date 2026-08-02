@@ -506,6 +506,27 @@ export interface MarketArea {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Long-form sections rendered after the highlights (services, neighborhoods, local rules, etc.)
+   */
+  contentSections?:
+    | {
+        heading: string;
+        paragraphs?:
+          | {
+              paragraph: string;
+              id?: string | null;
+            }[]
+          | null;
+        bullets?:
+          | {
+              text: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
   updatedAt: string;
@@ -1265,6 +1286,24 @@ export interface MarketAreasSelect<T extends boolean = true> {
     | T
     | {
         text?: T;
+        id?: T;
+      };
+  contentSections?:
+    | T
+    | {
+        heading?: T;
+        paragraphs?:
+          | T
+          | {
+              paragraph?: T;
+              id?: T;
+            };
+        bullets?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+            };
         id?: T;
       };
   seoTitle?: T;

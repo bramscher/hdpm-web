@@ -168,7 +168,7 @@ export default async function ContactPage() {
                     <div>
                       <p className="text-sm font-semibold text-neutral-dark">Office Hours</p>
                       <p className="mt-0.5 text-sm text-neutral-mid">
-                        {c?.officeHours ?? 'Monday \u2013 Friday\n9:00 AM \u2013 5:00 PM'}
+                        {c?.officeHours ?? 'Monday \u2013 Friday\n9:00 AM \u2013 4:00 PM'}
                       </p>
                     </div>
                   </div>

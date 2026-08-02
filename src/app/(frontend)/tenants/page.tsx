@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { createMetadata } from '@/lib/seo'
-import { breadcrumbSchema } from '@/lib/schema'
+import { breadcrumbSchema, faqSchema } from '@/lib/schema'
+import { defaultFaqs } from './faq-data'
 import { getPageBySlug } from '@/lib/page-content'
 import type { Media as MediaType } from '@/payload-types'
 import TenantFAQ from './TenantFAQ'
@@ -122,10 +123,17 @@ export default async function TenantsPage() {
       ? (c.heroImage as MediaType).url!
       : 'https://images.unsplash.com/photo-1565846894054-51426d448b96?w=1920&q=80'
 
-  const jsonLd = breadcrumbSchema([
-    { name: 'Home', url: '/' },
-    { name: 'Tenants', url: '/tenants' },
-  ])
+  const faqItems = c?.faqs?.length
+    ? c.faqs.map((f) => ({ question: f.question, answer: f.answer }))
+    : defaultFaqs
+
+  const jsonLd = [
+    breadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Tenants', url: '/tenants' },
+    ]),
+    faqSchema(faqItems),
+  ]
 
   return (
     <>

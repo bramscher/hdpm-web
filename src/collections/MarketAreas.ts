@@ -93,6 +93,43 @@ export const MarketAreas: CollectionConfig = {
       admin: { description: 'Bullet point highlights' },
     },
     {
+      name: 'contentSections',
+      type: 'array',
+      admin: {
+        description:
+          'Long-form sections rendered after the highlights (services, neighborhoods, local rules, etc.)',
+      },
+      fields: [
+        {
+          name: 'heading',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'paragraphs',
+          type: 'array',
+          fields: [
+            {
+              name: 'paragraph',
+              type: 'textarea',
+              required: true,
+            },
+          ],
+        },
+        {
+          name: 'bullets',
+          type: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'seoTitle',
       type: 'text',
       admin: { position: 'sidebar' },
