@@ -127,6 +127,27 @@ export const MarketAreas: CollectionConfig = {
             },
           ],
         },
+        {
+          name: 'image',
+          type: 'group',
+          admin: {
+            description: 'Optional photo rendered with this section',
+          },
+          fields: [
+            {
+              name: 'url',
+              type: 'text',
+              admin: { description: 'External image URL (e.g. Wikimedia Commons)' },
+            },
+            { name: 'alt', type: 'text' },
+            { name: 'caption', type: 'text' },
+            {
+              name: 'credit',
+              type: 'text',
+              admin: { description: 'Photographer / license attribution' },
+            },
+          ],
+        },
       ],
     },
     {

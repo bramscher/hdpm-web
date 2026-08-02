@@ -294,6 +294,29 @@ export default async function MarketAreaPage({
                       ))}
                     </ul>
                   )}
+                  {section.image?.url && (
+                    <figure className="mt-8">
+                      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl shadow-md">
+                        <Image
+                          src={section.image.url}
+                          alt={section.image.alt || section.heading}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 768px"
+                        />
+                      </div>
+                      {(section.image.caption || section.image.credit) && (
+                        <figcaption className="mt-2 text-sm text-neutral-mid">
+                          {section.image.caption}
+                          {section.image.credit && (
+                            <span className="ml-2 text-xs text-neutral-mid/70">
+                              {section.image.credit}
+                            </span>
+                          )}
+                        </figcaption>
+                      )}
+                    </figure>
+                  )}
                 </div>
               ))}
             </div>
