@@ -526,6 +526,21 @@ export interface MarketArea {
               id?: string | null;
             }[]
           | null;
+        /**
+         * Optional photo rendered with this section
+         */
+        image?: {
+          /**
+           * External image URL (e.g. Wikimedia Commons)
+           */
+          url?: string | null;
+          alt?: string | null;
+          caption?: string | null;
+          /**
+           * Photographer / license attribution
+           */
+          credit?: string | null;
+        };
         id?: string | null;
       }[]
     | null;
@@ -1362,6 +1377,14 @@ export interface MarketAreasSelect<T extends boolean = true> {
           | {
               text?: T;
               id?: T;
+            };
+        image?:
+          | T
+          | {
+              url?: T;
+              alt?: T;
+              caption?: T;
+              credit?: T;
             };
         id?: T;
       };
