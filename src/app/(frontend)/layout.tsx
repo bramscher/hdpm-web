@@ -1,7 +1,7 @@
 import { Plus_Jakarta_Sans, Inter } from 'next/font/google'
 import '../globals.css'
 
-import { GoogleAnalytics } from '@next/third-parties/google'
+import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AttributionCapture from '@/components/AttributionCapture'
@@ -48,6 +48,9 @@ export default function FrontendLayout({
           {children}
         </main>
         <Footer />
+        {process.env.NEXT_PUBLIC_GTM_ID && (
+          <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+        )}
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         )}
