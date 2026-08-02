@@ -86,8 +86,12 @@ export default function OwnerRentalAnalysisForm() {
       const res = await fetch(
         `/api/owner-intake/address-lookup?address=${encodeURIComponent(q)}`,
       )
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Lookup failed')
+      const data = await res.json().catch(() => null)
+      if (!res.ok) {
+        throw new Error(
+          (data && typeof data.error === 'string' && data.error) || 'Lookup failed',
+        )
+      }
       setLookupResult(data as AddressLookupResult)
     } catch (err) {
       setLookupError(err instanceof Error ? err.message : 'Address lookup failed')
@@ -134,7 +138,7 @@ export default function OwnerRentalAnalysisForm() {
           email: email.trim(),
           phone: phone.trim(),
           message: message.trim() || undefined,
-          company: honeypot || undefined,
+          hp: honeypot || undefined,
           attribution: getAttribution(),
           subject: {
             address: address.trim(),
@@ -149,9 +153,14 @@ export default function OwnerRentalAnalysisForm() {
           },
         }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Submission failed')
-      trackLead('rental_analysis')
+      const data = await res.json().catch(() => null)
+      if (!res.ok) {
+        throw new Error(
+          (data && typeof data.error === 'string' && data.error) ||
+            'Submission failed. Please try again or call us.',
+        )
+      }
+      if (!honeypot) trackLead('rental_analysis')
       setSubmitted(true)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Submission failed')
@@ -457,11 +466,12 @@ export default function OwnerRentalAnalysisForm() {
             />
           </Field>
 
-          {/* Honeypot — hidden from real users, bots fill it */}
+          {/* Honeypot — hidden from real users, bots fill it. Neutral naming
+              so browser address-autofill never populates it. */}
           <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
-            <label htmlFor="ra-company">Company</label>
+            <label htmlFor="ra-hp-check">Leave this field empty</label>
             <input
-              id="ra-company"
+              id="ra-hp-check"
               type="text"
               value={honeypot}
               onChange={(e) => setHoneypot(e.target.value)}

@@ -37,7 +37,7 @@ interface RentalAnalysisRequestBody {
   /** where on the site the lead came from, e.g. "Market page: Bend" */
   source_detail?: string
   /** honeypot — real users never fill this */
-  company?: string
+  hp?: string
 }
 
 /**
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Honeypot: bots fill every field. Pretend success, create nothing.
-  if (body.company) {
+  if (body.hp) {
     return NextResponse.json({ ok: true })
   }
 
@@ -77,9 +77,13 @@ export async function POST(req: NextRequest) {
 
   const email = normalizeEmail(body.email)
   const phone = body.phone ? normalizePhone(body.phone) : undefined
-  const { firstName, lastName } = body.firstName || body.lastName
+  const parsedName = body.firstName || body.lastName
     ? { firstName: body.firstName || '', lastName: body.lastName || '' }
     : splitName(body.name || '')
+  const firstName = parsedName.firstName
+  // Leads.lastName is required — single-word names would otherwise fail
+  // Payload validation and 500 the whole submission
+  const lastName = parsedName.lastName || '—'
 
   if (!firstName) {
     return NextResponse.json({ error: 'Name is required' }, { status: 400 })
@@ -120,7 +124,8 @@ export async function POST(req: NextRequest) {
           subjectProperty,
           rentAnalysisStatus: 'requested',
           message: body.message || undefined,
-          attribution: body.attribution || undefined,
+          // attribution intentionally omitted on the dedupe path —
+          // first-touch attribution on the existing lead is preserved
         },
       })
       leadId = updated.id as number

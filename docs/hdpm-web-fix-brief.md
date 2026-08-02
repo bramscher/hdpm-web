@@ -9,11 +9,12 @@ Audited against `https://hdpm-web.vercel.app` and `https://www.highdesertpm.com`
 ## MASTER PROMPT
 
 > You are working in the `hdpm-web` repository — the Next.js / Payload rebuild of High Desert Property Management's website (highdesertpm.com, ~850-door residential property manager in Redmond / Bend, Central Oregon). The rebuild is currently deployed to `hdpm-web.vercel.app` and will replace the live WordPress-era site at `highdesertpm.com` in a DNS cutover next week.
->
+> 
 > An external audit on August 1, 2026 found 11 launch blockers, 13 should-fix items, and 8 improvements. They are listed in `FIX-BRIEF.md` at the repo root, each with the evidence that produced it and acceptance criteria.
 >
 > **Work in this order: all P0 blockers first, then P1, then P2. Each issue is independently shippable — one branch and one PR per issue, named `fix/<issue-id>-<slug>`.**
 >
+
 > Ground rules:
 >
 > 1. **Verify before you change.** The audit was performed from outside the repo, through a fetch tool that strips `<script>` tags. Some findings are marked "verify first" — confirm the current state in the actual source before implementing. If a finding is already fixed, close it out and say so rather than making a redundant change.
