@@ -265,6 +265,16 @@ export default async function OwnersPage() {
                 (541) 548-0383
               </a>
             </div>
+
+            <p className="mt-8 text-sm text-white/70">
+              Already a client?{' '}
+              <Link
+                href="/owner-portal"
+                className="font-semibold text-accent-light underline-offset-2 hover:underline"
+              >
+                Owner Login &rarr;
+              </Link>
+            </p>
           </div>
         </div>
       </section>

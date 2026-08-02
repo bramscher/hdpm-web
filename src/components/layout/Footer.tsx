@@ -3,6 +3,7 @@ import Link from 'next/link'
 
 const quickLinks = [
   { href: '/owners', label: 'Property Owners' },
+  { href: '/owner-portal', label: 'Owner Login' },
   { href: '/tenants', label: 'Current Tenants' },
   { href: '/listings', label: 'Available Rentals' },
   { href: '/about', label: 'About Us' },
