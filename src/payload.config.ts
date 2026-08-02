@@ -3,6 +3,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { supabaseStorage } from './lib/supabase-storage-adapter'
+import { SITE_URL } from './lib/site-url'
 import sharp from 'sharp'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -90,7 +91,7 @@ export default buildConfig({
       generateDescription: ({ doc }: { doc: Record<string, unknown> }) =>
         (doc.seoDescription as string) || '',
       generateURL: ({ doc }: { doc: Record<string, unknown> }) =>
-        `https://highdesertpm.com/${(doc.slug as string) || ''}`,
+        `${SITE_URL}/${(doc.slug as string) || ''}`,
       tabbedUI: true,
     }),
     ...(process.env.SUPABASE_SERVICE_ROLE_KEY

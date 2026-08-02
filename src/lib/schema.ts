@@ -1,6 +1,5 @@
 import type { AppFolioListing } from './appfolio'
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://highdesertpm.com'
+import { SITE_URL } from '@/lib/site-url'
 
 export function localBusinessSchema() {
   return {

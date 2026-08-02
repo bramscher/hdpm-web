@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import React from 'react'
+import { SITE_URL } from '@/lib/site-url'
 
 export const metadata: Metadata = {
   title: {
@@ -8,9 +9,7 @@ export const metadata: Metadata = {
   },
   description:
     'Professional property management in Bend, Redmond, Sisters, Prineville, Culver, Metolius & Madras. Trusted by Central Oregon property owners since 2003.',
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || 'https://highdesertpm.com',
-  ),
+  metadataBase: new URL(SITE_URL),
 }
 
 export default function RootLayout({

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://highdesertpm.com'
+import { SITE_URL } from '@/lib/site-url'
 const SITE_NAME = 'High Desert Property Management'
 
 export function createMetadata({
