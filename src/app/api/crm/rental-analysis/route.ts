@@ -3,6 +3,8 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { normalizeEmail, normalizePhone, splitName } from '@/lib/crm/normalization'
 import { findDuplicateLead } from '@/lib/crm/dedup'
+import { sendLeadNotification } from '@/lib/notify'
+import type { Attribution } from '@/lib/attribution'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyPayload = any
@@ -31,6 +33,9 @@ interface RentalAnalysisRequestBody {
   phone?: string
   message?: string
   subject: SubjectPropertyInput
+  attribution?: Attribution
+  /** honeypot — real users never fill this */
+  company?: string
 }
 
 /**
@@ -50,8 +55,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
+  // Honeypot: bots fill every field. Pretend success, create nothing.
+  if (body.company) {
+    return NextResponse.json({ ok: true })
+  }
+
   if (!body.email) {
     return NextResponse.json({ error: 'Email is required' }, { status: 400 })
+  }
+  if (!body.phone?.trim()) {
+    return NextResponse.json({ error: 'Phone is required' }, { status: 400 })
   }
   if (!body.subject?.address) {
     return NextResponse.json(
@@ -105,6 +118,7 @@ export async function POST(req: NextRequest) {
           subjectProperty,
           rentAnalysisStatus: 'requested',
           message: body.message || undefined,
+          attribution: body.attribution || undefined,
         },
       })
       leadId = updated.id as number
@@ -123,6 +137,7 @@ export async function POST(req: NextRequest) {
           subjectProperty,
           rentAnalysisStatus: 'requested',
           message: body.message || undefined,
+          attribution: body.attribution || undefined,
         },
       })
       leadId = created.id as number
@@ -190,6 +205,33 @@ export async function POST(req: NextRequest) {
       forwardError = 'HDPM_CHATBOT_BASE_URL or HDPM_SERVICE_TOKEN not configured'
       console.warn('[rental-analysis]', forwardError)
     }
+
+    // 3. Notify the monitored inbox. If the chatbot handoff failed, say so
+    // prominently — the owner was promised an analysis within one business
+    // day and someone must run it manually.
+    const attribution = body.attribution || {}
+    await sendLeadNotification({
+      subject: `New Rental Analysis request — ${subject.address}`,
+      warning: forwardError
+        ? `Handoff to the analysis system FAILED (${forwardError}). Run this analysis manually — the owner was told to expect it within one business day.`
+        : undefined,
+      fields: [
+        ['Name', `${firstName} ${lastName}`.trim()],
+        ['Email', email],
+        ['Phone', phone],
+        ['Property', subject.address],
+        ['Town', subject.town],
+        ['Beds / Baths / Sqft', `${subject.bedrooms ?? '—'} / ${subject.bathrooms ?? '—'} / ${subject.sqft ?? '—'}`],
+        ['Property type', subject.property_type],
+        ['Current rent', subject.current_rent ? `$${subject.current_rent}` : undefined],
+        ['Message', body.message],
+        ['UTM source / medium', [attribution.utmSource, attribution.utmMedium].filter(Boolean).join(' / ')],
+        ['UTM campaign', attribution.utmCampaign],
+        ['Referrer', attribution.referrer],
+        ['Landing page', attribution.landingPage],
+        ['CRM lead ID', leadId],
+      ],
+    })
 
     return NextResponse.json({
       ok: true,

@@ -3,6 +3,7 @@ import '../globals.css'
 
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import AttributionCapture from '@/components/AttributionCapture'
 import { localBusinessSchema } from '@/lib/schema'
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -40,6 +41,7 @@ export default function FrontendLayout({
         >
           Skip to main content
         </a>
+        <AttributionCapture />
         <Header />
         <main id="main-content" className="flex-1">
           {children}

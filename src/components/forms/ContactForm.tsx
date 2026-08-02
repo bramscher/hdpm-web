@@ -1,7 +1,8 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { submitContactForm, type ContactFormState } from '@/app/(frontend)/contact/actions'
+import { getAttribution, type Attribution } from '@/lib/attribution'
 
 const initialState: ContactFormState = {
   success: false,
@@ -10,6 +11,11 @@ const initialState: ContactFormState = {
 
 export default function ContactForm() {
   const [state, formAction, isPending] = useActionState(submitContactForm, initialState)
+  const [attribution, setAttribution] = useState<Attribution>({})
+
+  useEffect(() => {
+    setAttribution(getAttribution())
+  }, [])
 
   if (state.success) {
     return (
@@ -29,6 +35,17 @@ export default function ContactForm() {
 
   return (
     <form action={formAction} className="space-y-6">
+      {/* Honeypot — hidden from real users, bots fill it */}
+      <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+        <label htmlFor="contact-company">Company</label>
+        <input id="contact-company" type="text" name="company" tabIndex={-1} autoComplete="off" />
+      </div>
+
+      {/* Attribution (first-touch UTM/referrer, captured client-side) */}
+      {Object.entries(attribution).map(([key, value]) =>
+        value ? <input key={key} type="hidden" name={key} value={value} /> : null,
+      )}
+
       {state.error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {state.error}

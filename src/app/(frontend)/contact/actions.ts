@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { findDuplicateLead } from '@/lib/crm/dedup'
 import { normalizeEmail, normalizePhone, splitName } from '../../../lib/crm/normalization'
+import { sendLeadNotification } from '@/lib/notify'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyPayload = any
@@ -22,6 +23,21 @@ export async function submitContactForm(
   const phone = (formData.get('phone') as string) || undefined
   const propertyInterest = (formData.get('propertyInterest') as string) || undefined
   const message = formData.get('message') as string
+
+  // Honeypot: bots fill every field. Pretend success, create nothing.
+  if (formData.get('company')) {
+    return { success: true, error: null }
+  }
+
+  const attribution = {
+    utmSource: (formData.get('utmSource') as string) || undefined,
+    utmMedium: (formData.get('utmMedium') as string) || undefined,
+    utmCampaign: (formData.get('utmCampaign') as string) || undefined,
+    utmTerm: (formData.get('utmTerm') as string) || undefined,
+    utmContent: (formData.get('utmContent') as string) || undefined,
+    referrer: (formData.get('referrer') as string) || undefined,
+    landingPage: (formData.get('landingPage') as string) || undefined,
+  }
 
   // Basic validation
   if (!name || !email || !message) {
@@ -69,25 +85,38 @@ export async function submitContactForm(
         id: existingLeadId,
         data: { lastInboundAt: new Date().toISOString() },
       })
-
-      return { success: true, error: null }
+    } else {
+      await payload.create({
+        collection: 'leads',
+        data: {
+          firstName,
+          lastName: lastName || '—', // fallback when only one name was provided
+          email: normalizedEmail,
+          phone: normalizedPhone,
+          leadType: leadType as 'tenant' | 'owner' | 'vendor' | 'other' | undefined,
+          message,
+          source: 'website' as const,
+          lastInboundAt: new Date().toISOString(),
+          attribution,
+        },
+      })
     }
 
-    await payload.create({
-      collection: 'leads',
-      data: {
-        firstName,
-        lastName: lastName || '—', // fallback when only one name was provided
-        email: normalizedEmail,
-        phone: normalizedPhone,
-        leadType: leadType as 'tenant' | 'owner' | 'vendor' | 'other' | undefined,
-        message,
-        source: 'website' as const,
-        lastInboundAt: new Date().toISOString(),
-      },
+    await sendLeadNotification({
+      subject: `New contact form message — ${name}`,
+      fields: [
+        ['Name', name],
+        ['Email', normalizedEmail],
+        ['Phone', normalizedPhone],
+        ['Inquiry type', propertyInterest],
+        ['Message', message],
+        ['Repeat contact', existingLeadId ? 'Yes — existing CRM lead' : undefined],
+        ['UTM source / medium', [attribution.utmSource, attribution.utmMedium].filter(Boolean).join(' / ')],
+        ['UTM campaign', attribution.utmCampaign],
+        ['Referrer', attribution.referrer],
+        ['Landing page', attribution.landingPage],
+      ],
     })
-
-    // TODO: Add Resend email notification here
 
     return { success: true, error: null }
   } catch (err) {
