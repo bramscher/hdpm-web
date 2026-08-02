@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { getAttribution } from '@/lib/attribution'
+import { trackLead } from '@/lib/analytics'
 
 type Town = 'Bend' | 'Redmond' | 'Sisters' | 'Prineville' | 'Culver' | 'Other'
 
@@ -150,6 +151,7 @@ export default function OwnerRentalAnalysisForm() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Submission failed')
+      trackLead('rental_analysis')
       setSubmitted(true)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Submission failed')

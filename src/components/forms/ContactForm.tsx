@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from 'react'
 import { submitContactForm, type ContactFormState } from '@/app/(frontend)/contact/actions'
 import { getAttribution, type Attribution } from '@/lib/attribution'
+import { trackLead } from '@/lib/analytics'
 
 const initialState: ContactFormState = {
   success: false,
@@ -16,6 +17,10 @@ export default function ContactForm() {
   useEffect(() => {
     setAttribution(getAttribution())
   }, [])
+
+  useEffect(() => {
+    if (state.success) trackLead('contact')
+  }, [state.success])
 
   if (state.success) {
     return (
