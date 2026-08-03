@@ -20,7 +20,12 @@ export async function generateMetadata({
   const listing = await getCachedListingById(id)
   if (!listing) return { title: 'Listing Not Found' }
 
-  const title = listing.MarketingTitle
+  // Append the street address so listings with identical layouts (e.g. two
+  // "1BR/1BA in Madras") get distinct titles for search engines.
+  const title =
+    listing.Address1 && !listing.MarketingTitle.includes(listing.Address1)
+      ? `${listing.MarketingTitle} — ${listing.Address1}`
+      : listing.MarketingTitle
   const description = `${listing.Bedrooms} bed / ${listing.Bathrooms} bath rental in ${listing.City}, OR — $${listing.AdvertisedRent.toLocaleString()}/mo. ${listing.MarketingDescription.slice(0, 120)}...`
 
   return {

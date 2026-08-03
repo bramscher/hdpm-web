@@ -5,12 +5,28 @@ import { createMetadata } from '@/lib/seo'
 import BlogPostCard from '@/components/blog/BlogPostCard'
 import type { Category } from '@/payload-types'
 
-export const metadata = createMetadata({
-  title: 'Blog',
-  description:
-    'Insights for Central Oregon property owners and tenants. Tips on property management, rental market trends, and living in Bend, Redmond, Sisters, and beyond.',
-  path: '/blog',
-})
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const params = await searchParams
+  const category = typeof params.category === 'string' ? params.category : undefined
+  // Differentiate filtered views ("Blog — Oregon Rental Law") while keeping
+  // the canonical on /blog so category URLs don't compete in search.
+  const categoryLabel = category
+    ? category
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ')
+    : null
+  return createMetadata({
+    title: categoryLabel ? `Blog — ${categoryLabel}` : 'Blog',
+    description:
+      'Insights for Central Oregon property owners and tenants. Tips on property management, rental market trends, and living in Bend, Redmond, Sisters, and beyond.',
+    path: '/blog',
+  })
+}
 
 const POSTS_PER_PAGE = 9
 

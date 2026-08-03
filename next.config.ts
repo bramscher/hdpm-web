@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: '/about-us', destination: '/about', permanent: true },
+      { source: '/contact-us', destination: '/contact', permanent: true },
+      { source: '/rentals', destination: '/listings', permanent: true },
       { source: '/availability', destination: '/listings', permanent: true },
       {
         source: '/bend-property-management',
@@ -28,8 +30,28 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: '/redmond-property-management',
+        destination: '/market-areas/redmond',
+        permanent: true,
+      },
+      {
         source: '/sisters-property-management',
         destination: '/market-areas/sisters',
+        permanent: true,
+      },
+      {
+        source: '/madras-property-management',
+        destination: '/market-areas/madras',
+        permanent: true,
+      },
+      {
+        source: '/culver-property-management',
+        destination: '/market-areas/culver',
+        permanent: true,
+      },
+      {
+        source: '/metolius-property-management',
+        destination: '/market-areas/metolius',
         permanent: true,
       },
       {
@@ -75,6 +97,18 @@ const nextConfig: NextConfig = {
       },
       // Old community page on the AppFolio site (60 GSC-known 404s audit)
       { source: '/mckenzie-meadows-village', destination: '/listings', permanent: true },
+    ]
+  },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        ],
+      },
     ]
   },
   images: {
