@@ -64,7 +64,11 @@ export async function generateMetadata({
   if (!page) return { title: 'Page Not Found' }
 
   const title = page.meta?.title || page.title
-  const description = page.meta?.description || ''
+  // Fallback so CMS pages without a curated meta description (privacy,
+  // terms, …) still ship a sensible one instead of an empty tag.
+  const description =
+    page.meta?.description ||
+    `${page.title} — High Desert Property Management, serving Central Oregon property owners and tenants since 2011.`
   const metaImage =
     typeof page.meta?.image === 'object' ? (page.meta.image as Media) : null
 
