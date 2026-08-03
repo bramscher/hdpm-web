@@ -19,7 +19,8 @@ function pickBest(results: SearchResult[]): SearchResult | null {
       SAFE_LICENSE.test(r.license) &&
       r.width >= 1000 &&
       r.width > r.height &&
-      /\.(jpe?g|png)$/i.test(r.url),
+      // Wikimedia appends ?utm_* params — check the extension on the path only
+      /\.(jpe?g|png)(\?|$)/i.test(r.url),
   )
   // Wikimedia search relevance order is already good — take the first
   // sufficiently-large landscape photo with a clear license.
@@ -57,6 +58,9 @@ export async function findAndAttachFeaturedImage(
     if (parsedUrl.protocol !== 'https:' || !ALLOWED_IMPORT_HOSTS.has(parsedUrl.hostname)) {
       return null
     }
+    // Strip Wikimedia's utm tracking params before downloading/storing
+    parsedUrl.search = ''
+    best.url = parsedUrl.toString()
 
     const res = await fetch(best.url, {
       headers: { 'User-Agent': 'HDPM-Web/1.0 (info@highdesertpm.com)' },

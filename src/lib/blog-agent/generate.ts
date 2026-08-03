@@ -175,6 +175,7 @@ Requirements:
 5. Include practical, actionable advice
 6. Mention HDPM naturally where appropriate (not salesy)
 7. End with a brief call-to-action
+8. EDITORIAL RULE: never write grievance or conflict content — no tenant-complaint stories, landlord-misdeed angles, dispute drama, or "know your rights against your landlord" framing. Tenant-facing content must be constructive and service-oriented (how to care for your rental, seasonal tips, local living guides). If the topic is inherently a complaint or conflict, reframe it entirely as positive, practical guidance — or write about the closest constructive adjacent topic instead.
 
 Also produce companion assets for the post:
 - image_query: a 2-4 word Wikimedia Commons search phrase for a fitting featured photo. Prefer real Central Oregon places or landscapes (e.g. "Bend Oregon houses", "Deschutes River Bend", "Smith Rock Oregon") over abstract concepts — Wikimedia has real-place photography, not stock imagery.

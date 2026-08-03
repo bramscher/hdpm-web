@@ -71,12 +71,16 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
   })
   const existingTitleWords = existing.docs.map((d) => significantWords(String(d.title ?? '')))
 
-  // Deprioritize topics tagged with another state (e.g. "[TX]", "[UT, USA]") —
-  // they adapt fine but Oregon-relevant topics make stronger posts.
+  // Editorial rule (Craig, 2026-08-03): never publish grievance/conflict
+  // content — no tenant-complaint stories, landlord-misdeed exposés, or
+  // dispute drama. Tenant-facing content must be constructive and
+  // service-oriented; it should never hand tenants new reasons to complain.
+  const grievance =
+    /drama|complain|dispute|scam|illegal|lawsuit|sue[sd]?\b|evict|refus|nightmare|horror|worst|slumlord|withhold|retaliat|caught|confess|cheat|steal|stole|fight|angry|furious|unfair|rights violat|deposit.*(kept|stolen|refus)|charg\w+ (me|for)/i
   const otherState = /\[(?!OR\b)[A-Z]{2}\b/
-  const candidates = [...research.topics].sort(
-    (a, b) => Number(otherState.test(a.title)) - Number(otherState.test(b.title)),
-  )
+  const candidates = research.topics
+    .filter((t) => !grievance.test(t.title))
+    .sort((a, b) => Number(otherState.test(a.title)) - Number(otherState.test(b.title)))
 
   const fresh = candidates.filter((t) => !tooSimilar(t.title, existingTitleWords))
   if (fresh.length === 0) {
