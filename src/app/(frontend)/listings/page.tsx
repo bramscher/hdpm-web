@@ -28,8 +28,10 @@ export default async function ListingsPage({
   const c = page?.listingsContent
   const allListings = await getCachedListings()
 
-  // Apply filters server-side
-  let filtered = allListings
+  // Most expensive first — showcases the premium inventory up top
+  let filtered = [...allListings].sort(
+    (a, b) => (b.AdvertisedRent ?? 0) - (a.AdvertisedRent ?? 0),
+  )
 
   const city = typeof params.city === 'string' ? params.city : undefined
   const beds = typeof params.beds === 'string' ? params.beds : undefined

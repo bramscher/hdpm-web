@@ -22,13 +22,19 @@ export function isListingPetFriendly(listing: Pick<AppFolioListing, 'CatsAllowed
  * parse; show a graceful fallback when nothing was supplied.
  */
 export function formatAvailableDate(raw: string | null | undefined): string {
-  if (!raw) return 'Contact for availability'
-  if (/^now$/i.test(raw.trim())) return 'Available now'
-  const d = new Date(raw.includes('T') ? raw : raw + 'T00:00:00')
-  if (isNaN(d.getTime())) return raw
-  return d.toLocaleDateString('en-US', {
+  if (!raw || !raw.trim()) return 'Contact for availability'
+  const trimmed = raw.trim()
+  // AppFolio sometimes sends label strings ("NOW", "Available Now") instead
+  // of dates — normalize so callers never render "Available Available Now".
+  if (/now/i.test(trimmed) && trimmed.length <= 20) return 'Available Now'
+  const d = new Date(trimmed.includes('T') ? trimmed : trimmed + 'T00:00:00')
+  if (isNaN(d.getTime())) {
+    return /^available/i.test(trimmed) ? trimmed : `Available ${trimmed}`
+  }
+  if (d.getTime() <= Date.now()) return 'Available Now'
+  return `Available ${d.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
-  })
+  })}`
 }

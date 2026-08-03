@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { AppFolioListing } from '@/lib/appfolio'
-import { isListingPetFriendly } from '@/lib/listing-utils'
+import { isListingPetFriendly, formatAvailableDate } from '@/lib/listing-utils'
 
 // Gradient placeholders when no photo available
 const placeholderGradients = [
@@ -13,17 +13,6 @@ const placeholderGradients = [
   'from-indigo-600/80 to-indigo-900/90',
 ]
 
-function formatDate(dateStr: string): string {
-  if (!dateStr) return 'Contact for availability'
-  // Handle various date formats: "April 1, 2026", "2026-04-01", etc.
-  const date = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00')
-  if (isNaN(date.getTime())) return dateStr // Return raw string if can't parse
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
 
 function isPetFriendly(listing: AppFolioListing): boolean {
   return isListingPetFriendly(listing)
@@ -116,7 +105,7 @@ export default function ListingCard({
 
         {/* Available date */}
         <p className="mt-3 text-xs text-neutral-mid">
-          Available {formatDate(listing.AvailableOn)}
+          {formatAvailableDate(listing.AvailableOn)}
         </p>
 
         {/* Apply button */}

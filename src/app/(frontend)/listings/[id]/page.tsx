@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import { getCachedListingById } from '@/lib/appfolio'
 import { listingSchema, breadcrumbSchema } from '@/lib/schema'
 import { isDogFriendlyPolicy, formatAvailableDate } from '@/lib/listing-utils'
+import ShareListing from '@/components/listings/ShareListing'
 
 // Use dynamic rendering — listing data from AppFolio v0 API is too large to SSG all at build time
 export const dynamic = 'force-dynamic'
@@ -28,6 +29,8 @@ export async function generateMetadata({
       : listing.MarketingTitle
   const description = `${listing.Bedrooms} bed / ${listing.Bathrooms} bath rental in ${listing.City}, OR — $${listing.AdvertisedRent.toLocaleString()}/mo. ${listing.MarketingDescription.slice(0, 120)}...`
 
+  const photo = listing.UnitPhotos[0]?.Url
+
   return {
     title,
     description,
@@ -36,6 +39,13 @@ export async function generateMetadata({
       description,
       type: 'website',
       url: `${SITE_URL}/listings/${listing.Id}`,
+      ...(photo ? { images: [{ url: photo, alt: title }] } : {}),
+    },
+    twitter: {
+      card: photo ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      ...(photo ? { images: [photo] } : {}),
     },
   }
 }
@@ -212,7 +222,15 @@ export default async function ListingDetailPage({
                     d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
                   />
                 </svg>
-                Available {availableDate}
+                {availableDate}
+              </div>
+
+              {/* Share */}
+              <div className="mt-6">
+                <ShareListing
+                  url={`${SITE_URL}/listings/${listing.Id}`}
+                  title={`${listing.MarketingTitle} — $${listing.AdvertisedRent.toLocaleString()}/mo | High Desert Property Management`}
+                />
               </div>
 
               {/* Description */}
@@ -344,7 +362,7 @@ export default async function ListingDetailPage({
                   <div className="flex justify-between">
                     <span>Available</span>
                     <span className="font-medium text-neutral-dark">
-                      {availableDate}
+                      {availableDate.replace(/^Available\s+/i, '')}
                     </span>
                   </div>
                   <div className="flex justify-between">
