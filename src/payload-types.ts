@@ -81,6 +81,9 @@ export interface Config {
     'properties-interest': PropertiesInterest;
     'automation-rules': AutomationRule;
     'seo-suggestions': SeoSuggestion;
+    'landing-pages': LandingPage;
+    campaigns: Campaign;
+    'campaign-visits': CampaignVisit;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -103,6 +106,9 @@ export interface Config {
     'properties-interest': PropertiesInterestSelect<false> | PropertiesInterestSelect<true>;
     'automation-rules': AutomationRulesSelect<false> | AutomationRulesSelect<true>;
     'seo-suggestions': SeoSuggestionsSelect<false> | SeoSuggestionsSelect<true>;
+    'landing-pages': LandingPagesSelect<false> | LandingPagesSelect<true>;
+    campaigns: CampaignsSelect<false> | CampaignsSelect<true>;
+    'campaign-visits': CampaignVisitsSelect<false> | CampaignVisitsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -947,6 +953,92 @@ export interface SeoSuggestion {
   createdAt: string;
 }
 /**
+ * Ad landing pages served at /lp/<slug>. No site navigation, always noindex. Attach campaigns to measure them.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "landing-pages".
+ */
+export interface LandingPage {
+  id: number;
+  /**
+   * Internal name (shown in admin lists, not on the page)
+   */
+  title: string;
+  /**
+   * URL: /lp/<slug>
+   */
+  slug: string;
+  status: 'draft' | 'published';
+  /**
+   * Big hero headline — mirror the ad promise
+   */
+  headline: string;
+  /**
+   * 1-2 supporting sentences under the headline
+   */
+  subheadline?: string | null;
+  heroImage?: (number | null) | Media;
+  /**
+   * 3-5 benefit bullets shown beside the form
+   */
+  bullets?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  formHeading?: string | null;
+  formSubheading?: string | null;
+  /**
+   * Optional social proof shown below the form
+   */
+  testimonial?: (number | null) | Testimonial;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * One entry per ad campaign. Copy the ad URL from the Campaigns dashboard into Ads Manager — visits and leads are measured by utm_campaign.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "campaigns".
+ */
+export interface Campaign {
+  id: number;
+  /**
+   * e.g. "August owner leads — Bend"
+   */
+  name: string;
+  /**
+   * Used as utm_campaign in the ad URL — lowercase, hyphens, no spaces (e.g. "aug-owner-leads-bend")
+   */
+  slug: string;
+  platform: 'facebook' | 'instagram' | 'google' | 'other';
+  status: 'draft' | 'active' | 'paused' | 'archived';
+  landingPage: number | LandingPage;
+  /**
+   * utm_medium in the ad URL (paid_social, cpc, …)
+   */
+  utmMedium?: string | null;
+  /**
+   * Budget, audience, creative notes — anything worth remembering
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "campaign-visits".
+ */
+export interface CampaignVisit {
+  id: number;
+  campaign: number | Campaign;
+  landingPath?: string | null;
+  referrer?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -1025,6 +1117,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'seo-suggestions';
         value: number | SeoSuggestion;
+      } | null)
+    | ({
+        relationTo: 'landing-pages';
+        value: number | LandingPage;
+      } | null)
+    | ({
+        relationTo: 'campaigns';
+        value: number | Campaign;
+      } | null)
+    | ({
+        relationTo: 'campaign-visits';
+        value: number | CampaignVisit;
       } | null)
     | ({
         relationTo: 'users';
@@ -1618,6 +1722,55 @@ export interface SeoSuggestionsSelect<T extends boolean = true> {
         position?: T;
       };
   outcome?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "landing-pages_select".
+ */
+export interface LandingPagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  headline?: T;
+  subheadline?: T;
+  heroImage?: T;
+  bullets?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  formHeading?: T;
+  formSubheading?: T;
+  testimonial?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "campaigns_select".
+ */
+export interface CampaignsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  platform?: T;
+  status?: T;
+  landingPage?: T;
+  utmMedium?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "campaign-visits_select".
+ */
+export interface CampaignVisitsSelect<T extends boolean = true> {
+  campaign?: T;
+  landingPath?: T;
+  referrer?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -33,6 +33,7 @@ import { default as default_bd4862e92e519d9042ef4a0acd14c27f } from '../../../ad
 import { default as default_28aa1833b7ff933ab80ad130d38aa80d } from '../../../admin/components/crm/InboxView'
 import { default as default_207af8a4dfc0a76eaa5bcc232ab8b362 } from '../../../admin/components/crm/ReportingView'
 import { default as default_5cdae0959de01090d3d25f91574ef2a3 } from '../../../admin/components/AutomationsView'
+import { default as default_7183dbecc6d735a62a3ba980c926f921 } from '../../../admin/components/CampaignsView'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -71,5 +72,6 @@ export const importMap = {
   "./admin/components/crm/InboxView#default": default_28aa1833b7ff933ab80ad130d38aa80d,
   "./admin/components/crm/ReportingView#default": default_207af8a4dfc0a76eaa5bcc232ab8b362,
   "./admin/components/AutomationsView#default": default_5cdae0959de01090d3d25f91574ef2a3,
+  "./admin/components/CampaignsView#default": default_7183dbecc6d735a62a3ba980c926f921,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
