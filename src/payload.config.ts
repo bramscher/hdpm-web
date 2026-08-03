@@ -26,6 +26,7 @@ import { SeoSuggestions } from './collections/SeoSuggestions'
 import { LandingPages } from './collections/LandingPages'
 import { Campaigns } from './collections/Campaigns'
 import { CampaignVisits } from './collections/CampaignVisits'
+import { ListingGeocodes } from './collections/ListingGeocodes'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -92,6 +93,7 @@ export default buildConfig({
     LandingPages,
     Campaigns,
     CampaignVisits,
+    ListingGeocodes,
     // Admin
     Users,
   ],

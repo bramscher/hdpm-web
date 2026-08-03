@@ -79,7 +79,7 @@ interface GeocodingResponse {
   error_message?: string
 }
 
-async function geocodeAddress(
+export async function geocodeAddress(
   address: string,
   apiKey: string,
 ): Promise<GeocodingResult | null> {
