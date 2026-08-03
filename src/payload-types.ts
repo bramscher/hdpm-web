@@ -84,6 +84,7 @@ export interface Config {
     'landing-pages': LandingPage;
     campaigns: Campaign;
     'campaign-visits': CampaignVisit;
+    'listing-geocodes': ListingGeocode;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -109,6 +110,7 @@ export interface Config {
     'landing-pages': LandingPagesSelect<false> | LandingPagesSelect<true>;
     campaigns: CampaignsSelect<false> | CampaignsSelect<true>;
     'campaign-visits': CampaignVisitsSelect<false> | CampaignVisitsSelect<true>;
+    'listing-geocodes': ListingGeocodesSelect<false> | ListingGeocodesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -1040,6 +1042,18 @@ export interface CampaignVisit {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-geocodes".
+ */
+export interface ListingGeocode {
+  id: number;
+  address: string;
+  lat: number;
+  lng: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1129,6 +1143,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'campaign-visits';
         value: number | CampaignVisit;
+      } | null)
+    | ({
+        relationTo: 'listing-geocodes';
+        value: number | ListingGeocode;
       } | null)
     | ({
         relationTo: 'users';
@@ -1771,6 +1789,17 @@ export interface CampaignVisitsSelect<T extends boolean = true> {
   campaign?: T;
   landingPath?: T;
   referrer?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-geocodes_select".
+ */
+export interface ListingGeocodesSelect<T extends boolean = true> {
+  address?: T;
+  lat?: T;
+  lng?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -6,6 +6,7 @@ import { getPageBySlug } from '@/lib/page-content'
 import { isListingPetFriendly } from '@/lib/listing-utils'
 import { ListingFilters } from '@/components/listings/ListingFilters'
 import { ListingGrid } from '@/components/listings/ListingGrid'
+import ListingsMapView from '@/components/listings/ListingsMapView'
 
 export async function generateMetadata() {
   const page = await getPageBySlug('listings')
@@ -32,6 +33,16 @@ export default async function ListingsPage({
   let filtered = [...allListings].sort(
     (a, b) => (b.AdvertisedRent ?? 0) - (a.AdvertisedRent ?? 0),
   )
+
+  const isMapView = params.view === 'map'
+  // Preserve active filters when toggling between list and map views
+  const currentParams = new URLSearchParams()
+  for (const [k, v] of Object.entries(params)) {
+    if (typeof v === 'string' && k !== 'view' && k !== 'notice') currentParams.set(k, v)
+  }
+  const baseQuery = currentParams.toString()
+  const listQuery = baseQuery ? `?${baseQuery}` : ''
+  const mapQuery = `?${baseQuery ? baseQuery + '&' : ''}view=map`
 
   const city = typeof params.city === 'string' ? params.city : undefined
   const beds = typeof params.beds === 'string' ? params.beds : undefined
@@ -140,15 +151,31 @@ export default async function ListingsPage({
           </Suspense>
         </div>
 
-        {/* Results count */}
-        <p className="mb-6 mt-8 font-body text-sm text-neutral-mid">
-          <span className="font-semibold text-neutral-dark">
-            {filtered.length}
-          </span>{' '}
-          {filtered.length === 1 ? 'property' : 'properties'} available
-        </p>
+        {/* Results count + view toggle */}
+        <div className="mb-6 mt-8 flex items-center justify-between gap-4">
+          <p className="font-body text-sm text-neutral-mid">
+            <span className="font-semibold text-neutral-dark">
+              {filtered.length}
+            </span>{' '}
+            {filtered.length === 1 ? 'property' : 'properties'} available
+          </p>
+          <div className="flex overflow-hidden rounded-lg border border-gray-200 text-sm font-semibold">
+            <Link
+              href={`/listings${listQuery}`}
+              className={`px-4 py-2 ${!isMapView ? 'bg-accent text-white' : 'bg-white text-neutral-dark hover:bg-gray-50'}`}
+            >
+              List
+            </Link>
+            <Link
+              href={`/listings${mapQuery}`}
+              className={`px-4 py-2 ${isMapView ? 'bg-accent text-white' : 'bg-white text-neutral-dark hover:bg-gray-50'}`}
+            >
+              Map
+            </Link>
+          </div>
+        </div>
 
-        <ListingGrid listings={filtered} />
+        {isMapView ? <ListingsMapView /> : <ListingGrid listings={filtered} />}
       </div>
     </div>
   )
