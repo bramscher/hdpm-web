@@ -23,6 +23,9 @@ import { PropertiesInterest } from './collections/PropertiesInterest'
 import { LeadConversations } from './collections/LeadConversations'
 import { AutomationRules } from './collections/AutomationRules'
 import { SeoSuggestions } from './collections/SeoSuggestions'
+import { LandingPages } from './collections/LandingPages'
+import { Campaigns } from './collections/Campaigns'
+import { CampaignVisits } from './collections/CampaignVisits'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -61,6 +64,10 @@ export default buildConfig({
           Component: './admin/components/AutomationsView',
           path: '/automations',
         },
+        campaigns: {
+          Component: './admin/components/CampaignsView',
+          path: '/campaigns',
+        },
       },
     },
   },
@@ -81,6 +88,10 @@ export default buildConfig({
     PropertiesInterest,
     AutomationRules,
     SeoSuggestions,
+    // Marketing
+    LandingPages,
+    Campaigns,
+    CampaignVisits,
     // Admin
     Users,
   ],

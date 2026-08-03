@@ -264,6 +264,9 @@ function NavLink({
 export default function AdminNav() {
   return (
     <div style={css.container}>
+      <NavLink href="/admin/campaigns" icon={icons.chart}>
+        Campaigns
+      </NavLink>
       <NavLink href="/admin/image-browser" icon={icons.image}>
         Image Browser
       </NavLink>
