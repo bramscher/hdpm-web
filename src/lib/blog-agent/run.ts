@@ -8,7 +8,7 @@
 
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { researchTopics, type TopicSuggestion } from './research'
+import { researchTopics, EXCLUDED_CONTENT, type TopicSuggestion } from './research'
 import { generateBlogPost, type GeneratedBlogPost } from './generate'
 import { findAndAttachFeaturedImage, type AttachedImage } from './image'
 import { sendLeadNotification } from '@/lib/notify'
@@ -71,15 +71,12 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
   })
   const existingTitleWords = existing.docs.map((d) => significantWords(String(d.title ?? '')))
 
-  // Editorial rule (Craig, 2026-08-03): never publish grievance/conflict
-  // content — no tenant-complaint stories, landlord-misdeed exposés, or
-  // dispute drama. Tenant-facing content must be constructive and
-  // service-oriented; it should never hand tenants new reasons to complain.
-  const grievance =
-    /drama|complain|dispute|scam|illegal|lawsuit|sue[sd]?\b|evict|refus|nightmare|horror|worst|slumlord|withhold|retaliat|caught|confess|cheat|steal|stole|fight|angry|furious|unfair|rights violat|deposit.*(kept|stolen|refus)|charg\w+ (me|for)/i
+  // Editorial rule (Craig, 2026-08-03): never publish grievance/conflict or
+  // personal-drama content. research.ts already filters at the source; this
+  // is defense in depth with the same shared pattern.
   const otherState = /\[(?!OR\b)[A-Z]{2}\b/
   const candidates = research.topics
-    .filter((t) => !grievance.test(t.title))
+    .filter((t) => !EXCLUDED_CONTENT.test(t.title))
     .sort((a, b) => Number(otherState.test(a.title)) - Number(otherState.test(b.title)))
 
   const fresh = candidates.filter((t) => !tooSimilar(t.title, existingTitleWords))

@@ -472,7 +472,7 @@ export default function AutomationsView() {
           {researchTopics.length > 0 && (
             <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '500px', overflow: 'auto' }}>
               <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: 'var(--theme-text, #333)' }}>
-                Top {researchTopics.length} Topic Suggestions (sorted by engagement):
+                Top {researchTopics.length} Topic Suggestions (sorted by relevance):
               </p>
               {researchTopics.map((topic, i) => (
                 <TopicCard

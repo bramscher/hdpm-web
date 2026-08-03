@@ -1,7 +1,14 @@
 /**
- * Blog topic research: mines Reddit discussions and Tavily web search for
- * property-management topics relevant to Central Oregon owners and tenants.
- * Shared by the admin "Blog Topic Research" button and the blog-agent cron.
+ * Blog topic research: mines professional property-management communities
+ * on Reddit plus Tavily web search for topics relevant to Central Oregon
+ * owners and tenants. Shared by the admin "Blog Topic Research" button and
+ * the blog-agent cron.
+ *
+ * Editorial guardrails (Craig, 2026-08-03):
+ * - only whitelisted, on-topic subreddits — never site-wide Reddit search
+ * - no grievance/conflict/personal-drama content, ever
+ * - ranking favors professional relevance over raw engagement, so viral
+ *   drama can't outrank useful industry topics
  */
 
 export interface TopicSuggestion {
@@ -16,6 +23,45 @@ export interface TopicSuggestion {
 }
 
 export type ResearchFocus = 'owners' | 'tenants' | 'both'
+
+/**
+ * Content we never write about: tenant complaints, landlord-vs-tenant
+ * conflict, and personal/relationship drama. Shared with run.ts so the
+ * cron applies the same rule.
+ */
+export const EXCLUDED_CONTENT =
+  /\[\s*\d+\s*[mf]\s*\]|\(\s*\d+\s*[mf]\s*\)|aita|am i (the|a bad)|boyfriend|girlfriend|husband|my wife|flatmate|roommate|divorc|cheat|in love|break.?up|my (mom|dad|sister|brother|ex)|drama|complain|dispute|scam|illegal|lawsuit|sue[sd]?\b|evict|non.?renewal|refus|nightmare|horror|worst|slumlord|withhold|retaliat|confess|steal|stole|poach|fight|angry|furious|unfair|rights violat|revenge|toxic|screwed|ripped off|by the balls|went (bad|wrong)|set up to fail|fired|i quit|hate|awful|terrible|regret|beware|warning|red flag|difficult tenant|problem tenant|^welcome to|charg\w+ (me|us) for/i
+
+/* ------------------------------------------------------------------ */
+/*  Source configuration                                               */
+/* ------------------------------------------------------------------ */
+
+const OWNER_SUBS = ['Landlord', 'PropertyManagement', 'realestateinvesting', 'RealEstate', 'RentalInvesting']
+const LOCAL_SUBS = ['Oregon', 'Bend', 'CentralOregon']
+const SERVICE_SUBS = ['HomeMaintenance', 'HomeImprovement', 'Moving']
+
+function subsForFocus(focus: ResearchFocus): string[] {
+  if (focus === 'owners') return [...OWNER_SUBS, ...LOCAL_SUBS]
+  if (focus === 'tenants') return [...SERVICE_SUBS, ...LOCAL_SUBS]
+  return [...OWNER_SUBS, ...LOCAL_SUBS, ...SERVICE_SUBS]
+}
+
+/** Professional/on-topic vocabulary — drives both relevance gate and ranking. */
+const PRO_TERMS = [
+  'property management', 'property manager', 'landlord', 'rental property', 'rental market',
+  'rent price', 'rent increase', 'lease', 'tenant screening', 'screening', 'vacancy',
+  'maintenance', 'winteriz', 'inspection', 'invest', 'cash flow', 'cap rate', 'roi',
+  'insurance', 'property tax', '1031', 'depreciation', 'renovation', 'turnover',
+  'deposit', 'application', 'move-in', 'move out', 'furnace', 'hvac', 'roof',
+  'landscap', 'snow', 'wildfire', 'irrigation', 'oregon', 'bend', 'redmond',
+  'central oregon', 'housing market', 'home value', 'appraisal', 'zoning', 'str',
+  'short term rental', 'long term rental', 'duplex', 'multifamily',
+]
+
+function proScore(text: string): number {
+  const lower = text.toLowerCase()
+  return PRO_TERMS.filter((t) => lower.includes(t)).length
+}
 
 /* ------------------------------------------------------------------ */
 /*  Reddit                                                             */
@@ -43,11 +89,6 @@ const REDDIT_UA = 'HDPM-BlogResearch/1.0 (info@highdesertpm.com)'
 
 let redditToken: { token: string; expiresAt: number } | null = null
 
-/**
- * App-only OAuth token when REDDIT_CLIENT_ID/SECRET are configured — much
- * higher rate limits than the anonymous JSON endpoints. Falls back to null
- * (anonymous access) on any failure.
- */
 async function getRedditToken(): Promise<string | null> {
   const id = process.env.REDDIT_CLIENT_ID
   const secret = process.env.REDDIT_CLIENT_SECRET
@@ -97,16 +138,16 @@ async function redditGet(path: string, params: URLSearchParams): Promise<RedditP
   }
 }
 
-export async function searchReddit(query: string, subreddit?: string): Promise<RedditPost[]> {
-  const path = subreddit ? `/r/${subreddit}/search.json` : '/search.json'
+/** Search restricted to one whitelisted subreddit — never site-wide. */
+export async function searchReddit(query: string, subreddit: string): Promise<RedditPost[]> {
   return redditGet(
-    path,
+    `/r/${subreddit}/search.json`,
     new URLSearchParams({
       q: query,
       sort: 'relevance',
       t: 'month',
       limit: '10',
-      restrict_sr: subreddit ? 'true' : 'false',
+      restrict_sr: 'true',
     }),
   )
 }
@@ -157,8 +198,8 @@ async function searchTavily(query: string): Promise<TavilyResult[]> {
 
 export function classifyAudience(text: string): 'owners' | 'tenants' | 'both' {
   const lower = text.toLowerCase()
-  const ownerTerms = ['landlord', 'owner', 'investment', 'roi', 'vacancy', 'property manager', 'rent collection', 'depreciation', 'cash flow']
-  const tenantTerms = ['tenant', 'renter', 'lease', 'security deposit', 'maintenance request', 'move-in', 'application', 'rent increase']
+  const ownerTerms = ['landlord', 'owner', 'investment', 'invest', 'roi', 'cash flow', 'cap rate', 'vacancy', 'property manager', 'property management', 'rent collection', 'depreciation', 'screening', '1031', 'multifamily']
+  const tenantTerms = ['renter', 'my apartment', 'my rental', 'move-in', 'moving to', 'application']
 
   const ownerScore = ownerTerms.filter((t) => lower.includes(t)).length
   const tenantScore = tenantTerms.filter((t) => lower.includes(t)).length
@@ -168,39 +209,25 @@ export function classifyAudience(text: string): 'owners' | 'tenants' | 'both' {
   return 'both'
 }
 
-function isRelevant(text: string): boolean {
-  const lower = text.toLowerCase()
-  const keywords = [
-    'property', 'rental', 'landlord', 'tenant', 'rent', 'lease',
-    'maintenance', 'screen', 'evict', 'deposit', 'manage', 'invest',
-    'vacancy', 'oregon', 'bend', 'central oregon', 'pet', 'snow',
-    'wildfire', 'winter', 'mountain', 'housing',
-  ]
-  return keywords.filter((k) => lower.includes(k)).length >= 2
-}
-
 function generateAngle(title: string, subreddit: string): string {
   const lower = title.toLowerCase()
 
   if (lower.includes('?')) {
     return 'Answer this common question with Central Oregon-specific expertise'
   }
-  if (lower.includes('tip') || lower.includes('advice')) {
+  if (lower.includes('tip') || lower.includes('advice') || lower.includes('checklist')) {
     return "Share HDPM's professional take with local market context"
   }
-  if (lower.includes('mistake') || lower.includes('wrong') || lower.includes('regret')) {
-    return 'Write a "how to avoid this" guide with real examples'
+  if (lower.includes('cost') || lower.includes('price') || lower.includes('worth') || lower.includes('market')) {
+    return 'Provide Central Oregon-specific data and market comparison'
   }
-  if (lower.includes('cost') || lower.includes('price') || lower.includes('worth')) {
-    return 'Provide Central Oregon-specific cost data and market comparison'
-  }
-  if (subreddit.toLowerCase() === 'oregon' || subreddit.toLowerCase() === 'bend') {
+  if (LOCAL_SUBS.some((s) => s.toLowerCase() === subreddit.toLowerCase())) {
     return 'Localize with Central Oregon market data and community knowledge'
   }
-  return 'Adapt this trending discussion into actionable advice for Central Oregon'
+  return 'Adapt this industry discussion into actionable guidance for Central Oregon owners'
 }
 
-function deduplicateTopics(topics: TopicSuggestion[]): TopicSuggestion[] {
+function deduplicateTopics(topics: (TopicSuggestion & { _score: number })[]) {
   const seen = new Set<string>()
   return topics.filter((t) => {
     const key = t.title.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40)
@@ -208,6 +235,51 @@ function deduplicateTopics(topics: TopicSuggestion[]): TopicSuggestion[] {
     seen.add(key)
     return true
   })
+}
+
+/**
+ * Relevance-first ranking: professional-topic matches dominate; engagement
+ * is log-dampened so a 5k-upvote viral thread can't outrank a genuinely
+ * on-topic discussion.
+ */
+function rank(title: string, body: string, upvotes: number, comments: number): number {
+  const relevance = proScore(`${title} ${body}`)
+  const engagement = Math.log10(upvotes + 1) * 6 + Math.log10(comments + 1) * 4
+  return relevance * 25 + engagement
+}
+
+interface Candidate {
+  title: string
+  body: string
+  subreddit: string
+  upvotes: number
+  comments: number
+  permalink: string
+  relevanceLabel: string
+  angleOverride?: string
+}
+
+function acceptCandidate(c: Candidate, focus: ResearchFocus): (TopicSuggestion & { _score: number }) | null {
+  const text = `${c.title} ${c.body.slice(0, 400)}`
+  if (EXCLUDED_CONTENT.test(text)) return null
+  if (c.title.length > 110) return null // story posts, not topics
+  if (proScore(text) < 2) return null // must be clearly on-topic
+
+  const audience = classifyAudience(text)
+  if (focus === 'owners' && audience === 'tenants') return null
+  if (focus === 'tenants' && audience === 'owners') return null
+
+  return {
+    title: c.title,
+    angle: c.angleOverride ?? generateAngle(c.title, c.subreddit),
+    audience,
+    source: `r/${c.subreddit}`,
+    sourceUrl: `https://reddit.com${c.permalink}`,
+    relevance: c.relevanceLabel,
+    upvotes: c.upvotes,
+    comments: c.comments,
+    _score: rank(c.title, c.body, c.upvotes, c.comments),
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -219,108 +291,88 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
   totalFound: number
   sourcesSearched: string[]
 }> {
-  const allTopics: TopicSuggestion[] = []
+  const scored: (TopicSuggestion & { _score: number })[] = []
+  const subs = subsForFocus(focus)
+  const allowed = new Set(subs.map((s) => s.toLowerCase()))
 
-  // 1. Hot posts from key subreddits
-  const hotResults = await Promise.all(
-    ['Landlord', 'PropertyManagement', 'TenantHelp', 'realestateinvesting'].map((sub) =>
-      getSubredditHot(sub),
-    ),
-  )
-
+  // 1. Hot posts from the whitelisted subreddits
+  const hotResults = await Promise.all(subs.map((sub) => getSubredditHot(sub)))
   for (const posts of hotResults) {
     for (const post of posts) {
-      if (!isRelevant(`${post.data.title} ${post.data.selftext}`)) continue
+      if (!allowed.has(post.data.subreddit.toLowerCase())) continue
       if (post.data.score < 5) continue
-
-      const audience = classifyAudience(`${post.data.title} ${post.data.selftext}`)
-      if (focus !== 'both' && audience !== focus && audience !== 'both') continue
-
-      allTopics.push({
-        title: post.data.title,
-        angle: generateAngle(post.data.title, post.data.subreddit),
-        audience,
-        source: `r/${post.data.subreddit}`,
-        sourceUrl: `https://reddit.com${post.data.permalink}`,
-        relevance: 'Trending discussion with high engagement',
-        upvotes: post.data.score,
-        comments: post.data.num_comments,
-      })
+      const item = acceptCandidate(
+        {
+          title: post.data.title,
+          body: post.data.selftext,
+          subreddit: post.data.subreddit,
+          upvotes: post.data.score,
+          comments: post.data.num_comments,
+          permalink: post.data.permalink,
+          relevanceLabel: 'Active discussion in a professional community',
+        },
+        focus,
+      )
+      if (item) scored.push(item)
     }
   }
 
-  // 2. Central Oregon-specific Reddit searches
-  const localQueries = [
-    'central oregon rental',
-    'bend oregon housing',
-    'oregon landlord tenant law',
-    'oregon rental market',
-  ]
+  // 2. Targeted searches inside professional subs (never site-wide)
+  const searchQueries =
+    focus === 'tenants'
+      ? ['moving checklist', 'winter home maintenance', 'renting first home']
+      : [
+          'rental market 2026',
+          'property management worth it',
+          'tenant screening best practices',
+          'rental property maintenance seasonal',
+          'oregon rental market',
+        ]
 
-  for (const query of localQueries) {
-    await new Promise((r) => setTimeout(r, 300))
-    const posts = await searchReddit(query)
-    for (const post of posts) {
-      if (post.data.score < 3) continue
-
-      const audience = classifyAudience(`${post.data.title} ${post.data.selftext}`)
-      if (focus !== 'both' && audience !== focus && audience !== 'both') continue
-
-      allTopics.push({
-        title: post.data.title,
-        angle: 'Local relevance — directly applicable to Central Oregon market',
-        audience,
-        source: `r/${post.data.subreddit}`,
-        sourceUrl: `https://reddit.com${post.data.permalink}`,
-        relevance: 'Central Oregon / Oregon specific',
-        upvotes: post.data.score,
-        comments: post.data.num_comments,
-      })
+  for (const query of searchQueries) {
+    for (const sub of subs.slice(0, 5)) {
+      await new Promise((r) => setTimeout(r, 200))
+      const posts = await searchReddit(query, sub)
+      for (const post of posts.slice(0, 5)) {
+        if (post.data.score < 3) continue
+        const item = acceptCandidate(
+          {
+            title: post.data.title,
+            body: post.data.selftext,
+            subreddit: post.data.subreddit,
+            upvotes: post.data.score,
+            comments: post.data.num_comments,
+            permalink: post.data.permalink,
+            relevanceLabel: 'Professional community search match',
+          },
+          focus,
+        )
+        if (item) scored.push(item)
+      }
     }
   }
 
-  // 3. Seasonal Reddit searches
+  // 3. Tavily web search — industry publications and Oregon news. These are
+  //    professionally written, so they get a ranking boost over forum posts.
   const month = new Date().toLocaleString('en-US', { month: 'long' }).toLowerCase()
-  const seasonalQueries = [
-    `${month} rental property`,
-    `${month} landlord`,
-    'seasonal property maintenance',
-  ]
-
-  for (const query of seasonalQueries) {
-    await new Promise((r) => setTimeout(r, 300))
-    const posts = await searchReddit(query)
-    for (const post of posts) {
-      if (post.data.score < 3) continue
-
-      allTopics.push({
-        title: post.data.title,
-        angle: 'Timely/seasonal — publish soon for maximum relevance',
-        audience: classifyAudience(`${post.data.title} ${post.data.selftext}`),
-        source: `r/${post.data.subreddit}`,
-        sourceUrl: `https://reddit.com${post.data.permalink}`,
-        relevance: 'Seasonal / timely topic',
-        upvotes: post.data.score,
-        comments: post.data.num_comments,
-      })
-    }
-  }
-
-  // 4. Tavily web search — industry trends and Oregon-specific news
   const tavilyQueries = [
-    'property management trends landlords',
-    `central oregon bend rental market ${new Date().getFullYear()}`,
-    'oregon landlord tenant law changes',
+    'property management industry trends landlords',
+    `central oregon bend redmond rental market ${new Date().getFullYear()}`,
+    'oregon landlord rental law update',
     `${month} rental property maintenance checklist`,
   ]
 
   for (const query of tavilyQueries) {
     const results = await searchTavily(query)
     for (const r of results) {
-      if (!isRelevant(`${r.title} ${r.content}`)) continue
+      const text = `${r.title} ${r.content.slice(0, 400)}`
+      if (EXCLUDED_CONTENT.test(text)) continue
+      if (r.title.length > 110) continue
+      if (proScore(text) < 2) continue
 
-      const audience = classifyAudience(`${r.title} ${r.content}`)
-      if (focus !== 'both' && audience !== focus && audience !== 'both') continue
+      const audience = classifyAudience(text)
+      if (focus === 'owners' && audience === 'tenants') continue
+      if (focus === 'tenants' && audience === 'owners') continue
 
       let host = 'web'
       try {
@@ -329,28 +381,29 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
         // keep generic label
       }
 
-      allTopics.push({
+      scored.push({
         title: r.title,
         angle: 'Cover this industry topic with a Central Oregon lens',
         audience,
         source: host,
         sourceUrl: r.url,
-        relevance: 'Web research (Tavily)',
-        // Scale Tavily's 0-1 relevance score into the same rough range as
-        // Reddit upvotes so mixed-source sorting stays meaningful.
-        upvotes: Math.round(r.score * 40),
+        relevance: 'Industry publication (Tavily)',
+        _score: proScore(text) * 25 + 20, // publication bonus in lieu of upvotes
       })
     }
   }
 
-  const unique = deduplicateTopics(allTopics)
-  unique.sort(
-    (a, b) => ((b.upvotes ?? 0) + (b.comments ?? 0) * 3) - ((a.upvotes ?? 0) + (a.comments ?? 0) * 3),
-  )
+  const unique = deduplicateTopics(scored)
+  unique.sort((a, b) => b._score - a._score)
+
+  const topics = unique.slice(0, 20).map(({ _score, ...t }) => {
+    void _score
+    return t
+  })
 
   return {
-    topics: unique.slice(0, 20),
+    topics,
     totalFound: unique.length,
-    sourcesSearched: [...new Set(unique.slice(0, 20).map((t) => t.source))],
+    sourcesSearched: [...new Set(topics.map((t) => t.source))],
   }
 }
