@@ -2,8 +2,8 @@
  * The full blog-agent pipeline: research topics (Reddit + Tavily), skip
  * anything too similar to an existing post, write a draft with Claude,
  * attach a license-safe featured image, and email the digest (draft link +
- * social copy) to the monitored inbox. Runs twice weekly via cron and
- * on-demand from the admin Automations page.
+ * social copy) to Craig. Runs twice weekly via cron and on-demand from the
+ * admin Automations page.
  */
 
 import { getPayload } from 'payload'
@@ -12,6 +12,9 @@ import { researchTopics, EXCLUDED_CONTENT, type TopicSuggestion } from './resear
 import { generateBlogPost, type GeneratedBlogPost } from './generate'
 import { findAndAttachFeaturedImage, type AttachedImage } from './image'
 import { sendLeadNotification } from '@/lib/notify'
+
+// Blog-agent emails are Craig's alone — never the monitored info@ inbox.
+const BLOG_AGENT_NOTIFY = 'craig@highdesertpm.com'
 
 const STOPWORDS = new Set([
   'the', 'a', 'an', 'and', 'or', 'to', 'of', 'in', 'on', 'for', 'with', 'your',
@@ -54,6 +57,7 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
   const research = await researchTopics('both')
   if (research.topics.length === 0) {
     await sendLeadNotification({
+      to: BLOG_AGENT_NOTIFY,
       subject: 'Blog agent: no topics found this run',
       fields: [['Detail', 'Reddit and Tavily research returned no usable topics. Will retry on the next scheduled run.']],
     })
@@ -82,6 +86,7 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
   const fresh = candidates.filter((t) => !tooSimilar(t.title, existingTitleWords))
   if (fresh.length === 0) {
     await sendLeadNotification({
+      to: BLOG_AGENT_NOTIFY,
       subject: 'Blog agent: all researched topics already covered',
       fields: [
         ['Detail', `${research.topics.length} topics researched, but every one overlaps an existing post. No draft created.`],
@@ -105,6 +110,7 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
   // 5. Digest email
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://hdpm-web.vercel.app'
   await sendLeadNotification({
+    to: BLOG_AGENT_NOTIFY,
     subject: `Blog draft ready for review: ${post.title}`,
     fields: [
       ['Draft', `${siteUrl}${post.adminUrl}`],
