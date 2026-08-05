@@ -12,6 +12,8 @@ export interface LeadNotification {
   fields: Array<[string, string | number | null | undefined]>
   /** rendered prominently at the top of the email, e.g. a failed-handoff warning */
   warning?: string
+  /** comma-separated recipient override; defaults to LEAD_NOTIFY_EMAIL */
+  to?: string
 }
 
 function escapeHtml(value: string): string {
@@ -64,7 +66,7 @@ export async function sendLeadNotification(
     const resend = new Resend(RESEND_API_KEY)
     const { error } = await resend.emails.send({
       from: LEAD_FROM_EMAIL,
-      to: LEAD_NOTIFY_EMAIL.split(',').map((address) => address.trim()),
+      to: (notification.to || LEAD_NOTIFY_EMAIL).split(',').map((address) => address.trim()),
       subject: notification.subject,
       html,
     })

@@ -218,6 +218,7 @@ export async function POST(req: NextRequest) {
     // day and someone must run it manually.
     const attribution = body.attribution || {}
     await sendLeadNotification({
+      to: 'matt@highdesertpm.com,craig@highdesertpm.com',
       subject: `New Rental Analysis request — ${subject.address}`,
       warning: forwardError
         ? `Handoff to the analysis system FAILED (${forwardError}). Run this analysis manually — the owner was told to expect it within one business day.`
