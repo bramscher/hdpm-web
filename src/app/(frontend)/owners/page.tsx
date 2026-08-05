@@ -6,6 +6,7 @@ import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 import { getPageBySlug } from '@/lib/page-content'
 import type { Media as MediaType } from '@/payload-types'
+import Button from '@/components/ui/Button'
 import OwnerRentalAnalysisForm from '@/components/forms/OwnerRentalAnalysisForm'
 
 export async function generateMetadata() {
@@ -134,7 +135,7 @@ function StarRating({ rating }: { rating: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <svg aria-hidden="true"
           key={i}
-          className={`h-5 w-5 ${i < rating ? 'text-accent' : 'text-gray-300'}`}
+          className={`h-5 w-5 ${i < rating ? 'text-accent' : 'text-neutral-300'}`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -223,47 +224,38 @@ export default async function OwnersPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-transparent" />
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-24 sm:px-8 lg:px-12">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium tracking-wide text-white/90 backdrop-blur-sm">
               <span className="inline-block h-2 w-2 rounded-full bg-accent-light animate-pulse" />
               For Property Owners
             </div>
 
-            <h1 className="font-heading text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="font-heading text-display-sm sm:text-display lg:text-display-xl text-white">
               {c?.heroHeading ?? 'Property Management for Central Oregon Owners'}
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
+            <p className="mt-6 max-w-2xl text-body-lg text-white/80">
               {c?.heroSubheading ??
                 "Maximize your rental income and protect your investment with Central Oregon\u2019s most trusted property management team. We deliver peace of mind so you can enjoy the lifestyle you moved here for."}
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link
+              <Button
                 href={c?.heroCTA1Link ?? '#get-started'}
-                className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
+                variant="primary"
+                size="lg"
+                elevated
+                withArrow
               >
                 {c?.heroCTA1Label ?? 'Get a Free Rental Analysis'}
-                <svg aria-hidden="true"
-                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              <a
-                href="tel:5415480383"
-                className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-8 py-4 text-base font-semibold text-white border border-white/20 shadow-lg shadow-black/20 backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
-              >
+              </Button>
+              <Button href="tel:5415480383" variant="glass" size="lg">
                 <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                 </svg>
                 (541) 548-0383
-              </a>
+              </Button>
             </div>
 
             <p className="mt-8 text-sm text-white/70">
@@ -280,16 +272,16 @@ export default async function OwnersPage() {
       </section>
 
       {/* ==================== WHY HDPM ==================== */}
-      <section className="bg-neutral-light py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-neutral-light py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               Why HDPM
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               The Central Oregon Advantage
             </h2>
-            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+            <p className="mt-4 text-body-lg text-neutral-mid">
               We combine local market knowledge with modern technology to deliver
               results that out-of-area firms simply can&apos;t match.
             </p>
@@ -299,12 +291,12 @@ export default async function OwnersPage() {
             {whyHdpm.map((item) => (
               <div
                 key={item.title}
-                className="group relative rounded-xl border border-gray-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-accent/20"
+                className="group relative rounded-xl border border-neutral-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-accent/20 active:scale-[0.99] motion-reduce:transform-none"
               >
                 <div className="mb-5 inline-flex items-center justify-center rounded-lg bg-accent/10 p-3 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
                   {item.icon}
                 </div>
-                <h3 className="font-heading text-lg font-bold text-neutral-dark">
+                <h3 className="font-heading text-heading text-neutral-dark">
                   {item.title}
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-neutral-mid">
@@ -318,16 +310,16 @@ export default async function OwnersPage() {
       </section>
 
       {/* ==================== SERVICES DETAIL ==================== */}
-      <section className="bg-white py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               Our Services
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               Everything Your Property Needs
             </h2>
-            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+            <p className="mt-4 text-body-lg text-neutral-mid">
               Comprehensive property management services tailored to Central
               Oregon&apos;s unique rental market.
             </p>
@@ -344,7 +336,7 @@ export default async function OwnersPage() {
               >
                 {/* Image side */}
                 <div className="w-full lg:w-5/12">
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-lg">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-xl shadow-lg">
                     <Image
                       src={service.image}
                       alt={service.imageAlt}
@@ -357,7 +349,7 @@ export default async function OwnersPage() {
 
                 {/* Content side */}
                 <div className="w-full lg:w-7/12">
-                  <h3 className="font-heading text-2xl font-extrabold tracking-tight text-neutral-dark sm:text-3xl">
+                  <h3 className="font-heading text-subtitle text-neutral-dark">
                     {service.title}
                   </h3>
                   <p className="mt-4 text-base leading-relaxed text-neutral-mid">
@@ -387,23 +379,23 @@ export default async function OwnersPage() {
       </section>
 
       {/* ==================== PRICING ==================== */}
-      <section className="bg-neutral-light py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-neutral-light py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               Pricing
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               Competitive, Transparent Pricing
             </h2>
-            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+            <p className="mt-4 text-body-lg text-neutral-mid">
               Every property is unique, so we customize our management plans to
               fit your goals and property type. No hidden fees, no long-term
               contracts required.
             </p>
           </div>
 
-          <div className="mx-auto mt-12 max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 shadow-sm sm:p-12">
+          <div className="mx-auto mt-12 max-w-2xl rounded-xl border border-neutral-200 bg-white p-8 shadow-sm sm:p-12">
             <div className="grid gap-6 sm:grid-cols-2">
               {pricingItems.map((item) => (
                 <div key={item.label} className="rounded-lg bg-neutral-light p-5">
@@ -413,42 +405,37 @@ export default async function OwnersPage() {
               ))}
             </div>
 
-            <div className="mt-8 border-t border-gray-200 pt-8 text-center">
+            <div className="mt-8 border-t border-neutral-200 pt-8 text-center">
               <p className="text-sm text-neutral-mid">
                 Contact us for a personalized quote based on your property type,
                 location, and management needs.
               </p>
-              <Link
+              <Button
                 href="#get-started"
-                className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
+                variant="primary"
+                size="lg"
+                elevated
+                withArrow
+                className="mt-6"
               >
                 Schedule a Consultation
-                <svg aria-hidden="true"
-                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
       {/* ==================== TESTIMONIALS ==================== */}
-      <section className="bg-white py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               Testimonials
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               Trusted by Central Oregon Owners
             </h2>
-            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+            <p className="mt-4 text-body-lg text-neutral-mid">
               Hear from property owners who trust us to protect their investments.
             </p>
           </div>
@@ -457,7 +444,7 @@ export default async function OwnersPage() {
             {ownerTestimonials.map((testimonial) => (
               <div
                 key={testimonial.id}
-                className="relative rounded-xl border border-gray-200 bg-neutral-light p-8 shadow-sm"
+                className="relative rounded-xl border border-neutral-200 bg-neutral-light p-8 shadow-sm"
               >
                 <div className="absolute -top-3 left-6">
                   <span className="inline-block rounded-lg bg-accent px-3 py-1 font-heading text-2xl font-bold leading-none text-white">
@@ -471,7 +458,7 @@ export default async function OwnersPage() {
                   {testimonial.text}
                 </blockquote>
 
-                <div className="mt-6 border-t border-gray-200 pt-4">
+                <div className="mt-6 border-t border-neutral-200 pt-4">
                   <p className="font-heading text-sm font-bold text-neutral-dark">
                     {testimonial.author}
                   </p>
@@ -503,16 +490,16 @@ export default async function OwnersPage() {
         <div className="absolute -right-32 -top-32 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
         <div className="absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
 
-        <div className="relative z-10 mx-auto max-w-4xl px-6 text-center sm:px-8">
-          <h2 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+        <div className="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+          <h2 className="font-heading text-title sm:text-display text-white">
             {c?.ctaHeading ?? 'Get Your Free Rental Analysis'}
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
+          <p className="mx-auto mt-6 max-w-2xl text-body-lg text-white/80">
             {c?.ctaBody ??
               'Find out how much your Central Oregon property could earn with professional management. Our free, no-obligation analysis includes a market rent estimate, property assessment, and customized management plan.'}
           </p>
 
-          <div className="mx-auto mt-10 max-w-2xl rounded-2xl bg-white p-6 text-left shadow-2xl sm:p-8">
+          <div className="mx-auto mt-10 max-w-2xl rounded-xl bg-white p-6 text-left shadow-xl sm:p-8">
             <OwnerRentalAnalysisForm />
           </div>
 

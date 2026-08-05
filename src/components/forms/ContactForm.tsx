@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useState } from 'react'
+import Button from '@/components/ui/Button'
 import { submitContactForm, type ContactFormState } from '@/app/(frontend)/contact/actions'
 import { getAttribution, type Attribution } from '@/lib/attribution'
 import { trackLead } from '@/lib/analytics'
@@ -27,14 +28,14 @@ export default function ContactForm() {
 
   if (state.success) {
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600">
+      <div className="rounded-xl border border-accent/20 bg-accent/5 p-8 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 text-accent-dark">
           <svg aria-hidden="true" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
-        <h3 className="font-heading text-lg font-bold text-green-800">Message Sent!</h3>
-        <p className="mt-2 text-sm text-green-700">
+        <h3 className="font-heading text-heading text-accent-dark">Message Sent!</h3>
+        <p className="mt-2 text-sm text-neutral-600">
           Thank you for reaching out. Our team will get back to you within one business day.
         </p>
       </div>
@@ -64,7 +65,7 @@ export default function ContactForm() {
       )}
 
       {state.error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
           {state.error}
         </div>
       )}
@@ -79,7 +80,7 @@ export default function ContactForm() {
           id="name"
           name="name"
           required
-          className="mt-1.5 block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          className="mt-1.5 block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
           placeholder="Your full name"
         />
       </div>
@@ -94,7 +95,7 @@ export default function ContactForm() {
           id="email"
           name="email"
           required
-          className="mt-1.5 block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          className="mt-1.5 block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
           placeholder="you@example.com"
         />
       </div>
@@ -108,7 +109,7 @@ export default function ContactForm() {
           type="tel"
           id="phone"
           name="phone"
-          className="mt-1.5 block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          className="mt-1.5 block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
           placeholder="(541) 555-0123"
         />
       </div>
@@ -121,7 +122,7 @@ export default function ContactForm() {
         <select
           id="propertyInterest"
           name="propertyInterest"
-          className="mt-1.5 block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          className="mt-1.5 block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
         >
           <option value="">Select an option</option>
           <option value="owner">Property Owner</option>
@@ -140,16 +141,19 @@ export default function ContactForm() {
           name="message"
           required
           rows={5}
-          className="mt-1.5 block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          className="mt-1.5 block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
           placeholder="How can we help you?"
         />
       </div>
 
       {/* Submit */}
-      <button
+      <Button
         type="submit"
+        variant="primary"
+        size="lg"
+        withArrow={!isPending}
         disabled={isPending}
-        className="group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-lg"
+        className="w-full disabled:opacity-60 disabled:pointer-events-none"
       >
         {isPending ? (
           <>
@@ -164,20 +168,9 @@ export default function ContactForm() {
             Sending...
           </>
         ) : (
-          <>
-            Send Message
-            <svg aria-hidden="true"
-              className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </>
+          'Send Message'
         )}
-      </button>
+      </Button>
     </form>
   )
 }

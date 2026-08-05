@@ -49,23 +49,23 @@ export default async function ContactPage() {
             </ol>
           </nav>
 
-          <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <h1 className="font-heading text-display-sm sm:text-display text-white">
             {c?.heroHeading ?? 'Get in Touch'}
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-white/80">
+          <p className="mt-4 max-w-2xl text-body-lg text-white/80">
             {c?.heroSubheading ?? "Have questions about our property management services? We'd love to hear from you. Fill out the form or reach us directly."}
           </p>
         </div>
       </section>
 
       {/* Form + Contact Info */}
-      <section className="bg-neutral-light py-20">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-neutral-light py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-5">
             {/* Contact Form — takes 3 of 5 columns */}
             <div className="lg:col-span-3">
-              <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-                <h2 className="font-heading text-xl font-bold text-neutral-dark">
+              <div className="rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
+                <h2 className="font-heading text-heading text-neutral-dark">
                   Send Us a Message
                 </h2>
                 <p className="mt-2 text-sm text-neutral-mid">
@@ -80,8 +80,8 @@ export default async function ContactPage() {
             {/* Contact Info Sidebar — takes 2 of 5 columns */}
             <div className="space-y-8 lg:col-span-2">
               {/* Office Info Card */}
-              <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-                <h2 className="font-heading text-xl font-bold text-neutral-dark">
+              <div className="rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
+                <h2 className="font-heading text-heading text-neutral-dark">
                   Our Office
                 </h2>
 
@@ -176,11 +176,11 @@ export default async function ContactPage() {
               </div>
 
               {/* Map Placeholder */}
-              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div className="flex h-64 items-center justify-center bg-gray-100 text-neutral-mid">
+              <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+                <div className="flex h-64 items-center justify-center bg-neutral-100 text-neutral-mid">
                   <div className="text-center">
                     <svg aria-hidden="true"
-                      className="mx-auto h-10 w-10 text-gray-400"
+                      className="mx-auto h-10 w-10 text-neutral-400"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -193,7 +193,7 @@ export default async function ContactPage() {
                       />
                     </svg>
                     <p className="mt-2 text-sm">Google Maps embed placeholder</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-neutral-400">
                       1515 SW Reindeer Ave, Redmond, OR
                     </p>
                   </div>

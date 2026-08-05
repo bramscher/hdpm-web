@@ -10,6 +10,7 @@ import { getCachedListingsByCity } from '@/lib/appfolio'
 import { FOUNDED_YEAR } from '@/lib/constants'
 import ListingCard from '@/components/listings/ListingCard'
 import LeadForm from '@/components/forms/LeadForm'
+import Button from '@/components/ui/Button'
 import type { MarketArea, Media } from '@/payload-types'
 
 // Towns the rental-analysis intake recognizes; others map to 'Other'
@@ -132,7 +133,7 @@ export default async function MarketAreaPage({
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-16 pt-32 sm:px-8 lg:px-12">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pb-16 pt-32 sm:px-6 lg:px-8">
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" className="mb-6">
             <ol className="flex items-center gap-2 text-sm text-white/60">
@@ -160,7 +161,7 @@ export default async function MarketAreaPage({
             </ol>
           </nav>
 
-          <h1 className="font-heading text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="font-heading text-display-sm sm:text-display lg:text-display-xl text-white">
             Property Management in{' '}
             <span className="relative">
               {area.city}
@@ -168,7 +169,7 @@ export default async function MarketAreaPage({
             </span>
           </h1>
           {area.tagline && (
-            <p className="mt-4 max-w-2xl text-xl text-white/80 italic">
+            <p className="mt-4 max-w-2xl text-body-lg text-white/80 italic">
               {area.tagline}
             </p>
           )}
@@ -176,9 +177,9 @@ export default async function MarketAreaPage({
       </section>
 
       {/* Quick Stats */}
-      <section className="border-b border-gray-100 bg-white">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-3 divide-x divide-gray-100">
+      <section className="border-b border-neutral-100 bg-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-3 divide-x divide-neutral-100">
             <div className="py-8 text-center">
               <p className="font-heading text-3xl font-extrabold text-primary sm:text-4xl">
                 {(area.population ?? 0).toLocaleString()}
@@ -202,13 +203,13 @@ export default async function MarketAreaPage({
       </section>
 
       {/* About Section */}
-      <section className="bg-white py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               Local Expertise
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               About {area.city} Rentals
             </h2>
 
@@ -223,10 +224,10 @@ export default async function MarketAreaPage({
 
       {/* Area Highlights */}
       {highlights.length > 0 && (
-        <section className="bg-neutral-light py-20 sm:py-24">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+        <section className="bg-neutral-light py-16 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-3xl">
-              <h2 className="font-heading text-2xl font-extrabold tracking-tight text-neutral-dark sm:text-3xl">
+              <h2 className="font-heading text-title text-neutral-dark">
                 Why {area.city}?
               </h2>
               <ul className="mt-8 space-y-4">
@@ -256,12 +257,12 @@ export default async function MarketAreaPage({
 
       {/* Long-form content sections */}
       {(area.contentSections?.length ?? 0) > 0 && (
-        <section className="bg-white py-20 sm:py-24">
-          <div className="mx-auto max-w-3xl px-6 sm:px-8 lg:px-12">
+        <section className="bg-white py-16 sm:py-24">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div className="space-y-16">
               {area.contentSections!.map((section, i) => (
                 <div key={section.id || i}>
-                  <h2 className="font-heading text-2xl font-extrabold tracking-tight text-neutral-dark sm:text-3xl">
+                  <h2 className="font-heading text-title text-neutral-dark">
                     {section.heading}
                   </h2>
                   <div className="mt-5 space-y-4">
@@ -296,7 +297,7 @@ export default async function MarketAreaPage({
                   )}
                   {section.image?.url && (
                     <figure className="mt-8">
-                      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl shadow-md">
+                      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl shadow-md">
                         <Image
                           src={section.image.url}
                           alt={section.image.alt || section.heading}
@@ -325,9 +326,9 @@ export default async function MarketAreaPage({
       )}
 
       {/* Lead form */}
-      <section id="get-started" className="bg-neutral-light py-20 sm:py-24">
-        <div className="mx-auto max-w-2xl px-6 sm:px-8">
-          <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm sm:p-10">
+      <section id="get-started" className="bg-neutral-light py-16 sm:py-24">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-xl border border-neutral-200 bg-white p-8 shadow-sm sm:p-10">
             <LeadForm
               town={TOWN_BY_SLUG[area.slug] ?? 'Other'}
               sourceDetail={`Market page: ${area.city}`}
@@ -341,14 +342,14 @@ export default async function MarketAreaPage({
 
       {/* Featured Listings */}
       {featuredListings.length > 0 && (
-        <section className="bg-white py-20 sm:py-24">
-          <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+        <section className="bg-white py-16 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between">
               <div>
-                <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+                <p className="font-heading text-overline uppercase text-accent">
                   Available Now
                 </p>
-                <h2 className="mt-3 font-heading text-2xl font-extrabold tracking-tight text-neutral-dark sm:text-3xl">
+                <h2 className="mt-3 font-heading text-title text-neutral-dark">
                   Rental Listings in {area.city}
                 </h2>
               </div>
@@ -397,10 +398,10 @@ export default async function MarketAreaPage({
       )}
 
       {/* Why Choose HDPM */}
-      <section className="bg-neutral-light py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-neutral-light py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="font-heading text-2xl font-extrabold tracking-tight text-neutral-dark sm:text-3xl">
+            <h2 className="font-heading text-title text-neutral-dark">
               Why Choose HDPM in {area.city}?
             </h2>
             <p className="mt-6 text-base leading-relaxed text-neutral-mid">
@@ -473,7 +474,7 @@ export default async function MarketAreaPage({
                     {feature.icon2}
                   </svg>
                 </div>
-                <h3 className="mt-4 font-heading text-lg font-bold text-neutral-dark">
+                <h3 className="mt-4 font-heading text-heading text-neutral-dark">
                   {feature.title}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-neutral-mid">
@@ -498,36 +499,21 @@ export default async function MarketAreaPage({
         )}
         <div className="absolute inset-0 bg-black/55" />
 
-        <div className="relative z-10 mx-auto max-w-4xl px-6 text-center sm:px-8">
-          <h2 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+        <div className="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+          <h2 className="font-heading text-title text-white">
             Looking for Property Management in {area.city}?
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
+          <p className="mx-auto mt-6 max-w-2xl text-body-lg text-white/80">
             Whether you own a single rental home or a portfolio of properties in{' '}
             {area.city}, our team is ready to help. Schedule a free consultation
             and learn how we can maximize your investment.
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/owners"
-              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
-            >
+            <Button href="/owners" variant="primary" size="lg" elevated withArrow>
               Free Consultation
-              <svg aria-hidden="true"
-                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-            <a
-              href="tel:5415480383"
-              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:-translate-y-0.5"
-            >
+            </Button>
+            <Button href="tel:5415480383" variant="glass" size="lg">
               <svg aria-hidden="true"
                 className="h-5 w-5"
                 fill="none"
@@ -542,7 +528,7 @@ export default async function MarketAreaPage({
                 />
               </svg>
               (541) 548-0383
-            </a>
+            </Button>
           </div>
 
           <p className="mt-8 text-sm text-white/50">

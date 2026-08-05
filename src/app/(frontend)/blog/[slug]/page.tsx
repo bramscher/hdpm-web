@@ -259,7 +259,7 @@ export default async function BlogPostPage({
           )}
 
           {/* Title */}
-          <h1 className="font-heading text-3xl font-bold text-neutral-dark sm:text-4xl lg:text-[2.75rem] lg:leading-tight">
+          <h1 className="font-heading text-display-sm sm:text-display text-neutral-dark">
             {post.title}
           </h1>
 
@@ -285,7 +285,7 @@ export default async function BlogPostPage({
             )}
             {post.publishedAt && (
               <>
-                <span aria-hidden="true" className="text-gray-300">
+                <span aria-hidden="true" className="text-neutral-300">
                   |
                 </span>
                 <time
@@ -309,7 +309,7 @@ export default async function BlogPostPage({
                 </time>
               </>
             )}
-            <span aria-hidden="true" className="text-gray-300">
+            <span aria-hidden="true" className="text-neutral-300">
               |
             </span>
             <span className="flex items-center gap-1.5">
@@ -346,14 +346,14 @@ export default async function BlogPostPage({
 
           {/* Rich text body */}
           {post.body && (
-            <div className="blog-article prose prose-lg mt-10 max-w-none font-body prose-headings:font-heading prose-headings:text-neutral-dark prose-p:text-neutral-mid prose-p:leading-relaxed prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-neutral-dark prose-img:rounded-xl prose-img:shadow-md prose-blockquote:border-accent prose-blockquote:bg-accent/5 prose-blockquote:rounded-r-lg prose-blockquote:py-1 prose-blockquote:pr-4 prose-blockquote:not-italic prose-blockquote:text-neutral-dark/80 prose-li:text-neutral-mid prose-hr:border-gray-200">
+            <div className="blog-article prose prose-lg mt-10 max-w-none font-body prose-headings:font-heading prose-headings:text-neutral-dark prose-p:text-neutral-mid prose-p:leading-relaxed prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-neutral-dark prose-img:rounded-xl prose-img:shadow-md prose-blockquote:border-accent prose-blockquote:bg-accent/5 prose-blockquote:rounded-r-lg prose-blockquote:py-1 prose-blockquote:pr-4 prose-blockquote:not-italic prose-blockquote:text-neutral-dark/80 prose-li:text-neutral-mid prose-hr:border-neutral-200">
               <RichText data={post.body} />
             </div>
           )}
 
           {/* Tags */}
           {tags.length > 0 && (
-            <div className="mt-10 border-t border-gray-200 pt-6">
+            <div className="mt-10 border-t border-neutral-200 pt-6">
               <div className="flex flex-wrap items-center gap-2">
                 <svg aria-hidden="true"
                   className="h-4 w-4 text-neutral-mid"
@@ -386,7 +386,7 @@ export default async function BlogPostPage({
           )}
 
           {/* Back to blog */}
-          <div className="mt-10 border-t border-gray-200 pt-8">
+          <div className="mt-10 border-t border-neutral-200 pt-8">
             <Link
               href="/blog"
               className="inline-flex items-center gap-2 font-body text-sm font-medium text-primary transition-colors hover:text-primary-dark"
@@ -409,7 +409,7 @@ export default async function BlogPostPage({
           </div>
 
           {/* Lead capture */}
-          <div className="mt-12 rounded-2xl border border-gray-200 bg-neutral-light p-8 sm:p-10">
+          <div className="mt-12 rounded-xl border border-neutral-200 bg-neutral-light p-8 sm:p-10">
             <LeadForm
               sourceDetail={`Blog post: ${post.slug}`}
               analyticsTag="blog_post"
@@ -421,9 +421,9 @@ export default async function BlogPostPage({
 
         {/* Related posts */}
         {relatedPosts.length > 0 && (
-          <section className="border-t border-gray-200 bg-white px-4 py-16 sm:px-6 lg:px-8">
+          <section className="border-t border-neutral-200 bg-white px-4 py-16 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-7xl">
-              <h2 className="font-heading text-2xl font-bold text-neutral-dark">
+              <h2 className="font-heading text-title text-neutral-dark">
                 Related Articles
               </h2>
               <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">

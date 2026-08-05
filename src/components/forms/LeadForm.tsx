@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Button from '@/components/ui/Button'
 import { getAttribution } from '@/lib/attribution'
 import { trackLead } from '@/lib/analytics'
 
@@ -42,7 +43,7 @@ export default function LeadForm({
 
   const labelClass = `block text-sm font-semibold ${dark ? 'text-white' : 'text-neutral-dark'}`
   const inputClass =
-    'mt-1.5 block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20'
+    'mt-1.5 block w-full rounded-lg border border-neutral-300 bg-white px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -87,11 +88,11 @@ export default function LeadForm({
 
   if (submitted) {
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-8 text-center">
-        <h3 className="font-heading text-lg font-bold text-green-800">
+      <div className="rounded-xl border border-accent/20 bg-accent/5 p-8 text-center">
+        <h3 className="font-heading text-heading text-accent-dark">
           Request Received!
         </h3>
-        <p className="mt-2 text-sm text-green-700">
+        <p className="mt-2 text-sm text-neutral-600">
           We&apos;ll review your property and email a full rent analysis within
           one business day.
         </p>
@@ -103,7 +104,7 @@ export default function LeadForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <h3
-          className={`font-heading text-2xl font-extrabold tracking-tight ${dark ? 'text-white' : 'text-neutral-dark'}`}
+          className={`font-heading text-subtitle ${dark ? 'text-white' : 'text-neutral-dark'}`}
         >
           {heading}
         </h3>
@@ -186,18 +187,20 @@ export default function LeadForm({
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
           {error}
         </div>
       )}
 
-      <button
+      <Button
         type="submit"
+        variant="primary"
+        size="lg"
         disabled={submitting}
-        className="w-full rounded-lg bg-accent px-6 py-4 text-base font-semibold text-white shadow-sm transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full disabled:opacity-60 disabled:pointer-events-none"
       >
         {submitting ? 'Submitting…' : 'Get My Free Rental Analysis'}
-      </button>
+      </Button>
       <p className={`text-center text-xs ${dark ? 'text-white/60' : 'text-neutral-mid'}`}>
         Prefer to talk? Call{' '}
         <a href="tel:+15415480383" className="font-semibold underline">

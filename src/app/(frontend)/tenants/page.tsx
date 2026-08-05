@@ -1,10 +1,10 @@
-import Link from 'next/link'
 import Image from 'next/image'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema, faqSchema } from '@/lib/schema'
 import { defaultFaqs } from './faq-data'
 import { getPageBySlug } from '@/lib/page-content'
 import type { Media as MediaType } from '@/payload-types'
+import Button from '@/components/ui/Button'
 import TenantFAQ from './TenantFAQ'
 
 export async function generateMetadata() {
@@ -154,14 +154,14 @@ export default async function TenantsPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-transparent" />
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-24 sm:px-8 lg:px-12">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium tracking-wide text-white/90 backdrop-blur-sm">
               <span className="inline-block h-2 w-2 rounded-full bg-accent-light animate-pulse" />
               For Tenants
             </div>
 
-            <h1 className="font-heading text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="font-heading text-display-sm sm:text-display lg:text-display-xl text-white">
               {c?.heroHeading ?? <>Your Next Home in{' '}
               <span className="relative">
                 Central Oregon
@@ -169,35 +169,24 @@ export default async function TenantsPage() {
               </span></>}
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
+            <p className="mt-6 max-w-2xl text-body-lg text-white/80">
               {c?.heroSubheading ?? "Whether you're a current tenant or searching for your next rental, we're here to make your experience seamless. Access your portal, browse listings, or learn about our application process."}
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/listings"
-                className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
-              >
+              <Button href="/listings" variant="primary" size="lg" elevated withArrow>
                 Browse Available Rentals
-                <svg aria-hidden="true"
-                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-              <a
+              </Button>
+              <Button
                 href="https://highdesertpm.appfolio.com/connect/users/sign_in"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-8 py-4 text-base font-semibold text-white border border-white/20 shadow-lg shadow-black/20 backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
+                variant="glass"
+                size="lg"
               >
                 Tenant Portal Login
                 <svg aria-hidden="true"
-                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -205,23 +194,23 @@ export default async function TenantsPage() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                 </svg>
-              </a>
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
       {/* ==================== CURRENT TENANTS ==================== */}
-      <section className="bg-neutral-light py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-neutral-light py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               Current Tenants
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               Manage Your Tenancy Online
             </h2>
-            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+            <p className="mt-4 text-body-lg text-neutral-mid">
               Access everything you need through our secure online tenant portal.
             </p>
           </div>
@@ -233,13 +222,13 @@ export default async function TenantsPage() {
                 href={portal.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group relative rounded-xl border border-gray-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-accent/20"
+                className="group relative rounded-xl border border-neutral-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-accent/20 active:scale-[0.99] motion-reduce:transform-none"
               >
                 <div className="mb-5 inline-flex items-center justify-center rounded-lg bg-accent/10 p-3 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
                   {portal.icon}
                 </div>
 
-                <h3 className="font-heading text-lg font-bold text-neutral-dark">
+                <h3 className="font-heading text-heading text-neutral-dark">
                   {portal.title}
                 </h3>
 
@@ -262,24 +251,24 @@ export default async function TenantsPage() {
       </section>
 
       {/* ==================== LOOKING FOR A RENTAL ==================== */}
-      <section className="bg-white py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center gap-12 lg:flex-row">
             <div className="flex w-full items-center justify-center lg:w-5/12">
-              <div className="flex h-48 w-48 items-center justify-center rounded-2xl bg-accent/10 text-accent sm:h-56 sm:w-56">
+              <div className="flex h-48 w-48 items-center justify-center rounded-xl bg-accent/10 text-accent sm:h-56 sm:w-56">
                 <svg aria-hidden="true" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                 </svg>
               </div>
             </div>
             <div className="w-full lg:w-7/12">
-              <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+              <p className="font-heading text-overline uppercase text-accent">
                 Find Your Home
               </p>
-              <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+              <h2 className="mt-3 font-heading text-title text-neutral-dark">
                 Looking for a Rental?
               </h2>
-              <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+              <p className="mt-4 text-body-lg text-neutral-mid">
                 We manage quality rental homes across Bend, Redmond, Sisters,
                 Prineville, Culver, Metolius, and Madras. Browse our current available
                 listings to find your next Central Oregon home.
@@ -305,37 +294,32 @@ export default async function TenantsPage() {
                   </div>
                 ))}
               </div>
-              <Link
+              <Button
                 href="/listings"
-                className="group mt-8 inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
+                variant="primary"
+                size="lg"
+                elevated
+                withArrow
+                className="mt-8"
               >
                 View Available Listings
-                <svg aria-hidden="true"
-                  className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
       {/* ==================== APPLICATION PROCESS ==================== */}
-      <section className="bg-neutral-light py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-neutral-light py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               How It Works
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               Application Process
             </h2>
-            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+            <p className="mt-4 text-body-lg text-neutral-mid">
               Getting into your new Central Oregon home is simple. Here&apos;s
               how it works.
             </p>
@@ -354,7 +338,7 @@ export default async function TenantsPage() {
                   <div className="absolute left-[calc(50%+2rem)] top-8 hidden h-0.5 w-[calc(100%-4rem)] bg-accent/20 lg:block" />
                 )}
 
-                <h3 className="mt-6 font-heading text-lg font-bold text-neutral-dark">
+                <h3 className="mt-6 font-heading text-heading text-neutral-dark">
                   {item.title}
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-neutral-mid">
@@ -367,16 +351,16 @@ export default async function TenantsPage() {
       </section>
 
       {/* ==================== TENANT FAQ ==================== */}
-      <section className="bg-white py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               FAQ
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               Frequently Asked Questions
             </h2>
-            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+            <p className="mt-4 text-body-lg text-neutral-mid">
               Answers to common questions from current and prospective tenants.
             </p>
           </div>
@@ -400,42 +384,27 @@ export default async function TenantsPage() {
         <div className="absolute -right-32 -top-32 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
         <div className="absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
 
-        <div className="relative z-10 mx-auto max-w-4xl px-6 text-center sm:px-8">
-          <h2 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+        <div className="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+          <h2 className="font-heading text-title sm:text-display text-white">
             {c?.ctaHeading ?? 'Ready to Find Your Home?'}
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
+          <p className="mx-auto mt-6 max-w-2xl text-body-lg text-white/80">
             {c?.ctaBody ?? 'Browse our available rental listings or contact us to learn more about living in Central Oregon. Our team is here to help you every step of the way.'}
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/listings"
-              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
-            >
+            <Button href="/listings" variant="primary" size="lg" elevated withArrow>
               <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
               Browse Listings
-              <svg aria-hidden="true"
-                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-            <a
-              href="tel:5415480383"
-              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-8 py-4 text-base font-semibold text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
-            >
+            </Button>
+            <Button href="tel:5415480383" variant="glass" size="lg">
               <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
               </svg>
               Call (541) 548-0383
-            </a>
+            </Button>
           </div>
 
           <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-white/60">

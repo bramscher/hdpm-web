@@ -134,10 +134,10 @@ export default async function ListingsPage({
             </ol>
           </nav>
 
-          <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl">
+          <h1 className="font-heading text-display-sm sm:text-display text-white">
             {c?.heroHeading ?? 'Available Rentals'}
           </h1>
-          <p className="mt-2 text-lg text-white/80">
+          <p className="mt-2 text-body-lg text-white/80">
             {c?.heroSubheading ?? 'Find your next home in Central Oregon'}
           </p>
         </div>
@@ -159,16 +159,16 @@ export default async function ListingsPage({
             </span>{' '}
             {filtered.length === 1 ? 'property' : 'properties'} available
           </p>
-          <div className="flex overflow-hidden rounded-lg border border-gray-200 text-sm font-semibold">
+          <div className="flex overflow-hidden rounded-lg border border-neutral-200 text-sm font-semibold">
             <Link
               href={`/listings${listQuery}`}
-              className={`px-4 py-2 ${!isMapView ? 'bg-accent text-white' : 'bg-white text-neutral-dark hover:bg-gray-50'}`}
+              className={`px-4 py-2 ${!isMapView ? 'bg-accent text-white' : 'bg-white text-neutral-dark hover:bg-neutral-50'}`}
             >
               List
             </Link>
             <Link
               href={`/listings${mapQuery}`}
-              className={`px-4 py-2 ${isMapView ? 'bg-accent text-white' : 'bg-white text-neutral-dark hover:bg-gray-50'}`}
+              className={`px-4 py-2 ${isMapView ? 'bg-accent text-white' : 'bg-white text-neutral-dark hover:bg-neutral-50'}`}
             >
               Map
             </Link>

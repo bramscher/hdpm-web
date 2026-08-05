@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
+import Button from '@/components/ui/Button'
 
 const OWNER_PORTAL_URL = 'https://highdesertpm.appfolio.com/oportal'
 
@@ -50,20 +51,17 @@ export default function OwnerPortalPage() {
       {/* Hero */}
       <section className="bg-primary px-4 pb-16 pt-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <h1 className="font-heading text-display-sm sm:text-display text-white">
             Owner Portal
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-white/80">
+          <p className="mt-4 max-w-2xl text-body-lg text-white/80">
             Secure online access to your statements, reports, and documents —
             any time, from any device.
           </p>
           <div className="mt-8">
-            <a
-              href={OWNER_PORTAL_URL}
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
-            >
+            <Button href={OWNER_PORTAL_URL} variant="primary" size="lg" elevated>
               Log In to the Owner Portal
-            </a>
+            </Button>
           </div>
           <p className="mt-4 text-sm text-white/60">
             First time here? Your login invitation was sent to the email we
@@ -73,18 +71,18 @@ export default function OwnerPortalPage() {
       </section>
 
       {/* What you can do */}
-      <section className="bg-white py-16">
+      <section className="bg-white py-16 sm:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="font-heading text-2xl font-extrabold tracking-tight text-neutral-dark sm:text-3xl">
+          <h2 className="font-heading text-title text-neutral-dark">
             What you can do in the portal
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {portalFeatures.map((feature) => (
               <div
                 key={feature.title}
-                className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
+                className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm"
               >
-                <h3 className="font-heading text-lg font-bold text-neutral-dark">
+                <h3 className="font-heading text-heading text-neutral-dark">
                   {feature.title}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-neutral-mid">
@@ -97,10 +95,10 @@ export default function OwnerPortalPage() {
       </section>
 
       {/* Help + prospective owners */}
-      <section className="bg-neutral-light py-16">
+      <section className="bg-neutral-light py-16 sm:py-24">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
           <div>
-            <h2 className="font-heading text-xl font-extrabold text-neutral-dark">
+            <h2 className="font-heading text-heading text-neutral-dark">
               Trouble logging in?
             </h2>
             <p className="mt-3 leading-relaxed text-neutral-mid">
@@ -122,7 +120,7 @@ export default function OwnerPortalPage() {
             </p>
           </div>
           <div>
-            <h2 className="font-heading text-xl font-extrabold text-neutral-dark">
+            <h2 className="font-heading text-heading text-neutral-dark">
               Not a client yet?
             </h2>
             <p className="mt-3 leading-relaxed text-neutral-mid">
