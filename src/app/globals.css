@@ -10,15 +10,122 @@
   --color-accent-dark: #22A840;
   --color-accent-light: #4ADE6B;
   --color-brand-green: #37E336;
-  --color-neutral-dark: #1a1a1a;
-  --color-neutral-light: #F5F5F5;
-  --color-neutral-mid: #6B7280;
   --color-surface: #FFFFFF;
   --color-surface-dark: #111111;
+
+  /* Neutral ramp — pure grays (no blue cast) so they sit cleanly against
+     the near-black primary and the green accent.
+     Convention: neutral-* on light surfaces; on dark surfaces (header,
+     footer, hero overlays) use white at /90, /70, /50 opacity steps. */
+  --color-neutral-50: #FAFAFA;
+  --color-neutral-100: #F5F5F5;
+  --color-neutral-200: #E7E7E7;
+  --color-neutral-300: #D4D4D4;
+  --color-neutral-400: #A3A3A3;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #3F3F3F;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+  /* Back-compat aliases (existing markup) */
+  --color-neutral-dark: #1a1a1a;
+  --color-neutral-light: var(--color-neutral-100);
+  --color-neutral-mid: var(--color-neutral-500);
 
   /* Font families */
   --font-heading: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Type scale — tracking tightens as size grows, leading loosens as size
+     shrinks. Hierarchy is weight + size + leading as a set. */
+  --text-display-xl: 3.75rem; /* hero on lg */
+  --text-display-xl--line-height: 1.05;
+  --text-display-xl--letter-spacing: -0.025em;
+  --text-display-xl--font-weight: 800;
+
+  --text-display-sm: 2.25rem; /* hero on mobile */
+  --text-display-sm--line-height: 1.1;
+  --text-display-sm--letter-spacing: -0.02em;
+  --text-display-sm--font-weight: 800;
+
+  --text-display: 3rem; /* hero on sm, page titles */
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.022em;
+  --text-display--font-weight: 800;
+
+  --text-title: 2.25rem; /* section h2 */
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.02em;
+  --text-title--font-weight: 700;
+
+  --text-subtitle: 1.5rem; /* h3, card-group headers */
+  --text-subtitle--line-height: 1.3;
+  --text-subtitle--letter-spacing: -0.01em;
+  --text-subtitle--font-weight: 700;
+
+  --text-heading: 1.125rem; /* card titles */
+  --text-heading--line-height: 1.4;
+  --text-heading--letter-spacing: -0.005em;
+  --text-heading--font-weight: 700;
+
+  --text-body-lg: 1.125rem; /* lede paragraphs */
+  --text-body-lg--line-height: 1.6;
+
+  --text-overline: 0.8125rem; /* uppercase eyebrows */
+  --text-overline--line-height: 1.3;
+  --text-overline--letter-spacing: 0.06em;
+  --text-overline--font-weight: 600;
+
+  /* Radius scale (matches Tailwind defaults — declared to make the rule
+     explicit): buttons/inputs = rounded-lg, cards = rounded-xl. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 0.75rem; /* normalized to xl — don't introduce new steps */
+
+  /* Elevation — soft, layered, context-aware. Resting cards → raised
+     chrome → hover lift → drawer/modal. shadow-2xl is retired (== xl). */
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.07), 0 2px 4px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 12px 24px -6px rgb(0 0 0 / 0.12), 0 4px 8px rgb(0 0 0 / 0.05);
+  --shadow-xl: 0 24px 48px -12px rgb(0 0 0 / 0.18);
+  --shadow-2xl: 0 24px 48px -12px rgb(0 0 0 / 0.18);
+
+  /* Motion — durations: 75–120ms press feedback, 200ms hover/color,
+     300ms drawer/overlay, 500ms+ image crossfades only. */
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1); /* subtle overshoot: hover lifts */
+  --default-transition-duration: 200ms;
+  --default-transition-timing-function: var(--ease-out);
+}
+
+/* ── Materials ──
+   Translucent chrome. Weight encodes hierarchy — never stack two light
+   translucent surfaces. Text on glass: one weight step heavier, ≥ /90
+   opacity. */
+@utility glass-dark {
+  background-color: rgb(23 23 23 / 0.72);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-primary);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@utility glass-light {
+  background-color: rgb(255 255 255 / 0.85);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 
 /* Base styles */
@@ -32,6 +139,13 @@
   body {
     background-color: var(--color-neutral-light);
     color: var(--color-neutral-dark);
+    font-optical-sizing: auto;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
   }
 
   ::selection {
@@ -44,6 +158,23 @@
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
     border-radius: 4px;
+  }
+
+  /* Reduced motion: gentler, non-vestibular equivalents. CSS transitions
+     and keyframes collapse to near-instant; JS-driven motion handles this
+     signal itself (useReducedMotion). */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
