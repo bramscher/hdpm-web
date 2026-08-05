@@ -1,6 +1,8 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import Link from 'next/link'
+import Reveal from '@/components/ui/Reveal'
+import Section from '@/components/ui/Section'
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -8,7 +10,7 @@ function StarRating({ rating }: { rating: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <svg aria-hidden="true"
           key={i}
-          className={`h-5 w-5 ${i < rating ? 'text-accent' : 'text-gray-300'}`}
+          className={`h-5 w-5 ${i < rating ? 'text-accent' : 'text-neutral-300'}`}
           fill="currentColor"
           viewBox="0 0 20 20"
         >
@@ -47,29 +49,26 @@ export default async function TestimonialsSection() {
   if (testimonials.length === 0) return null
 
   return (
-    <section className="bg-white py-24">
-      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
-        {/* Section header */}
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
-            Testimonials
-          </p>
-          <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
-            What Our Clients Say
-          </h2>
-          <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
-            Real reviews from property owners and tenants who trust us with their
-            Central Oregon homes.
-          </p>
-        </div>
+    <Section tone="white">
+      {/* Section header */}
+      <Reveal className="mx-auto max-w-2xl text-center">
+        <p className="font-heading text-overline uppercase text-accent">
+          Testimonials
+        </p>
+        <h2 className="mt-3 font-heading text-title text-neutral-dark">
+          What Our Clients Say
+        </h2>
+        <p className="mt-4 text-body-lg text-neutral-mid">
+          Real reviews from property owners and tenants who trust us with their
+          Central Oregon homes.
+        </p>
+      </Reveal>
 
-        {/* Reviews grid */}
-        <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((testimonial) => (
-            <div
-              key={testimonial.id}
-              className="relative flex flex-col rounded-xl border border-gray-200 bg-neutral-light p-8 shadow-sm"
-            >
+      {/* Reviews grid */}
+      <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {testimonials.map((testimonial, i) => (
+          <Reveal key={testimonial.id} delay={Math.min(i, 3) * 0.07} className="h-full">
+            <div className="relative flex h-full flex-col rounded-xl border border-neutral-200 bg-neutral-light p-8 shadow-sm">
               {/* Decorative quote mark */}
               <div className="absolute -top-3 left-6">
                 <span className="inline-block rounded-lg bg-accent px-3 py-1 font-heading text-2xl font-bold leading-none text-white">
@@ -86,7 +85,7 @@ export default async function TestimonialsSection() {
                 {testimonial.text}
               </blockquote>
 
-              <div className="mt-6 border-t border-gray-200 pt-4">
+              <div className="mt-6 border-t border-neutral-200 pt-4">
                 <p className="font-heading text-sm font-bold text-neutral-dark">
                   {testimonial.author}
                 </p>
@@ -100,22 +99,22 @@ export default async function TestimonialsSection() {
                 )}
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Google review link */}
-        <div className="mt-10 text-center">
-          <Link
-            href="https://g.page/r/highdesertpm/review"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-medium text-neutral-mid transition-colors hover:text-accent"
-          >
-            <GoogleIcon />
-            Leave us a review on Google
-          </Link>
-        </div>
+          </Reveal>
+        ))}
       </div>
-    </section>
+
+      {/* Google review link */}
+      <div className="mt-10 text-center">
+        <Link
+          href="https://g.page/r/highdesertpm/review"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 text-sm font-medium text-neutral-mid transition-colors hover:text-accent"
+        >
+          <GoogleIcon />
+          Leave us a review on Google
+        </Link>
+      </div>
+    </Section>
   )
 }

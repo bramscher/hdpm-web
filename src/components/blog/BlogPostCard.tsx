@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Post, Category, Media } from '@/payload-types'
+import Card from '@/components/ui/Card'
 
 const placeholderGradients = [
   'from-primary/80 to-primary-dark/90',
@@ -60,7 +61,11 @@ export default function BlogPostCard({
   const excerpt = getExcerpt(post.body)
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/20">
+    <Card
+      as="article"
+      interactive
+      className="group relative flex flex-col overflow-hidden"
+    >
       {/* Image / Placeholder */}
       <Link
         href={`/blog/${post.slug}`}
@@ -71,7 +76,7 @@ export default function BlogPostCard({
             src={featuredImage.url}
             alt={featuredImage.alt || post.title}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
@@ -110,7 +115,7 @@ export default function BlogPostCard({
           href={`/blog/${post.slug}`}
           className="transition-colors hover:text-accent"
         >
-          <h3 className="font-heading text-lg font-bold leading-snug text-neutral-dark line-clamp-2">
+          <h3 className="font-heading text-heading text-neutral-dark line-clamp-2">
             {post.title}
           </h3>
         </Link>
@@ -123,7 +128,7 @@ export default function BlogPostCard({
 
         <div className="mt-auto pt-4">
           {/* Meta: date + author */}
-          <div className="flex items-center gap-3 border-t border-gray-100 pt-4 text-xs text-neutral-mid">
+          <div className="flex items-center gap-3 border-t border-neutral-100 pt-4 text-xs text-neutral-mid">
             {post.publishedAt && (
               <time dateTime={post.publishedAt}>
                 {formatDate(post.publishedAt)}
@@ -131,7 +136,7 @@ export default function BlogPostCard({
             )}
             {post.author && (
               <>
-                <span aria-hidden="true" className="text-gray-300">
+                <span aria-hidden="true" className="text-neutral-300">
                   |
                 </span>
                 <span>{post.author}</span>
@@ -146,7 +151,7 @@ export default function BlogPostCard({
           >
             Read More
             <svg aria-hidden="true"
-              className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+              className="h-4 w-4 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -161,6 +166,6 @@ export default function BlogPostCard({
           </Link>
         </div>
       </div>
-    </article>
+    </Card>
   )
 }

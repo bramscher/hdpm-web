@@ -1,9 +1,9 @@
 import Image from 'next/image'
-import Link from 'next/link'
+import Button from '@/components/ui/Button'
 
 export default function CTASection() {
   return (
-    <section className="relative overflow-hidden py-24">
+    <section className="relative overflow-hidden py-16 sm:py-24">
       {/* Background image - Mt. Bachelor */}
       <Image
         src="https://images.unsplash.com/photo-1687451223552-c7afa980bdad?w=1920&q=80"
@@ -11,6 +11,8 @@ export default function CTASection() {
         fill
         className="object-cover"
         sizes="100vw"
+        placeholder="blur"
+        blurDataURL="data:image/webp;base64,UklGRmoAAABXRUJQVlA4IF4AAAAQAgCdASoQAAsAAsBMJYgCdGuAAsk/CxvgAP7uPvx+ckyLTq6CgpmQtZklh0/bt9mscaf3A+FfvveZx/Fe3v+VfTawZ3geOH7ukzfr9ZDCD5eSh2CWfRYvYl/yAAAA"
       />
 
       {/* Lighter overlay - let the mountain show through */}
@@ -20,55 +22,31 @@ export default function CTASection() {
       <div className="absolute -right-32 -top-32 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
       <div className="absolute -bottom-32 -left-32 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
 
-      <div className="relative z-10 mx-auto max-w-4xl px-6 text-center sm:px-8">
-        <h2 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+      <div className="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+        <h2 className="font-heading text-title text-white lg:text-display">
           Ready to Get Started?
         </h2>
 
-        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
+        <p className="mx-auto mt-6 max-w-2xl text-body-lg text-white/80">
           Whether you&apos;re a property owner looking for peace of mind or a renter
           searching for your next Central Oregon home, we&apos;re here to help.
           Schedule a free, no-obligation consultation today.
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link
-            href="/owners"
-            className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
-          >
+          <Button href="/owners" variant="primary" size="lg" elevated withArrow>
             <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />
             </svg>
             I&apos;m a Property Owner
-            <svg aria-hidden="true"
-              className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
+          </Button>
 
-          <Link
-            href="/listings"
-            className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-8 py-4 text-base font-semibold text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
-          >
+          <Button href="/listings" variant="glass" size="lg" withArrow>
             <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
             I&apos;m Looking for a Rental
-            <svg aria-hidden="true"
-              className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
+          </Button>
         </div>
 
         {/* Contact info */}

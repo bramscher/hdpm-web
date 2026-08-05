@@ -1,45 +1,61 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
+import { AnimatePresence, motion } from 'motion/react'
 import { useState, useEffect, useCallback } from 'react'
 import { SERVING_SINCE } from '@/lib/constants'
+import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
 
 const heroImages = [
   {
     // Three Sisters mountain range from Central Oregon — iconic view
     src: 'https://images.unsplash.com/photo-1718927445954-b050d18bc135?w=1920&q=80',
     alt: 'Three Sisters mountain range viewed from Central Oregon',
+    blurDataURL:
+      'data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAAAQAgCdASoQAAwAAsBMJbACdAEO4c5+BkwAAP706qJ/7u/7TDdBhKdeSHmFqnaixuJ9CUAQh2TVUl174UQRnQpekg34GAAA',
   },
   {
     // Couple on paddleboards together on the water
     src: 'https://images.unsplash.com/photo-1633998125621-a28f4447252a?w=1920&q=80',
     alt: 'Couple paddleboarding together on a lake in Central Oregon',
+    blurDataURL:
+      'data:image/webp;base64,UklGRngAAABXRUJQVlA4IGwAAAAwBACdASoQABYAPtFUo0uoJKMhsAgBABoJYwCdMoAC9ely4yRD/GJl5QAA9qfchxHuaMqAC9C2QdM2CVpMlejFE93Q2NVwfjYyPEGqi7veWBmRD+1TKpiktt/bi5L5+VgPrDmgVFaN5cDAAAA=',
   },
   {
     // Deschutes River flowing through lush green landscape
     src: 'https://images.unsplash.com/photo-1565846894054-51426d448b96?w=1920&q=80',
     alt: 'Deschutes River flowing through green landscape near Bend',
+    blurDataURL:
+      'data:image/webp;base64,UklGRj4AAABXRUJQVlA4IDIAAADQAQCdASoQAAwAAsBMJbACdADBaYuxAAD9ErSpdSNct5P4zNP8h8Z/MccUfsBPMEAAAA==',
   },
   {
     // Road into Bend with Cascade mountain backdrop
     src: 'https://images.unsplash.com/photo-1687451225150-e25d21b013cc?w=1920&q=80',
     alt: 'Road leading into Bend with snow-capped Cascade mountains',
+    blurDataURL:
+      'data:image/webp;base64,UklGRmIAAABXRUJQVlA4IFYAAADwAQCdASoQAAsAAsBMJZACdADwf0IfmgAA4f4U9Qeu5xE94W32TxKH27cHPP4QCpBfDLkoOvimhbot5iD7jxViAa6wx8F7YLNHSHbQvDCK6nY3B3pQAA==',
   },
   {
     // Misty morning river — moody Central Oregon vibes
     src: 'https://images.unsplash.com/photo-1676999163461-7d90a767c4fc?w=1920&q=80',
     alt: 'Misty morning on a river in Central Oregon',
+    blurDataURL:
+      'data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAADwAQCdASoQAAsAAsBMJYwCdADcaDuhvEAA/C5Ny+MMl1vi7INy3HjnaIry9LPvD5WeD+pYxc6rJZdsfhwvwAAA',
   },
   {
     // Two people kayaking on a clear lake
     src: 'https://images.unsplash.com/photo-1769197047973-265783a7f1f4?w=1920&q=80',
     alt: 'Two people kayaking together on a clear lake',
+    blurDataURL:
+      'data:image/webp;base64,UklGRlIAAABXRUJQVlA4IEYAAADwAQCdASoQAAsAAsBMJQBWAB6XcUDJwAAA/uoa8Olvd7uKmK6r4CKkwFvveKE76uAZ7sJ202ZqExF/UJ1fgt+jL5XNUAAA',
   },
   {
     // Three Sisters at sunset — golden hour glow
     src: 'https://images.unsplash.com/photo-1646528487362-962045c5eeb9?w=1920&q=80',
     alt: 'Three Sisters mountains at sunset in Central Oregon',
+    blurDataURL:
+      'data:image/webp;base64,UklGRsYAAABXRUJQVlA4ILoAAAAwBACdASoQAB0APtFUo0uoJKMhsAgBABoJZQDImdwLgTK8M8G+pGt6wAAA/vF6XUPFm8EwqvDsX3SjBTbqXSJQPsHLapK4A6AJ8QXSmZpqp0yHqAwVm8yl4Z5HDZr+1przfeDuQbqB/4QKKh4QclFzaLC5tNqqLYlplrkpArNoUm9qU2Uh5wTwb58nvLKuSqA2xyP+Iv+JksAok/Ej/+pB1QLPyQgajWX1veJoAAHXsTtKIw21hfYAAAA=',
   },
 ]
 
@@ -57,59 +73,81 @@ interface HeroContent {
 
 export default function Hero({ content }: { content?: HeroContent | null }) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isTransitioning, setIsTransitioning] = useState(false)
+  // Previous image stays mounted underneath while the new one fades in,
+  // so combined opacity never dips mid-crossfade.
+  const [prevIndex, setPrevIndex] = useState<number | null>(null)
 
-  const advance = useCallback(() => {
-    setIsTransitioning(true)
-    setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % heroImages.length)
-      setIsTransitioning(false)
-    }, 1000) // 1s crossfade
+  const goTo = useCallback((next: number) => {
+    setCurrentIndex((current) => {
+      if (next === current) return current
+      setPrevIndex(current)
+      return next
+    })
   }, [])
 
   useEffect(() => {
-    const timer = setInterval(advance, INTERVAL_MS)
+    // Auto-rotation is vestibular motion — don't autoplay for users who
+    // prefer reduced motion (manual dot navigation still works).
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const timer = setInterval(
+      () => goTo((currentIndex + 1) % heroImages.length),
+      INTERVAL_MS,
+    )
     return () => clearInterval(timer)
-  }, [advance])
+  }, [currentIndex, goTo])
+
+  const current = heroImages[currentIndex]
+  const prev = prevIndex === null ? null : heroImages[prevIndex]
 
   return (
-    <section className="relative min-h-[85vh] flex items-center overflow-hidden">
-      {/* Rotating background images with crossfade */}
-      {heroImages.map((img, i) => (
+    <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-primary">
+      {/* Rotating background: outgoing image below, incoming fades in above */}
+      {prev && (
         <Image
-          key={img.src}
-          src={img.src}
-          alt={img.alt}
+          key={`prev-${prev.src}`}
+          src={prev.src}
+          alt=""
           fill
-          priority={i === 0}
-          className={`object-cover transition-opacity duration-[2000ms] ease-in-out ${
-            i === currentIndex && !isTransitioning ? 'opacity-100' : 'opacity-0'
-          }`}
+          className="object-cover"
           sizes="100vw"
+          placeholder="blur"
+          blurDataURL={prev.blurDataURL}
         />
-      ))}
-
-      {/* Ken Burns slow zoom effect on active image */}
-      <style jsx>{`
-        @keyframes kenburns {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.08); }
-        }
-      `}</style>
+      )}
+      <AnimatePresence>
+        <motion.div
+          key={current.src}
+          className="absolute inset-0"
+          initial={{ opacity: prevIndex === null ? 1 : 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, ease: 'easeInOut' }}
+          onAnimationComplete={() => setPrevIndex(null)}
+        >
+          <Image
+            src={current.src}
+            alt={current.alt}
+            fill
+            priority={currentIndex === 0}
+            className="object-cover"
+            sizes="100vw"
+            placeholder="blur"
+            blurDataURL={current.blurDataURL}
+          />
+        </motion.div>
+      </AnimatePresence>
 
       {/* Overlay - just enough for text readability, lets the image shine */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
 
       {/* Content */}
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-24 sm:px-8 lg:px-12">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
-          {/* Badge */}
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium tracking-wide text-white/90 backdrop-blur-sm">
-            <span className="inline-block h-2 w-2 rounded-full bg-accent-light animate-pulse" />
+          <Badge className="mb-6 tracking-wide">
+            <span className="inline-block h-2 w-2 rounded-full bg-accent-light" />
             {content?.heroBadge ?? SERVING_SINCE}
-          </div>
+          </Badge>
 
-          <h1 className="font-heading text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="font-heading text-display-sm text-white sm:text-display lg:text-display-xl">
             {content?.heroHeading ?? (
               <>
                 Professional Property{' '}
@@ -122,43 +160,30 @@ export default function Hero({ content }: { content?: HeroContent | null }) {
             )}
           </h1>
 
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
+          <p className="mt-6 max-w-2xl text-body-lg text-white/80 sm:text-xl">
             {content?.heroSubheading ??
-              'Trusted by property owners across Bend, Redmond, Sisters, and beyond. We protect your investment and find exceptional tenants \u2014 so you can enjoy the Central Oregon lifestyle.'}
+              'Trusted by property owners across Bend, Redmond, Sisters, and beyond. We protect your investment and find exceptional tenants — so you can enjoy the Central Oregon lifestyle.'}
           </p>
 
           {/* CTA Buttons */}
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <Link
+            <Button
               href={content?.heroCTA1Link ?? '/owners'}
-              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-black/20 transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
+              variant="primary"
+              size="lg"
+              elevated
+              withArrow
             >
               {content?.heroCTA1Label ?? 'For Property Owners'}
-              <svg aria-hidden="true"
-                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-            <Link
+            </Button>
+            <Button
               href={content?.heroCTA2Link ?? '/listings'}
-              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-8 py-4 text-base font-semibold text-white border border-white/20 shadow-lg shadow-black/20 backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
+              variant="glass"
+              size="lg"
+              withArrow
             >
               {content?.heroCTA2Label ?? 'Find a Rental Home'}
-              <svg aria-hidden="true"
-                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+            </Button>
           </div>
 
           {/* Trust indicators */}
@@ -184,24 +209,23 @@ export default function Hero({ content }: { content?: HeroContent | null }) {
           </div>
 
           {/* Image dots indicator */}
-          <div className="mt-8 flex gap-2">
-            {heroImages.map((_, i) => (
+          <div className="mt-6 flex">
+            {heroImages.map((img, i) => (
               <button
                 key={i}
-                onClick={() => {
-                  setIsTransitioning(true)
-                  setTimeout(() => {
-                    setCurrentIndex(i)
-                    setIsTransitioning(false)
-                  }, 500)
-                }}
-                className={`h-1.5 rounded-full transition-all duration-500 ${
-                  i === currentIndex
-                    ? 'w-8 bg-accent'
-                    : 'w-1.5 bg-white/40 hover:bg-white/60'
-                }`}
-                aria-label={`Show image ${i + 1}`}
-              />
+                onClick={() => goTo(i)}
+                className="group/dot flex min-h-11 items-center p-2"
+                aria-label={`Show image ${i + 1}: ${img.alt}`}
+                aria-current={i === currentIndex}
+              >
+                <span
+                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                    i === currentIndex
+                      ? 'w-8 bg-accent'
+                      : 'w-1.5 bg-white/40 group-hover/dot:bg-white/60'
+                  }`}
+                />
+              </button>
             ))}
           </div>
         </div>

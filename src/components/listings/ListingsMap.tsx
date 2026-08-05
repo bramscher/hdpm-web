@@ -102,7 +102,7 @@ export default function ListingsMap() {
     <div className="relative">
       <div
         ref={containerRef}
-        className="h-[560px] w-full overflow-hidden rounded-2xl border border-gray-200 shadow-sm"
+        className="h-[560px] w-full overflow-hidden rounded-xl border border-neutral-200 shadow-sm"
       />
       {state === 'loading' && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">

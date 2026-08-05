@@ -2,7 +2,12 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { motion, useReducedMotion } from 'motion/react'
 import { useState, useEffect } from 'react'
+import Button from '@/components/ui/Button'
+import { springGentle } from '@/lib/motion'
+import { cn } from '@/lib/cn'
 
 const navLinks = [
   { href: '/owners', label: 'For Owners' },
@@ -16,6 +21,11 @@ const navLinks = [
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const pathname = usePathname()
+  const reduceMotion = useReducedMotion()
+
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
@@ -33,9 +43,10 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full bg-primary text-white transition-all duration-300 ${
-        scrolled ? 'shadow-md' : ''
-      }`}
+      className={cn(
+        'sticky top-0 z-50 w-full glass-dark text-white transition-all duration-300',
+        scrolled && 'border-b border-white/10 shadow-md',
+      )}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Logo */}
@@ -55,30 +66,36 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-white/90 transition-colors hover:text-accent"
+              aria-current={isActive(link.href) ? 'page' : undefined}
+              className={cn(
+                'relative rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-accent active:bg-white/10',
+                isActive(link.href) ? 'text-accent' : 'text-white/90',
+              )}
             >
               {link.label}
+              {isActive(link.href) && (
+                <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-accent" />
+              )}
             </Link>
           ))}
-          <Link
+          <Button
             href="/owner-portal"
-            className="ml-3 rounded-lg border border-white/30 px-4 py-2 text-sm font-semibold text-white/90 transition-all hover:border-accent hover:text-accent"
+            variant="outline-light"
+            size="sm"
+            className="ml-3"
           >
             Owner Login
-          </Link>
-          <Link
-            href="/owners#get-started"
-            className="ml-3 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-accent-dark hover:shadow-md"
-          >
+          </Button>
+          <Button href="/owners#get-started" variant="primary" size="md" className="ml-3">
             Free Rental Analysis
-          </Link>
+          </Button>
         </nav>
 
         {/* Mobile Menu Button */}
         <button
           type="button"
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="relative z-50 flex h-10 w-10 items-center justify-center rounded-lg text-white transition-colors hover:bg-white/10 lg:hidden"
+          className="relative z-50 flex h-10 w-10 items-center justify-center rounded-lg text-white transition-colors hover:bg-white/10 active:bg-white/20 lg:hidden"
           aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={mobileOpen}
         >
@@ -111,11 +128,20 @@ export default function Header() {
         aria-hidden="true"
       />
 
-      {/* Mobile Slide-out Menu */}
-      <nav
-        className={`fixed top-0 right-0 z-40 flex h-full w-[280px] max-w-[80vw] flex-col bg-primary shadow-2xl transition-transform duration-300 ease-out lg:hidden ${
-          mobileOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+      {/* Mobile Slide-out Menu — spring slide; opacity-only under reduced motion */}
+      <motion.nav
+        initial={false}
+        animate={
+          reduceMotion
+            ? { x: 0, opacity: mobileOpen ? 1 : 0 }
+            : { x: mobileOpen ? 0 : '100%', opacity: 1 }
+        }
+        transition={reduceMotion ? { duration: 0.2 } : springGentle}
+        className={cn(
+          'fixed top-0 right-0 z-40 flex h-full w-[280px] max-w-[80vw] translate-x-full flex-col bg-primary shadow-xl lg:hidden',
+          !mobileOpen && 'pointer-events-none',
+        )}
+        aria-hidden={!mobileOpen}
       >
         <div className="flex-1 overflow-y-auto px-6 pt-20 pb-8">
           <div className="flex flex-col gap-1">
@@ -124,27 +150,35 @@ export default function Header() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="rounded-lg px-3 py-3 text-base font-medium text-white/90 transition-colors hover:text-accent"
+                aria-current={isActive(link.href) ? 'page' : undefined}
+                className={cn(
+                  'rounded-lg px-3 py-3 text-base font-medium transition-colors hover:text-accent active:bg-white/10',
+                  isActive(link.href) ? 'text-accent' : 'text-white/90',
+                )}
               >
                 {link.label}
               </Link>
             ))}
           </div>
           <div className="mt-6 space-y-3 border-t border-white/10 pt-6">
-            <Link
+            <Button
               href="/owners#get-started"
+              variant="primary"
+              size="md"
+              className="w-full"
               onClick={() => setMobileOpen(false)}
-              className="block rounded-lg bg-accent px-5 py-3 text-center text-sm font-semibold text-white shadow-sm transition-all hover:bg-accent-dark"
             >
               Free Rental Analysis
-            </Link>
-            <Link
+            </Button>
+            <Button
               href="/owner-portal"
+              variant="outline-light"
+              size="md"
+              className="w-full"
               onClick={() => setMobileOpen(false)}
-              className="block rounded-lg border border-white/30 px-5 py-3 text-center text-sm font-semibold text-white/90 transition-all hover:border-accent hover:text-accent"
             >
               Owner Login
-            </Link>
+            </Button>
           </div>
           <div className="mt-8 space-y-3 text-sm text-white/60">
             <a
@@ -163,7 +197,7 @@ export default function Header() {
             </a>
           </div>
         </div>
-      </nav>
+      </motion.nav>
     </header>
   )
 }
