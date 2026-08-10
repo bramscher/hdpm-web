@@ -206,6 +206,13 @@ export default async function ContactPage() {
                         Ask for Leesa for leasing questions — availability, applications,
                         and tours.
                       </p>
+                      <a
+                        href="tel:5414066409"
+                        className="mt-1 inline-block text-sm font-semibold text-accent transition-colors hover:text-accent-dark"
+                        aria-label="Call Leesa at 541-406-6409"
+                      >
+                        541-406-6409
+                      </a>
                     </div>
                   </div>
 
@@ -227,6 +234,13 @@ export default async function ContactPage() {
                       <p className="mt-0.5 text-sm text-neutral-mid">
                         Sally answers general questions anytime the office is unavailable.
                       </p>
+                      <a
+                        href="tel:5415480383"
+                        className="mt-1 inline-block text-sm font-semibold text-accent transition-colors hover:text-accent-dark"
+                        aria-label="Call Sally at 541-548-0383"
+                      >
+                        541-548-0383
+                      </a>
                     </div>
                   </div>
 
@@ -252,6 +266,13 @@ export default async function ContactPage() {
                         Max is available around the clock for maintenance requests and
                         emergencies.
                       </p>
+                      <a
+                        href="tel:5416002592"
+                        className="mt-1 inline-block text-sm font-semibold text-accent transition-colors hover:text-accent-dark"
+                        aria-label="Call Max at 541-600-2592"
+                      >
+                        541-600-2592
+                      </a>
                     </div>
                   </div>
                 </div>

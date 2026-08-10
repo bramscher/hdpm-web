@@ -89,6 +89,7 @@ const aiAgents = [
     role: 'Leasing',
     image: '/agents/leesa.png',
     availability: 'After hours',
+    phone: '541-406-6409',
     description:
       'Ask for Leesa for anything leasing — current availability, application questions, and scheduling tours — whenever our leasing team is away.',
   },
@@ -97,6 +98,7 @@ const aiAgents = [
     role: 'General Questions',
     image: '/agents/sally.png',
     availability: 'After hours',
+    phone: '541-548-0383',
     description:
       'Sally is a friendly first stop for general questions about our services, your account, and how we work — perfect for when the office is closed or everyone is on another call.',
   },
@@ -105,6 +107,7 @@ const aiAgents = [
     role: 'Maintenance',
     image: '/agents/max.png',
     availability: '24/7',
+    phone: '541-600-2592',
     description:
       'Max is here around the clock for maintenance requests and emergencies, so urgent issues never have to wait until morning.',
   },
@@ -412,6 +415,20 @@ export default async function AboutPage() {
                 <p className="mt-3 text-sm leading-relaxed text-neutral-mid">
                   {agent.description}
                 </p>
+                <a
+                  href={`tel:${agent.phone.replace(/\D/g, '')}`}
+                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-4 py-2 text-sm font-semibold text-accent transition-colors hover:border-accent hover:bg-accent hover:text-white"
+                  aria-label={`Call ${agent.name} at ${agent.phone}`}
+                >
+                  <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
+                    />
+                  </svg>
+                  {agent.phone}
+                </a>
               </div>
             ))}
           </div>
