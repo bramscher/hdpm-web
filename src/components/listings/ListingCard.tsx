@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { AppFolioListing } from '@/lib/appfolio'
-import { isListingPetFriendly, formatAvailableDate } from '@/lib/listing-utils'
+import { isListingPetFriendly, formatAvailableDate, extractRentZapUrl } from '@/lib/listing-utils'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import CallLeesa from '@/components/CallLeesa'
@@ -36,6 +36,7 @@ export default function ListingCard({
   const hasPhoto = listing.UnitPhotos.length > 0 && listing.UnitPhotos[0].Url.length > 0
   const gradientClass = placeholderGradients[index % placeholderGradients.length]
   const petFriendly = isPetFriendly(listing)
+  const { rentZapUrl } = extractRentZapUrl(listing.MarketingDescription)
 
   return (
     <Card
@@ -125,10 +126,10 @@ export default function ListingCard({
           {formatAvailableDate(listing.AvailableOn)}
         </p>
 
-        {/* Apply button + Call Leesa */}
+        {/* Apply / Flier / Call Leesa */}
         <div className="mt-4 flex flex-col gap-2 pt-1">
           <Button
-            href={listing.ApplicationURL}
+            href={rentZapUrl ?? listing.ApplicationURL}
             target="_blank"
             rel="noopener noreferrer"
             variant="primary"
@@ -140,7 +141,19 @@ export default function ListingCard({
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
             </svg>
           </Button>
-          <CallLeesa compact className="w-full" />
+          <div className="flex gap-2">
+            {rentZapUrl && (
+              <a
+                href={listing.ApplicationURL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-1 items-center justify-center rounded-lg border border-neutral-200 bg-white px-3 py-2 font-body text-sm font-semibold text-neutral-dark transition-colors hover:border-accent hover:text-accent"
+              >
+                View Flier
+              </a>
+            )}
+            <CallLeesa compact className={rentZapUrl ? 'flex-1' : 'w-full'} />
+          </div>
         </div>
       </div>
     </Card>

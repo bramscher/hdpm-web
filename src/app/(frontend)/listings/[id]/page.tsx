@@ -4,7 +4,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getCachedListingById } from '@/lib/appfolio'
 import { listingSchema, breadcrumbSchema } from '@/lib/schema'
-import { isDogFriendlyPolicy, formatAvailableDate } from '@/lib/listing-utils'
+import { isDogFriendlyPolicy, formatAvailableDate, extractRentZapUrl } from '@/lib/listing-utils'
 import ShareListing from '@/components/listings/ShareListing'
 import PhotoGallery from '@/components/listings/PhotoGallery'
 import CallLeesa from '@/components/CallLeesa'
@@ -29,7 +29,8 @@ export async function generateMetadata({
     listing.Address1 && !listing.MarketingTitle.includes(listing.Address1)
       ? `${listing.MarketingTitle} — ${listing.Address1}`
       : listing.MarketingTitle
-  const description = `${listing.Bedrooms} bed / ${listing.Bathrooms} bath rental in ${listing.City}, OR — $${listing.AdvertisedRent.toLocaleString()}/mo. ${listing.MarketingDescription.slice(0, 120)}...`
+  const { cleanedDescription } = extractRentZapUrl(listing.MarketingDescription)
+  const description = `${listing.Bedrooms} bed / ${listing.Bathrooms} bath rental in ${listing.City}, OR — $${listing.AdvertisedRent.toLocaleString()}/mo. ${cleanedDescription.slice(0, 120)}...`
 
   const photo = listing.UnitPhotos[0]?.Url
 
@@ -69,8 +70,12 @@ export default async function ListingDetailPage({
 
   const availableDate = formatAvailableDate(listing.AvailableOn)
 
+  // The unique RentZap application link lives in the marketing description;
+  // pull it out for the Apply button and hide it from the displayed copy.
+  const { rentZapUrl, cleanedDescription } = extractRentZapUrl(listing.MarketingDescription)
+
   const jsonLd = [
-    listingSchema(listing),
+    listingSchema({ ...listing, MarketingDescription: cleanedDescription }),
     breadcrumbSchema([
       { name: 'Home', url: '/' },
       { name: 'Listings', url: '/listings' },
@@ -200,7 +205,7 @@ export default async function ListingDetailPage({
                   About This Property
                 </h2>
                 <p className="mt-3 font-body leading-relaxed text-neutral-mid whitespace-pre-line">
-                  {listing.MarketingDescription}
+                  {cleanedDescription}
                 </p>
               </section>
 
@@ -335,7 +340,7 @@ export default async function ListingDetailPage({
                 </div>
 
                 <Button
-                  href={listing.ApplicationURL}
+                  href={rentZapUrl ?? listing.ApplicationURL}
                   target="_blank"
                   rel="noopener noreferrer"
                   variant="primary"
@@ -345,10 +350,25 @@ export default async function ListingDetailPage({
                   Apply Now
                 </Button>
 
+                {rentZapUrl && (
+                  <Button
+                    href={listing.ApplicationURL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="outline"
+                    size="lg"
+                    className="mt-3 w-full"
+                  >
+                    View Flier
+                  </Button>
+                )}
+
                 <CallLeesa className="mt-3 w-full justify-center" />
 
                 <p className="mt-3 text-center font-body text-xs text-neutral-mid">
-                  Application handled securely through AppFolio
+                  {rentZapUrl
+                    ? 'Apply online through RentZap · flier hosted on AppFolio'
+                    : 'Application handled securely through AppFolio'}
                 </p>
               </div>
             </div>

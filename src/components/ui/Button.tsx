@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 
-type Variant = 'primary' | 'glass' | 'outline-light'
+type Variant = 'primary' | 'glass' | 'outline-light' | 'outline'
 type Size = 'sm' | 'md' | 'lg'
 
 const baseClasses =
@@ -14,6 +14,8 @@ const variantClasses: Record<Variant, string> = {
     'border border-white/20 bg-white/10 text-white shadow-lg shadow-black/20 backdrop-blur-sm hover:bg-white/20 hover:shadow-xl',
   'outline-light':
     'border border-white/30 text-white/90 hover:border-accent hover:text-accent',
+  outline:
+    'border border-neutral-200 bg-white text-neutral-dark hover:border-accent hover:text-accent',
 }
 
 /* Deeper shadows for buttons sitting on imagery (hero, CTA banners). */
