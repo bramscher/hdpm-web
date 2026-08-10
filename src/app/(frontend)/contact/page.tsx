@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 import ContactForm from '@/components/forms/ContactForm'
@@ -169,6 +170,87 @@ export default async function ContactPage() {
                       <p className="text-sm font-semibold text-neutral-dark">Office Hours</p>
                       <p className="mt-0.5 text-sm text-neutral-mid">
                         {c?.officeHours ?? 'Monday \u2013 Friday\n9:00 AM \u2013 4:00 PM'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* After-Hours AI Support */}
+              <div className="rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
+                <h2 className="font-heading text-heading text-neutral-dark">
+                  After Hours
+                </h2>
+                <p className="mt-2 text-sm text-neutral-mid">
+                  When the office is closed or the team is on another call, our AI
+                  agents are here to help:
+                </p>
+
+                <div className="mt-6 space-y-5">
+                  {/* Leesa */}
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                      <Image
+                        src="/agents/leesa.png"
+                        alt="Leesa, AI leasing agent"
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover object-top"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-neutral-dark">
+                        Leesa &mdash; Leasing
+                      </p>
+                      <p className="mt-0.5 text-sm text-neutral-mid">
+                        Ask for Leesa for leasing questions — availability, applications,
+                        and tours.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Sally */}
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                      <Image
+                        src="/agents/sally.png"
+                        alt="Sally, AI general-questions agent"
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover object-top"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-neutral-dark">
+                        Sally &mdash; General Questions
+                      </p>
+                      <p className="mt-0.5 text-sm text-neutral-mid">
+                        Sally answers general questions anytime the office is unavailable.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Max */}
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                      <Image
+                        src="/agents/max.png"
+                        alt="Max, AI maintenance agent"
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover object-top"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-neutral-dark">
+                        Max &mdash; Maintenance{' '}
+                        <span className="ml-1 rounded-full bg-accent px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
+                          24/7
+                        </span>
+                      </p>
+                      <p className="mt-0.5 text-sm text-neutral-mid">
+                        Max is available around the clock for maintenance requests and
+                        emergencies.
                       </p>
                     </div>
                   </div>

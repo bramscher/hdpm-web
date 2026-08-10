@@ -83,6 +83,33 @@ const defaultIcon = (
 
 const serviceAreas = ['Bend', 'Redmond', 'Sisters', 'Prineville', 'Culver', 'Metolius', 'Madras']
 
+const aiAgents = [
+  {
+    name: 'Leesa',
+    role: 'Leasing',
+    image: '/agents/leesa.png',
+    availability: 'After hours',
+    description:
+      'Ask for Leesa for anything leasing — current availability, application questions, and scheduling tours — whenever our leasing team is away.',
+  },
+  {
+    name: 'Sally',
+    role: 'General Questions',
+    image: '/agents/sally.png',
+    availability: 'After hours',
+    description:
+      'Sally is a friendly first stop for general questions about our services, your account, and how we work — perfect for when the office is closed or everyone is on another call.',
+  },
+  {
+    name: 'Max',
+    role: 'Maintenance',
+    image: '/agents/max.png',
+    availability: '24/7',
+    description:
+      'Max is here around the clock for maintenance requests and emergencies, so urgent issues never have to wait until morning.',
+  },
+]
+
 export default async function AboutPage() {
   const page = await getPageBySlug('about')
   const c = page?.aboutContent
@@ -240,12 +267,13 @@ export default async function AboutPage() {
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               {serviceAreas.map((area) => (
-                <span
+                <Link
                   key={area}
-                  className="rounded-full border border-accent/20 bg-accent/5 px-5 py-2 text-sm font-semibold text-accent"
+                  href={`/market-areas/${area.toLowerCase()}`}
+                  className="rounded-full border border-accent/20 bg-accent/5 px-5 py-2 text-sm font-semibold text-accent transition-colors hover:border-accent hover:bg-accent hover:text-white"
                 >
                   {area}, OR
-                </span>
+                </Link>
               ))}
             </div>
 
@@ -334,6 +362,73 @@ export default async function AboutPage() {
               Team profiles coming soon.
             </p>
           )}
+        </div>
+      </section>
+
+      {/* AI Agents */}
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="font-heading text-overline uppercase text-accent">
+              Always Here to Help
+            </p>
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
+              Meet Our AI Agents
+            </h2>
+            <p className="mt-4 text-body-lg text-neutral-mid">
+              When the office is closed or our team is tied up on another call, our AI
+              agents step in — so you always get answers, day or night.
+            </p>
+          </div>
+
+          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {aiAgents.map((agent) => (
+              <div
+                key={agent.name}
+                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              >
+                <div className="relative aspect-[4/5] overflow-hidden bg-neutral-100">
+                  <Image
+                    src={agent.image}
+                    alt={`${agent.name}, High Desert Property Management's AI ${agent.role.toLowerCase()} agent`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
+                  />
+                  <span className="absolute left-4 top-4 rounded-full bg-neutral-dark/70 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white backdrop-blur-sm">
+                    AI Agent
+                  </span>
+                  <span
+                    className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow ${
+                      agent.availability === '24/7'
+                        ? 'bg-accent'
+                        : 'bg-primary/80 backdrop-blur-sm'
+                    }`}
+                  >
+                    {agent.availability}
+                  </span>
+                </div>
+                <div className="flex flex-1 flex-col p-6">
+                  <h3 className="font-heading text-heading text-neutral-dark">
+                    {agent.name}
+                  </h3>
+                  <p className="text-sm font-semibold text-accent">{agent.role}</p>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-neutral-mid">
+                    {agent.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-neutral-mid">
+            After office hours, ask for{' '}
+            <span className="font-semibold text-neutral-dark">Leesa</span> for leasing,{' '}
+            <span className="font-semibold text-neutral-dark">Sally</span> for general
+            questions, and{' '}
+            <span className="font-semibold text-neutral-dark">Max</span> anytime —
+            he&rsquo;s available 24/7 for maintenance.
+          </p>
         </div>
       </section>
 
