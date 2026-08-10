@@ -385,38 +385,33 @@ export default async function AboutPage() {
             {aiAgents.map((agent) => (
               <div
                 key={agent.name}
-                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                className="rounded-xl border border-neutral-200 bg-white p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
               >
-                <div className="relative aspect-[4/5] overflow-hidden bg-neutral-100">
+                <div className="mx-auto h-28 w-28 overflow-hidden rounded-full">
                   <Image
                     src={agent.image}
                     alt={`${agent.name}, High Desert Property Management's AI ${agent.role.toLowerCase()} agent`}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover object-top transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
+                    width={112}
+                    height={112}
+                    className="h-full w-full object-cover object-top"
                   />
-                  <span className="absolute left-4 top-4 rounded-full bg-neutral-dark/70 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-                    AI Agent
-                  </span>
-                  <span
-                    className={`absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide text-white shadow ${
-                      agent.availability === '24/7'
-                        ? 'bg-accent'
-                        : 'bg-primary/80 backdrop-blur-sm'
-                    }`}
-                  >
-                    {agent.availability}
-                  </span>
                 </div>
-                <div className="flex flex-1 flex-col p-6">
-                  <h3 className="font-heading text-heading text-neutral-dark">
-                    {agent.name}
-                  </h3>
-                  <p className="text-sm font-semibold text-accent">{agent.role}</p>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-neutral-mid">
-                    {agent.description}
-                  </p>
-                </div>
+                <h3 className="mt-4 font-heading text-heading text-neutral-dark">
+                  {agent.name}
+                </h3>
+                <p className="text-sm font-medium text-accent">{agent.role}</p>
+                <span
+                  className={`mt-2 inline-block rounded-full px-3 py-0.5 text-xs font-semibold uppercase tracking-wide ${
+                    agent.availability === '24/7'
+                      ? 'bg-accent text-white'
+                      : 'bg-accent/10 text-accent'
+                  }`}
+                >
+                  {agent.availability}
+                </span>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-mid">
+                  {agent.description}
+                </p>
               </div>
             ))}
           </div>
