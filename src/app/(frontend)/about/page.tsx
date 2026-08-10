@@ -7,7 +7,7 @@ import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 import { getPageBySlug } from '@/lib/page-content'
 import { FOUNDED_YEAR, SERVING_SINCE } from '@/lib/constants'
-import type { Media as MediaType } from '@/payload-types'
+import type { Media as MediaType, TeamMember } from '@/payload-types'
 
 // Rendered on demand: this page reads CMS content from Payload/Postgres, and
 // the build must not depend on the database being reachable and migrated
@@ -87,12 +87,20 @@ export default async function AboutPage() {
   const page = await getPageBySlug('about')
   const c = page?.aboutContent
 
-  const payload = await getPayload({ config })
-  const { docs: teamMembers } = await payload.find({
-    collection: 'team-members',
-    sort: 'order',
-    limit: 20,
-  })
+  // Guarded so the page still renders (without the team grid) when the
+  // database is unavailable — e.g. a Preview deployment on an unmigrated DB.
+  let teamMembers: TeamMember[] = []
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({
+      collection: 'team-members',
+      sort: 'order',
+      limit: 20,
+    })
+    teamMembers = res.docs
+  } catch {
+    teamMembers = []
+  }
   const breadcrumbs = breadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'About', url: '/about' },

@@ -25,14 +25,22 @@ function getAreaImage(area: MarketArea): string {
 }
 
 export default async function MarketAreasPage() {
-  const payload = await getPayload({ config })
-  const { docs: areas } = await payload.find({
-    collection: 'market-areas',
-    where: { status: { equals: 'published' } },
-    limit: 100,
-    sort: '-population',
-    depth: 1,
-  })
+  // Guarded so the page still renders when the database is unavailable —
+  // e.g. a Preview deployment on an unmigrated DB.
+  let areas: MarketArea[] = []
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({
+      collection: 'market-areas',
+      where: { status: { equals: 'published' } },
+      limit: 100,
+      sort: '-population',
+      depth: 1,
+    })
+    areas = res.docs
+  } catch {
+    areas = []
+  }
 
   const jsonLd = [
     breadcrumbSchema([

@@ -5,7 +5,7 @@ import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 import { getPageBySlug } from '@/lib/page-content'
-import type { Media as MediaType } from '@/payload-types'
+import type { Media as MediaType, Testimonial } from '@/payload-types'
 import Button from '@/components/ui/Button'
 import OwnerRentalAnalysisForm from '@/components/forms/OwnerRentalAnalysisForm'
 
@@ -192,14 +192,22 @@ export default async function OwnersPage() {
         { label: 'Maintenance Coordination', note: 'Included with full-service' },
       ]
 
-  const payload = await getPayload({ config })
-  const { docs: ownerTestimonials } = await payload.find({
-    collection: 'testimonials',
-    where: { approved: { equals: true }, rating: { equals: 5 } },
-    sort: '-publishedAt',
-    limit: 3,
-    depth: 0,
-  })
+  // Guarded so the page still renders (without testimonials) when the
+  // database is unavailable — e.g. a Preview deployment on an unmigrated DB.
+  let ownerTestimonials: Testimonial[] = []
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({
+      collection: 'testimonials',
+      where: { approved: { equals: true }, rating: { equals: 5 } },
+      sort: '-publishedAt',
+      limit: 3,
+      depth: 0,
+    })
+    ownerTestimonials = res.docs
+  } catch {
+    ownerTestimonials = []
+  }
 
   const jsonLd = breadcrumbSchema([
     { name: 'Home', url: '/' },
