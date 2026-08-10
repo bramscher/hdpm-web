@@ -1,12 +1,12 @@
 import { permanentRedirect } from 'next/navigation'
 import { SITE_URL } from '@/lib/site-url'
-import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getCachedListingById } from '@/lib/appfolio'
 import { listingSchema, breadcrumbSchema } from '@/lib/schema'
 import { isDogFriendlyPolicy, formatAvailableDate } from '@/lib/listing-utils'
 import ShareListing from '@/components/listings/ShareListing'
+import PhotoGallery from '@/components/listings/PhotoGallery'
 
 // Use dynamic rendering — listing data from AppFolio v0 API is too large to SSG all at build time
 export const dynamic = 'force-dynamic'
@@ -117,48 +117,7 @@ export default async function ListingDetailPage({
         </div>
 
         {/* Photo gallery */}
-        <section className="bg-primary/5">
-          <div className="mx-auto grid max-w-7xl gap-2 p-2 sm:grid-cols-4 sm:grid-rows-2 sm:p-4">
-            {/* Main image */}
-            <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 via-primary/10 to-accent/10 sm:col-span-2 sm:row-span-2">
-              {listing.UnitPhotos[0]?.Url ? (
-                <Image
-                  src={listing.UnitPhotos[0].Url}
-                  alt={listing.UnitPhotos[0].Caption || `${listing.Address1} - Main photo`}
-                  fill
-                  sizes="(max-width: 640px) 100vw, 50vw"
-                  priority
-                  className="object-cover"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <PhotoPlaceholder caption="No photos available" />
-                </div>
-              )}
-            </div>
-            {/* Smaller images */}
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="relative hidden aspect-[16/10] overflow-hidden rounded-lg bg-gradient-to-br from-gray-200 to-gray-100 sm:block"
-              >
-                {listing.UnitPhotos[i]?.Url ? (
-                  <Image
-                    src={listing.UnitPhotos[i].Url}
-                    alt={listing.UnitPhotos[i].Caption || `${listing.Address1} - Photo ${i + 1}`}
-                    fill
-                    sizes="25vw"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-neutral-mid/40">
-                    <CameraIcon />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
+        <PhotoGallery photos={listing.UnitPhotos} address={listing.Address1} />
 
         {/* Content */}
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -457,37 +416,5 @@ function StatCard({
       </p>
       <p className="mt-1 font-body text-xs text-neutral-mid">{label}</p>
     </div>
-  )
-}
-
-function PhotoPlaceholder({ caption }: { caption?: string }) {
-  return (
-    <div className="flex flex-col items-center gap-2 text-neutral-mid/60">
-      <CameraIcon />
-      {caption && <span className="text-xs">{caption}</span>}
-    </div>
-  )
-}
-
-function CameraIcon() {
-  return (
-    <svg aria-hidden="true"
-      className="h-10 w-10"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={1.5}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
-      />
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"
-      />
-    </svg>
   )
 }
