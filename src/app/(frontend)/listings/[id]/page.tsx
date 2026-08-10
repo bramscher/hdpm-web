@@ -7,6 +7,7 @@ import { listingSchema, breadcrumbSchema } from '@/lib/schema'
 import { isDogFriendlyPolicy, formatAvailableDate } from '@/lib/listing-utils'
 import ShareListing from '@/components/listings/ShareListing'
 import PhotoGallery from '@/components/listings/PhotoGallery'
+import CallLeesa from '@/components/CallLeesa'
 import Button from '@/components/ui/Button'
 
 // Use dynamic rendering — listing data from AppFolio v0 API is too large to SSG all at build time
@@ -343,6 +344,8 @@ export default async function ListingDetailPage({
                 >
                   Apply Now
                 </Button>
+
+                <CallLeesa className="mt-3 w-full justify-center" />
 
                 <p className="mt-3 text-center font-body text-xs text-neutral-mid">
                   Application handled securely through AppFolio
