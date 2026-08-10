@@ -79,10 +79,10 @@ export default async function BlogPage({
       {/* Hero */}
       <section className="bg-primary px-4 pb-12 pt-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl text-center">
-          <h1 className="font-heading text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+          <h1 className="font-heading text-display-sm sm:text-display text-white">
             HDPM Blog
           </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-lg text-white/80">
+          <p className="mx-auto mt-3 max-w-2xl text-body-lg text-white/80">
             Insights for Central Oregon property owners and tenants
           </p>
         </div>
@@ -91,13 +91,13 @@ export default async function BlogPage({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Category filter pills */}
         <div className="-mt-5 mb-8">
-          <div className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-4 shadow-sm border border-gray-200">
+          <div className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-4 shadow-sm border border-neutral-200">
             <Link
               href="/blog"
               className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 !categorySlug
                   ? 'bg-accent text-white'
-                  : 'bg-gray-100 text-neutral-mid hover:bg-primary/10 hover:text-primary'
+                  : 'bg-neutral-100 text-neutral-mid hover:bg-primary/10 hover:text-primary'
               }`}
             >
               All
@@ -109,7 +109,7 @@ export default async function BlogPage({
                 className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   categorySlug === cat.slug
                     ? 'bg-accent text-white'
-                    : 'bg-gray-100 text-neutral-mid hover:bg-primary/10 hover:text-primary'
+                    : 'bg-neutral-100 text-neutral-mid hover:bg-primary/10 hover:text-primary'
                 }`}
               >
                 {cat.name}
@@ -144,7 +144,7 @@ export default async function BlogPage({
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-gray-200 bg-white py-20 text-center">
+          <div className="rounded-xl border border-neutral-200 bg-white py-20 text-center">
             <svg aria-hidden="true"
               className="mx-auto h-12 w-12 text-neutral-mid/40"
               fill="none"
@@ -158,7 +158,7 @@ export default async function BlogPage({
                 d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6V7.5z"
               />
             </svg>
-            <p className="mt-4 font-heading text-lg font-semibold text-neutral-dark">
+            <p className="mt-4 font-heading text-heading text-neutral-dark">
               No articles found
             </p>
             <p className="mt-1 font-body text-sm text-neutral-mid">
@@ -179,7 +179,7 @@ export default async function BlogPage({
                   ...(categorySlug ? { category: categorySlug } : {}),
                   page: String(currentPage - 1),
                 }).toString()}`}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 font-body text-sm font-medium text-neutral-dark shadow-sm transition-colors hover:border-primary/30 hover:text-primary"
+                className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-5 py-2.5 font-body text-sm font-medium text-neutral-dark shadow-sm transition-colors hover:border-primary/30 hover:text-primary"
               >
                 <svg aria-hidden="true"
                   className="h-4 w-4"
@@ -197,7 +197,7 @@ export default async function BlogPage({
                 Previous
               </Link>
             ) : (
-              <span className="inline-flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-5 py-2.5 font-body text-sm font-medium text-neutral-mid/50">
+              <span className="inline-flex items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50 px-5 py-2.5 font-body text-sm font-medium text-neutral-mid/50">
                 <svg aria-hidden="true"
                   className="h-4 w-4"
                   fill="none"
@@ -225,7 +225,7 @@ export default async function BlogPage({
                   ...(categorySlug ? { category: categorySlug } : {}),
                   page: String(currentPage + 1),
                 }).toString()}`}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-5 py-2.5 font-body text-sm font-medium text-neutral-dark shadow-sm transition-colors hover:border-primary/30 hover:text-primary"
+                className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-5 py-2.5 font-body text-sm font-medium text-neutral-dark shadow-sm transition-colors hover:border-primary/30 hover:text-primary"
               >
                 Next
                 <svg aria-hidden="true"
@@ -243,7 +243,7 @@ export default async function BlogPage({
                 </svg>
               </Link>
             ) : (
-              <span className="inline-flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-5 py-2.5 font-body text-sm font-medium text-neutral-mid/50">
+              <span className="inline-flex items-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50 px-5 py-2.5 font-body text-sm font-medium text-neutral-mid/50">
                 Next
                 <svg aria-hidden="true"
                   className="h-4 w-4"

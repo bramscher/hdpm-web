@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 import ContactForm from '@/components/forms/ContactForm'
@@ -49,23 +50,23 @@ export default async function ContactPage() {
             </ol>
           </nav>
 
-          <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <h1 className="font-heading text-display-sm sm:text-display text-white">
             {c?.heroHeading ?? 'Get in Touch'}
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-white/80">
+          <p className="mt-4 max-w-2xl text-body-lg text-white/80">
             {c?.heroSubheading ?? "Have questions about our property management services? We'd love to hear from you. Fill out the form or reach us directly."}
           </p>
         </div>
       </section>
 
       {/* Form + Contact Info */}
-      <section className="bg-neutral-light py-20">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-neutral-light py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-5">
             {/* Contact Form — takes 3 of 5 columns */}
             <div className="lg:col-span-3">
-              <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-                <h2 className="font-heading text-xl font-bold text-neutral-dark">
+              <div className="rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
+                <h2 className="font-heading text-heading text-neutral-dark">
                   Send Us a Message
                 </h2>
                 <p className="mt-2 text-sm text-neutral-mid">
@@ -80,8 +81,8 @@ export default async function ContactPage() {
             {/* Contact Info Sidebar — takes 2 of 5 columns */}
             <div className="space-y-8 lg:col-span-2">
               {/* Office Info Card */}
-              <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-                <h2 className="font-heading text-xl font-bold text-neutral-dark">
+              <div className="rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
+                <h2 className="font-heading text-heading text-neutral-dark">
                   Our Office
                 </h2>
 
@@ -175,29 +176,119 @@ export default async function ContactPage() {
                 </div>
               </div>
 
-              {/* Map Placeholder */}
-              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div className="flex h-64 items-center justify-center bg-gray-100 text-neutral-mid">
-                  <div className="text-center">
-                    <svg aria-hidden="true"
-                      className="mx-auto h-10 w-10 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"
+              {/* After-Hours AI Support */}
+              <div className="rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
+                <h2 className="font-heading text-heading text-neutral-dark">
+                  After Hours
+                </h2>
+                <p className="mt-2 text-sm text-neutral-mid">
+                  When the office is closed or the team is on another call, our AI
+                  agents are here to help:
+                </p>
+
+                <div className="mt-6 space-y-5">
+                  {/* Leesa */}
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                      <Image
+                        src="/agents/leesa.png"
+                        alt="Leesa, AI leasing agent"
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover object-top"
                       />
-                    </svg>
-                    <p className="mt-2 text-sm">Google Maps embed placeholder</p>
-                    <p className="text-xs text-gray-400">
-                      1515 SW Reindeer Ave, Redmond, OR
-                    </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-neutral-dark">
+                        Leesa &mdash; Leasing
+                      </p>
+                      <p className="mt-0.5 text-sm text-neutral-mid">
+                        Ask for Leesa for leasing questions — availability, applications,
+                        and tours.
+                      </p>
+                      <a
+                        href="tel:5414066409"
+                        className="mt-1 inline-block text-sm font-semibold text-accent transition-colors hover:text-accent-dark"
+                        aria-label="Call Leesa at 541-406-6409"
+                      >
+                        541-406-6409
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Sally */}
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                      <Image
+                        src="/agents/sally.png"
+                        alt="Sally, AI general-questions agent"
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover object-top"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-neutral-dark">
+                        Sally &mdash; General Questions
+                      </p>
+                      <p className="mt-0.5 text-sm text-neutral-mid">
+                        Sally answers general questions anytime the office is unavailable.
+                      </p>
+                      <a
+                        href="tel:5415480383"
+                        className="mt-1 inline-block text-sm font-semibold text-accent transition-colors hover:text-accent-dark"
+                        aria-label="Call Sally at 541-548-0383"
+                      >
+                        541-548-0383
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Max */}
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                      <Image
+                        src="/agents/max.png"
+                        alt="Max, AI maintenance agent"
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover object-top"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-neutral-dark">
+                        Max &mdash; Maintenance{' '}
+                        <span className="ml-1 rounded-full bg-accent px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
+                          24/7
+                        </span>
+                      </p>
+                      <p className="mt-0.5 text-sm text-neutral-mid">
+                        Max is available around the clock for maintenance requests and
+                        emergencies.
+                      </p>
+                      <a
+                        href="tel:5416002592"
+                        className="mt-1 inline-block text-sm font-semibold text-accent transition-colors hover:text-accent-dark"
+                        aria-label="Call Max at 541-600-2592"
+                      >
+                        541-600-2592
+                      </a>
+                    </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Office Map */}
+              <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+                <iframe
+                  title="High Desert Property Management office — 1515 SW Reindeer Ave, Redmond, OR"
+                  src="https://www.google.com/maps?q=1515%20SW%20Reindeer%20Ave%2C%20Redmond%2C%20OR%2097756&output=embed"
+                  className="block h-64 w-full"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                />
               </div>
             </div>
           </div>

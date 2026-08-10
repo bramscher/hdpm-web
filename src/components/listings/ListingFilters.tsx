@@ -61,7 +61,7 @@ export function ListingFilters() {
   }, [router, pathname])
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-lg sm:p-6">
+    <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-lg sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-4">
         {/* City */}
         <div className="flex-1">
@@ -75,7 +75,7 @@ export function ListingFilters() {
             id="filter-city"
             value={city}
             onChange={(e) => updateParams('city', e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 font-body text-sm text-neutral-dark transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+            className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 font-body text-sm text-neutral-dark transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
           >
             {CITIES.map((c) => (
               <option key={c} value={c === 'All' ? '' : c}>
@@ -97,7 +97,7 @@ export function ListingFilters() {
             id="filter-beds"
             value={beds}
             onChange={(e) => updateParams('beds', e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 font-body text-sm text-neutral-dark transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+            className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 font-body text-sm text-neutral-dark transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
           >
             {BEDROOMS.map((b) => (
               <option key={b.value} value={b.value}>
@@ -119,7 +119,7 @@ export function ListingFilters() {
             id="filter-price"
             value={price}
             onChange={(e) => updateParams('price', e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 font-body text-sm text-neutral-dark transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
+            className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2.5 font-body text-sm text-neutral-dark transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
           >
             {PRICE_RANGES.map((p) => (
               <option key={p.value} value={p.value}>
@@ -137,7 +137,7 @@ export function ListingFilters() {
             aria-checked={pets}
             onClick={() => updateParams('pets', pets ? '' : 'true')}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:ring-2 focus:ring-primary/20 focus:outline-none ${
-              pets ? 'bg-primary' : 'bg-gray-300'
+              pets ? 'bg-primary' : 'bg-neutral-300'
             }`}
           >
             <span

@@ -1,12 +1,18 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPayload } from 'payload'
+import Button from '@/components/ui/Button'
 import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 import { getPageBySlug } from '@/lib/page-content'
 import { FOUNDED_YEAR, SERVING_SINCE } from '@/lib/constants'
-import type { Media as MediaType } from '@/payload-types'
+import type { Media as MediaType, TeamMember } from '@/payload-types'
+
+// Rendered on demand: this page reads CMS content from Payload/Postgres, and
+// the build must not depend on the database being reachable and migrated
+// (Preview deployments connect to a DB without the Payload schema).
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata() {
   const page = await getPageBySlug('about')
@@ -77,16 +83,54 @@ const defaultIcon = (
 
 const serviceAreas = ['Bend', 'Redmond', 'Sisters', 'Prineville', 'Culver', 'Metolius', 'Madras']
 
+const aiAgents = [
+  {
+    name: 'Leesa',
+    role: 'Leasing',
+    image: '/agents/leesa.png',
+    availability: 'After hours',
+    phone: '541-406-6409',
+    description:
+      'Ask for Leesa for anything leasing — current availability, application questions, and scheduling tours — whenever our leasing team is away.',
+  },
+  {
+    name: 'Sally',
+    role: 'General Questions',
+    image: '/agents/sally.png',
+    availability: 'After hours',
+    phone: '541-548-0383',
+    description:
+      'Sally is a friendly first stop for general questions about our services, your account, and how we work — perfect for when the office is closed or everyone is on another call.',
+  },
+  {
+    name: 'Max',
+    role: 'Maintenance',
+    image: '/agents/max.png',
+    availability: '24/7',
+    phone: '541-600-2592',
+    description:
+      'Max is here around the clock for maintenance requests and emergencies, so urgent issues never have to wait until morning.',
+  },
+]
+
 export default async function AboutPage() {
   const page = await getPageBySlug('about')
   const c = page?.aboutContent
 
-  const payload = await getPayload({ config })
-  const { docs: teamMembers } = await payload.find({
-    collection: 'team-members',
-    sort: 'order',
-    limit: 20,
-  })
+  // Guarded so the page still renders (without the team grid) when the
+  // database is unavailable — e.g. a Preview deployment on an unmigrated DB.
+  let teamMembers: TeamMember[] = []
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({
+      collection: 'team-members',
+      sort: 'order',
+      limit: 20,
+    })
+    teamMembers = res.docs
+  } catch {
+    teamMembers = []
+  }
   const breadcrumbs = breadcrumbSchema([
     { name: 'Home', url: '/' },
     { name: 'About', url: '/about' },
@@ -118,26 +162,26 @@ export default async function AboutPage() {
             </ol>
           </nav>
 
-          <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <h1 className="font-heading text-display-sm sm:text-display text-white">
             {c?.heroHeading ?? 'About High Desert Property Management'}
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-white/80">
+          <p className="mt-4 max-w-2xl text-body-lg text-white/80">
             {c?.heroSubheading ?? 'Trusted by Central Oregon property owners for over a decade.'}
           </p>
         </div>
       </section>
 
       {/* Company Story */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               {c?.storyLabel ?? 'Our Story'}
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               {c?.storyHeading ?? SERVING_SINCE}
             </h2>
-            <div className="mt-8 space-y-6 text-lg leading-relaxed text-neutral-mid">
+            <div className="mt-8 space-y-6 text-body-lg text-neutral-mid">
               {c?.storyParagraphs && c.storyParagraphs.length > 0 ? (
                 c.storyParagraphs.map((para, i) => <p key={i}>{para.text}</p>)
               ) : (
@@ -169,13 +213,13 @@ export default async function AboutPage() {
       </section>
 
       {/* Values */}
-      <section className="bg-neutral-light py-20">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-neutral-light py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               What Drives Us
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               Our Core Values
             </h2>
           </div>
@@ -191,12 +235,12 @@ export default async function AboutPage() {
             ).map((value) => (
               <div
                 key={value.title}
-                className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm"
+                className="rounded-xl border border-neutral-200 bg-white p-8 shadow-sm"
               >
                 <div className="mb-5 inline-flex items-center justify-center rounded-lg bg-accent/10 p-3 text-accent">
                   {value.icon}
                 </div>
-                <h3 className="font-heading text-lg font-bold text-neutral-dark">
+                <h3 className="font-heading text-heading text-neutral-dark">
                   {value.title}
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-neutral-mid">
@@ -209,16 +253,16 @@ export default async function AboutPage() {
       </section>
 
       {/* Service Area */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               Where We Work
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               Our Service Area
             </h2>
-            <p className="mt-6 text-lg leading-relaxed text-neutral-mid">
+            <p className="mt-6 text-body-lg text-neutral-mid">
               We proudly serve property owners and tenants across seven Central Oregon
               communities. Each market has its own character, and we bring specialized
               knowledge to every one.
@@ -226,12 +270,13 @@ export default async function AboutPage() {
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               {serviceAreas.map((area) => (
-                <span
+                <Link
                   key={area}
-                  className="rounded-full border border-accent/20 bg-accent/5 px-5 py-2 text-sm font-semibold text-accent"
+                  href={`/market-areas/${area.toLowerCase()}`}
+                  className="rounded-full border border-accent/20 bg-accent/5 px-5 py-2 text-sm font-semibold text-accent transition-colors hover:border-accent hover:bg-accent hover:text-white"
                 >
                   {area}, OR
-                </span>
+                </Link>
               ))}
             </div>
 
@@ -257,16 +302,16 @@ export default async function AboutPage() {
       </section>
 
       {/* Team */}
-      <section className="bg-neutral-light py-20">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-neutral-light py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
+            <p className="font-heading text-overline uppercase text-accent">
               The People Behind HDPM
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
               Meet Our Team
             </h2>
-            <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
+            <p className="mt-4 text-body-lg text-neutral-mid">
               Our experienced team is dedicated to making property ownership simple and
               stress-free.
             </p>
@@ -278,7 +323,7 @@ export default async function AboutPage() {
               return (
                 <div
                   key={member.id}
-                  className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm"
+                  className="rounded-xl border border-neutral-200 bg-white p-6 text-center shadow-sm"
                 >
                   {photo?.url ? (
                     <div className="mx-auto h-28 w-28 overflow-hidden rounded-full">
@@ -301,7 +346,7 @@ export default async function AboutPage() {
                       </svg>
                     </div>
                   )}
-                  <h3 className="mt-4 font-heading text-lg font-bold text-neutral-dark">
+                  <h3 className="mt-4 font-heading text-heading text-neutral-dark">
                     {member.name}
                   </h3>
                   <p className="text-sm font-medium text-accent">{member.title}</p>
@@ -323,47 +368,99 @@ export default async function AboutPage() {
         </div>
       </section>
 
+      {/* AI Agents */}
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="font-heading text-overline uppercase text-accent">
+              Always Here to Help
+            </p>
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
+              Meet Our AI Agents
+            </h2>
+            <p className="mt-4 text-body-lg text-neutral-mid">
+              When the office is closed or our team is tied up on another call, our AI
+              agents step in — so you always get answers, day or night.
+            </p>
+          </div>
+
+          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {aiAgents.map((agent) => (
+              <div
+                key={agent.name}
+                className="rounded-xl border border-neutral-200 bg-white p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+              >
+                <div className="mx-auto h-28 w-28 overflow-hidden rounded-full">
+                  <Image
+                    src={agent.image}
+                    alt={`${agent.name}, High Desert Property Management's AI ${agent.role.toLowerCase()} agent`}
+                    width={112}
+                    height={112}
+                    className="h-full w-full object-cover object-top"
+                  />
+                </div>
+                <h3 className="mt-4 font-heading text-heading text-neutral-dark">
+                  {agent.name}
+                </h3>
+                <p className="text-sm font-medium text-accent">{agent.role}</p>
+                <span
+                  className={`mt-2 inline-block rounded-full px-3 py-0.5 text-xs font-semibold uppercase tracking-wide ${
+                    agent.availability === '24/7'
+                      ? 'bg-accent text-white'
+                      : 'bg-accent/10 text-accent'
+                  }`}
+                >
+                  {agent.availability}
+                </span>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-mid">
+                  {agent.description}
+                </p>
+                <a
+                  href={`tel:${agent.phone.replace(/\D/g, '')}`}
+                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-4 py-2 text-sm font-semibold text-accent transition-colors hover:border-accent hover:bg-accent hover:text-white"
+                  aria-label={`Call ${agent.name} at ${agent.phone}`}
+                >
+                  <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
+                    />
+                  </svg>
+                  {agent.phone}
+                </a>
+              </div>
+            ))}
+          </div>
+
+          <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-neutral-mid">
+            After office hours, ask for{' '}
+            <span className="font-semibold text-neutral-dark">Leesa</span> for leasing,{' '}
+            <span className="font-semibold text-neutral-dark">Sally</span> for general
+            questions, and{' '}
+            <span className="font-semibold text-neutral-dark">Max</span> anytime —
+            he&rsquo;s available 24/7 for maintenance.
+          </p>
+        </div>
+      </section>
+
       {/* CTA */}
-      <section className="bg-primary py-20">
-        <div className="mx-auto max-w-4xl px-6 text-center sm:px-8">
-          <h2 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+      <section className="bg-primary py-16 sm:py-24">
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+          <h2 className="font-heading text-title text-white">
             Ready to Work With Us?
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
+          <p className="mx-auto mt-6 max-w-2xl text-body-lg text-white/80">
             Whether you own one property or twenty, we&apos;d love to show you what
             professional management looks like. Get in touch for a free consultation.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/contact"
-              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
-            >
+            <Button href="/contact" variant="primary" size="lg" elevated withArrow>
               Contact Us
-              <svg aria-hidden="true"
-                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-            <Link
-              href="/owners"
-              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-8 py-4 text-base font-semibold text-white shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:shadow-xl hover:-translate-y-0.5"
-            >
+            </Button>
+            <Button href="/owners" variant="glass" size="lg" withArrow>
               Owner Services
-              <svg aria-hidden="true"
-                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+            </Button>
           </div>
         </div>
       </section>

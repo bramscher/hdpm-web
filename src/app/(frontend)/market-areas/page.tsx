@@ -4,7 +4,13 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema, localBusinessSchema } from '@/lib/schema'
+import Button from '@/components/ui/Button'
 import type { MarketArea, Media } from '@/payload-types'
+
+// Rendered on demand: this page reads CMS content from Payload/Postgres, and
+// the build must not depend on the database being reachable and migrated
+// (Preview deployments connect to a DB without the Payload schema).
+export const dynamic = 'force-dynamic'
 
 export const metadata = createMetadata({
   title: 'Property Management Across Central Oregon',
@@ -19,14 +25,22 @@ function getAreaImage(area: MarketArea): string {
 }
 
 export default async function MarketAreasPage() {
-  const payload = await getPayload({ config })
-  const { docs: areas } = await payload.find({
-    collection: 'market-areas',
-    where: { status: { equals: 'published' } },
-    limit: 100,
-    sort: '-population',
-    depth: 1,
-  })
+  // Guarded so the page still renders when the database is unavailable —
+  // e.g. a Preview deployment on an unmigrated DB.
+  let areas: MarketArea[] = []
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({
+      collection: 'market-areas',
+      where: { status: { equals: 'published' } },
+      limit: 100,
+      sort: '-population',
+      depth: 1,
+    })
+    areas = res.docs
+  } catch {
+    areas = []
+  }
 
   const jsonLd = [
     breadcrumbSchema([
@@ -48,15 +62,15 @@ export default async function MarketAreasPage() {
         {/* Subtle texture overlay */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent" />
 
-        <div className="relative mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent-light">
+            <p className="font-heading text-overline uppercase text-accent-light">
               Our Service Areas
             </p>
-            <h1 className="mt-3 font-heading text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+            <h1 className="mt-3 font-heading text-display-sm sm:text-display text-white">
               Property Management Across Central Oregon
             </h1>
-            <p className="mt-6 text-lg leading-relaxed text-white/70">
+            <p className="mt-6 text-body-lg text-white/70">
               From the peaks of Bend to the high desert of Madras, we manage
               properties in six Central Oregon communities. Local expertise means
               better tenants, faster maintenance, and stronger returns.
@@ -66,8 +80,8 @@ export default async function MarketAreasPage() {
       </section>
 
       {/* City Cards Grid */}
-      <section className="bg-neutral-light py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <section className="bg-neutral-light py-16 sm:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {areas.map((area) => {
               const image = getAreaImage(area)
@@ -77,7 +91,7 @@ export default async function MarketAreasPage() {
                 <Link
                   key={area.slug}
                   href={`/market-areas/${area.slug}`}
-                  className="group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-[0.99] motion-reduce:transform-none"
                 >
                   {/* Image */}
                   <div className="relative aspect-[16/10] overflow-hidden">
@@ -86,7 +100,7 @@ export default async function MarketAreasPage() {
                         src={image}
                         alt={area.imageAlt || `${area.city}, Oregon`}
                         fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
                     )}
@@ -94,7 +108,7 @@ export default async function MarketAreasPage() {
 
                     {/* City name overlay */}
                     <div className="absolute bottom-4 left-5">
-                      <h2 className="font-heading text-2xl font-extrabold text-white">
+                      <h2 className="font-heading text-subtitle text-white">
                         {area.city}
                       </h2>
                       {area.tagline && (
@@ -110,7 +124,7 @@ export default async function MarketAreasPage() {
                     </p>
 
                     {/* Quick stats */}
-                    <div className="mt-4 flex items-center gap-4 border-t border-gray-100 pt-4 text-xs text-neutral-mid">
+                    <div className="mt-4 flex items-center gap-4 border-t border-neutral-100 pt-4 text-xs text-neutral-mid">
                       {area.population && (
                         <span>
                           Pop.{' '}
@@ -120,7 +134,7 @@ export default async function MarketAreasPage() {
                         </span>
                       )}
                       {area.population && area.medianRent && (
-                        <span className="text-gray-300">|</span>
+                        <span className="text-neutral-300">|</span>
                       )}
                       {area.medianRent && (
                         <span>
@@ -157,46 +171,22 @@ export default async function MarketAreasPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-primary py-16">
-        <div className="mx-auto max-w-4xl px-6 text-center sm:px-8">
-          <h2 className="font-heading text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+      <section className="bg-primary py-16 sm:py-24">
+        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+          <h2 className="font-heading text-title text-white">
             Not sure which area is right for your investment?
           </h2>
-          <p className="mt-4 text-lg text-white/70">
+          <p className="mt-4 text-body-lg text-white/70">
             Our team knows every Central Oregon market. Let us help you evaluate
             opportunities and maximize your rental income.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              href="/owners"
-              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
-            >
+            <Button href="/owners" variant="primary" size="lg" elevated withArrow>
               Talk to Our Team
-              <svg aria-hidden="true"
-                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-            <Link
-              href="/listings"
-              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 border border-white/20 px-8 py-4 text-base font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:-translate-y-0.5"
-            >
+            </Button>
+            <Button href="/listings" variant="glass" size="lg" withArrow>
               Browse All Listings
-              <svg aria-hidden="true"
-                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+            </Button>
           </div>
         </div>
       </section>

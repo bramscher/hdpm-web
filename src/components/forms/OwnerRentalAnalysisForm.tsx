@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Button from '@/components/ui/Button'
 import { getAttribution } from '@/lib/attribution'
 import { trackLead } from '@/lib/analytics'
 
@@ -171,14 +172,14 @@ export default function OwnerRentalAnalysisForm() {
 
   if (submitted) {
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600">
+      <div className="rounded-xl border border-accent/20 bg-accent/5 p-8 text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 text-accent-dark">
           <svg aria-hidden="true" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
-        <h3 className="font-heading text-lg font-bold text-green-800">Request Received!</h3>
-        <p className="mt-2 text-sm text-green-700">
+        <h3 className="font-heading text-heading text-accent-dark">Request Received!</h3>
+        <p className="mt-2 text-sm text-neutral-600">
           Our team will prepare your rental analysis and email it to you within one business day.
         </p>
       </div>
@@ -210,17 +211,19 @@ export default function OwnerRentalAnalysisForm() {
                   }
                 }}
                 placeholder="123 NW Franklin Ave, Bend, OR 97703"
-                className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
                 disabled={lookingUp}
               />
-              <button
+              <Button
                 type="button"
                 onClick={handleLookup}
                 disabled={lookingUp || addressQuery.trim().length < 5}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-50"
+                variant="primary"
+                size="md"
+                className="disabled:opacity-60 disabled:pointer-events-none"
               >
                 {lookingUp ? 'Looking up…' : 'Look Up'}
-              </button>
+              </Button>
             </div>
             {lookupError && (
               <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
@@ -230,7 +233,7 @@ export default function OwnerRentalAnalysisForm() {
           </div>
 
           {lookupResult && (
-            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+            <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
               <div className="flex items-start gap-2">
                 <svg aria-hidden="true" className="mt-0.5 h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
@@ -249,7 +252,7 @@ export default function OwnerRentalAnalysisForm() {
               </div>
 
               {lookupResult.property && (
-                <div className="mt-3 grid grid-cols-2 gap-3 border-t border-gray-100 pt-3 sm:grid-cols-4">
+                <div className="mt-3 grid grid-cols-2 gap-3 border-t border-neutral-100 pt-3 sm:grid-cols-4">
                   <Stat label="Bedrooms" value={lookupResult.property.bedrooms ?? '—'} />
                   <Stat label="Bathrooms" value={lookupResult.property.bathrooms ?? '—'} />
                   <Stat label="Sqft" value={lookupResult.property.sqft?.toLocaleString() ?? '—'} />
@@ -265,13 +268,9 @@ export default function OwnerRentalAnalysisForm() {
                 >
                   Enter details manually
                 </button>
-                <button
-                  type="button"
-                  onClick={acceptLookup}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-dark"
-                >
+                <Button type="button" onClick={acceptLookup} variant="primary" size="md">
                   Continue
-                </button>
+                </Button>
               </div>
             </div>
           )}
@@ -312,7 +311,7 @@ export default function OwnerRentalAnalysisForm() {
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+              className="block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
               required
             />
           </Field>
@@ -322,7 +321,7 @@ export default function OwnerRentalAnalysisForm() {
               <select
                 value={town}
                 onChange={(e) => setTown(e.target.value as Town)}
-                className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="block w-full rounded-lg border border-neutral-300 bg-white px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
               >
                 {TOWNS.map((t) => (
                   <option key={t} value={t}>{t}</option>
@@ -334,14 +333,14 @@ export default function OwnerRentalAnalysisForm() {
                 type="text"
                 value={zipCode}
                 onChange={(e) => setZipCode(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="block w-full rounded-lg border border-neutral-300 px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
               />
             </Field>
             <Field label="Property Type">
               <select
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value as PropertyType)}
-                className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="block w-full rounded-lg border border-neutral-300 bg-white px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
               >
                 {PROPERTY_TYPES.map((p) => (
                   <option key={p.value} value={p.value}>{p.label}</option>
@@ -355,7 +354,7 @@ export default function OwnerRentalAnalysisForm() {
               <select
                 value={bedrooms}
                 onChange={(e) => setBedrooms(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="block w-full rounded-lg border border-neutral-300 bg-white px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
               >
                 <option value="0">Studio</option>
                 {[1, 2, 3, 4, 5, 6].map((n) => (
@@ -370,7 +369,7 @@ export default function OwnerRentalAnalysisForm() {
                 min="0"
                 value={bathrooms}
                 onChange={(e) => setBathrooms(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="block w-full rounded-lg border border-neutral-300 px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
               />
             </Field>
             <Field label="Sqft">
@@ -379,7 +378,7 @@ export default function OwnerRentalAnalysisForm() {
                 min="0"
                 value={sqft}
                 onChange={(e) => setSqft(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="block w-full rounded-lg border border-neutral-300 px-3 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
                 placeholder="—"
               />
             </Field>
@@ -392,21 +391,23 @@ export default function OwnerRentalAnalysisForm() {
                   value={currentRent}
                   onChange={(e) => setCurrentRent(e.target.value)}
                   placeholder="Optional"
-                  className="block w-full rounded-lg border border-gray-300 px-3 py-3 pl-7 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                  className="block w-full rounded-lg border border-neutral-300 px-3 py-3 pl-7 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
               </div>
             </Field>
           </div>
 
           <div className="flex justify-end">
-            <button
+            <Button
               type="button"
               onClick={() => setStep(3)}
               disabled={!address.trim()}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-50"
+              variant="primary"
+              size="md"
+              className="disabled:opacity-60 disabled:pointer-events-none"
             >
               Continue →
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -432,7 +433,7 @@ export default function OwnerRentalAnalysisForm() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
-                className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
               />
             </Field>
             <Field label="Last Name">
@@ -440,7 +441,7 @@ export default function OwnerRentalAnalysisForm() {
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                className="block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
               />
             </Field>
           </div>
@@ -451,7 +452,7 @@ export default function OwnerRentalAnalysisForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+              className="block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
           </Field>
 
@@ -462,7 +463,7 @@ export default function OwnerRentalAnalysisForm() {
               onChange={(e) => setPhone(e.target.value)}
               required
               placeholder="(541) 555-0123"
-              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+              className="block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
           </Field>
 
@@ -486,23 +487,25 @@ export default function OwnerRentalAnalysisForm() {
               onChange={(e) => setMessage(e.target.value)}
               rows={3}
               placeholder="Timeline, condition notes, current lease situation, etc."
-              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+              className="block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
           </Field>
 
           {submitError && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {submitError}
             </div>
           )}
 
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="lg"
             disabled={submitting}
-            className="w-full rounded-lg bg-accent px-6 py-4 text-base font-semibold text-white shadow-sm transition-colors hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full disabled:opacity-60 disabled:pointer-events-none"
           >
             {submitting ? 'Submitting…' : 'Get My Free Rental Analysis'}
-          </button>
+          </Button>
           <p className="text-center text-xs text-neutral-mid">
             We&apos;ll review your property and email a full rent analysis within one business day.
           </p>

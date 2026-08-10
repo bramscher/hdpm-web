@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { FOUNDED_YEAR } from '@/lib/constants'
+import Button from '@/components/ui/Button'
 
 const quickLinks = [
   { href: '/owners', label: 'Property Owners' },
@@ -24,7 +25,7 @@ const marketAreas = [
 
 export default function Footer() {
   return (
-    <footer className="bg-primary text-gray-300">
+    <footer className="bg-primary text-white/90">
       {/* Main Footer */}
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
@@ -38,11 +39,11 @@ export default function Footer() {
                 height={44}
               />
             </div>
-            <p className="mb-5 max-w-xs text-sm leading-relaxed text-gray-400">
+            <p className="mb-5 max-w-xs text-sm leading-relaxed text-white/70">
               Professional property management across Central Oregon. Maximizing
               your investment while keeping tenants happy since {FOUNDED_YEAR}.
             </p>
-            <address className="space-y-2 text-sm not-italic text-gray-400">
+            <address className="space-y-2 text-sm not-italic text-white/70">
               <p>1515 SW Reindeer Ave</p>
               <p>Redmond, OR 97756</p>
               <a
@@ -62,7 +63,7 @@ export default function Footer() {
               href="https://www.instagram.com/highdesertpm/"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent"
+              className="mt-5 inline-flex items-center gap-2 text-sm text-white/70 transition-colors hover:text-accent"
               aria-label="Follow High Desert Property Management on Instagram"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -74,7 +75,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold tracking-wider text-accent uppercase">
+            <h3 className="mb-4 text-overline text-accent uppercase">
               Quick Links
             </h3>
             <ul className="space-y-2.5">
@@ -82,7 +83,7 @@ export default function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-gray-400 transition-colors hover:text-accent"
+                    className="text-sm text-white/70 transition-colors hover:text-accent"
                   >
                     {link.label}
                   </Link>
@@ -93,7 +94,7 @@ export default function Footer() {
 
           {/* Market Areas */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold tracking-wider text-accent uppercase">
+            <h3 className="mb-4 text-overline text-accent uppercase">
               Areas We Serve
             </h3>
             <ul className="space-y-2.5">
@@ -101,7 +102,7 @@ export default function Footer() {
                 <li key={area.href}>
                   <Link
                     href={area.href}
-                    className="text-sm text-gray-400 transition-colors hover:text-accent"
+                    className="text-sm text-white/70 transition-colors hover:text-accent"
                   >
                     {area.label}
                   </Link>
@@ -112,32 +113,29 @@ export default function Footer() {
 
           {/* Contact / Hours */}
           <div>
-            <h3 className="mb-4 text-sm font-semibold tracking-wider text-accent uppercase">
+            <h3 className="mb-4 text-overline text-accent uppercase">
               Office Hours
             </h3>
-            <dl className="space-y-2.5 text-sm text-gray-400">
+            <dl className="space-y-2.5 text-sm text-white/70">
               <div>
-                <dt className="font-medium text-gray-300">Monday - Friday</dt>
+                <dt className="font-medium text-white/90">Monday - Friday</dt>
                 <dd>9:00 AM - 4:00 PM</dd>
               </div>
               <div>
-                <dt className="font-medium text-gray-300">Saturday - Sunday</dt>
+                <dt className="font-medium text-white/90">Saturday - Sunday</dt>
                 <dd>Closed</dd>
               </div>
               <div className="pt-2">
-                <dt className="font-medium text-gray-300">
+                <dt className="font-medium text-white/90">
                   Emergency Maintenance
                 </dt>
                 <dd>24/7 Online Portal</dd>
               </div>
             </dl>
             <div className="mt-6">
-              <Link
-                href="/owners#get-started"
-                className="inline-block rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-dark hover:shadow-md"
-              >
+              <Button href="/owners#get-started" variant="primary" size="md">
                 Free Rental Analysis
-              </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -146,8 +144,8 @@ export default function Footer() {
       {/* Fair Housing */}
       <div className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-          <p className="text-sm leading-relaxed text-gray-500">
-            <span className="font-semibold text-gray-400">
+          <p className="text-sm leading-relaxed text-white/50">
+            <span className="font-semibold text-white/70">
               Equal Housing Opportunity.
             </span>{' '}
             We do business in accordance with the federal{' '}
@@ -169,11 +167,11 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row sm:px-6 lg:px-8">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-white/50">
             &copy; {new Date().getFullYear()} High Desert Property Management.
             All rights reserved.
           </p>
-          <div className="flex gap-6 text-sm text-gray-500">
+          <div className="flex gap-6 text-sm text-white/50">
             <Link
               href="/privacy"
               className="transition-colors hover:text-accent"

@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import type { MarketArea, Media } from '@/payload-types'
+import Reveal from '@/components/ui/Reveal'
+import Section from '@/components/ui/Section'
 
 function getAreaImage(area: MarketArea): string {
   const heroImage = typeof area.heroImage === 'object' ? (area.heroImage as Media) : null
@@ -10,53 +12,62 @@ function getAreaImage(area: MarketArea): string {
 }
 
 export default async function MarketAreasSection() {
-  const payload = await getPayload({ config })
-  const { docs: areas } = await payload.find({
-    collection: 'market-areas',
-    where: { status: { equals: 'published' } },
-    limit: 100,
-    sort: '-population',
-    depth: 1,
-  })
+  // Guarded so the section (and the pages that render it, e.g. the home page)
+  // degrade to nothing rather than crashing the build when the database is
+  // unreachable or unmigrated — Preview deployments connect to a DB without
+  // the Payload schema.
+  let areas: MarketArea[] = []
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({
+      collection: 'market-areas',
+      where: { status: { equals: 'published' } },
+      limit: 100,
+      sort: '-population',
+      depth: 1,
+    })
+    areas = res.docs
+  } catch {
+    return null
+  }
 
   if (areas.length === 0) return null
 
   return (
-    <section className="bg-neutral-light py-24">
-      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
-        {/* Section header */}
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
-            Our Service Areas
-          </p>
-          <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
-            Managing Properties Across Central Oregon
-          </h2>
-          <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
-            From Bend to Madras, we know every neighborhood and market. Local expertise
-            means better tenants and stronger returns.
-          </p>
-        </div>
+    <Section tone="muted">
+      {/* Section header */}
+      <Reveal className="mx-auto max-w-2xl text-center">
+        <p className="font-heading text-overline uppercase text-accent">
+          Our Service Areas
+        </p>
+        <h2 className="mt-3 font-heading text-title text-neutral-dark">
+          Managing Properties Across Central Oregon
+        </h2>
+        <p className="mt-4 text-body-lg text-neutral-mid">
+          From Bend to Madras, we know every neighborhood and market. Local expertise
+          means better tenants and stronger returns.
+        </p>
+      </Reveal>
 
-        {/* City cards grid */}
-        <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {areas.map((area) => {
-            const image = getAreaImage(area)
+      {/* City cards grid */}
+      <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {areas.map((area, i) => {
+          const image = getAreaImage(area)
 
-            return (
+          return (
+            <Reveal key={area.slug} delay={Math.min(i, 3) * 0.07} className="h-full">
               <Link
-                key={area.slug}
                 href={`/market-areas/${area.slug}`}
-                className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                className="group relative block h-full overflow-hidden rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-[0.99] motion-reduce:transform-none"
               >
-                <div className="relative min-h-[220px] flex flex-col justify-end">
+                <div className="relative flex min-h-[220px] h-full flex-col justify-end">
                   {/* Background image */}
                   {image && (
                     <Image
                       src={image}
                       alt={area.imageAlt || `${area.city}, Oregon`}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transform-none"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     />
                   )}
@@ -92,10 +103,10 @@ export default async function MarketAreasSection() {
                   <div className="absolute inset-x-0 bottom-0 h-1 scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100" />
                 </div>
               </Link>
-            )
-          })}
-        </div>
+            </Reveal>
+          )
+        })}
       </div>
-    </section>
+    </Section>
   )
 }

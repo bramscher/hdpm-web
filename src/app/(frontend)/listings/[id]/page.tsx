@@ -4,9 +4,11 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getCachedListingById } from '@/lib/appfolio'
 import { listingSchema, breadcrumbSchema } from '@/lib/schema'
-import { isDogFriendlyPolicy, formatAvailableDate } from '@/lib/listing-utils'
+import { isDogFriendlyPolicy, formatAvailableDate, extractRentZapUrl } from '@/lib/listing-utils'
 import ShareListing from '@/components/listings/ShareListing'
 import PhotoGallery from '@/components/listings/PhotoGallery'
+import CallLeesa from '@/components/CallLeesa'
+import Button from '@/components/ui/Button'
 
 // Use dynamic rendering — listing data from AppFolio v0 API is too large to SSG all at build time
 export const dynamic = 'force-dynamic'
@@ -27,7 +29,8 @@ export async function generateMetadata({
     listing.Address1 && !listing.MarketingTitle.includes(listing.Address1)
       ? `${listing.MarketingTitle} — ${listing.Address1}`
       : listing.MarketingTitle
-  const description = `${listing.Bedrooms} bed / ${listing.Bathrooms} bath rental in ${listing.City}, OR — $${listing.AdvertisedRent.toLocaleString()}/mo. ${listing.MarketingDescription.slice(0, 120)}...`
+  const { cleanedDescription } = extractRentZapUrl(listing.MarketingDescription)
+  const description = `${listing.Bedrooms} bed / ${listing.Bathrooms} bath rental in ${listing.City}, OR — $${listing.AdvertisedRent.toLocaleString()}/mo. ${cleanedDescription.slice(0, 120)}...`
 
   const photo = listing.UnitPhotos[0]?.Url
 
@@ -67,8 +70,13 @@ export default async function ListingDetailPage({
 
   const availableDate = formatAvailableDate(listing.AvailableOn)
 
+  // The RentZap application link is pasted into the marketing description and
+  // is reachable from the flier (where Apply Now points); strip it from the
+  // displayed copy so the raw URL doesn't show up in the listing text.
+  const { cleanedDescription } = extractRentZapUrl(listing.MarketingDescription)
+
   const jsonLd = [
-    listingSchema(listing),
+    listingSchema({ ...listing, MarketingDescription: cleanedDescription }),
     breadcrumbSchema([
       { name: 'Home', url: '/' },
       { name: 'Listings', url: '/listings' },
@@ -194,18 +202,18 @@ export default async function ListingDetailPage({
 
               {/* Description */}
               <section className="mt-10">
-                <h2 className="font-heading text-xl font-semibold text-neutral-dark">
+                <h2 className="font-heading text-subtitle text-neutral-dark">
                   About This Property
                 </h2>
                 <p className="mt-3 font-body leading-relaxed text-neutral-mid whitespace-pre-line">
-                  {listing.MarketingDescription}
+                  {cleanedDescription}
                 </p>
               </section>
 
               {/* Amenities */}
               {listing.UnitAmenities.length > 0 && (
                 <section className="mt-10">
-                  <h2 className="font-heading text-xl font-semibold text-neutral-dark">
+                  <h2 className="font-heading text-subtitle text-neutral-dark">
                     Amenities
                   </h2>
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -223,10 +231,10 @@ export default async function ListingDetailPage({
 
               {/* Pet policy */}
               <section className="mt-10">
-                <h2 className="font-heading text-xl font-semibold text-neutral-dark">
+                <h2 className="font-heading text-subtitle text-neutral-dark">
                   Pet Policy
                 </h2>
-                <div className="mt-3 rounded-lg border border-gray-200 bg-white p-4">
+                <div className="mt-3 rounded-lg border border-neutral-200 bg-white p-4">
                   <div className="flex items-start gap-3">
                     <div
                       className={`mt-0.5 rounded-full p-1.5 ${isPetFriendly ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-500'}`}
@@ -277,7 +285,7 @@ export default async function ListingDetailPage({
 
               {/* Deposit */}
               <section className="mt-10">
-                <h2 className="font-heading text-xl font-semibold text-neutral-dark">
+                <h2 className="font-heading text-subtitle text-neutral-dark">
                   Deposit
                 </h2>
                 <p className="mt-3 font-body text-neutral-mid">
@@ -291,7 +299,7 @@ export default async function ListingDetailPage({
 
             {/* Right column: CTA sidebar */}
             <div className="mt-10 lg:mt-0">
-              <div className="sticky top-8 rounded-xl border border-gray-200 bg-white p-6 shadow-lg">
+              <div className="sticky top-8 rounded-xl border border-neutral-200 bg-white p-6 shadow-lg">
                 <p className="font-heading text-3xl font-bold text-neutral-dark">
                   ${listing.AdvertisedRent.toLocaleString()}
                   <span className="text-lg font-normal text-neutral-mid">
@@ -299,7 +307,7 @@ export default async function ListingDetailPage({
                   </span>
                 </p>
 
-                <div className="mt-4 space-y-2 border-t border-gray-100 pt-4 font-body text-sm text-neutral-mid">
+                <div className="mt-4 space-y-2 border-t border-neutral-100 pt-4 font-body text-sm text-neutral-mid">
                   <div className="flex justify-between">
                     <span>Bedrooms</span>
                     <span className="font-medium text-neutral-dark">
@@ -332,24 +340,28 @@ export default async function ListingDetailPage({
                   </div>
                 </div>
 
-                <a
+                <Button
                   href={listing.ApplicationURL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-6 block w-full rounded-lg bg-accent px-6 py-4 text-center font-heading text-lg font-bold text-white shadow-md transition-all hover:bg-accent-dark hover:shadow-lg focus:ring-4 focus:ring-accent/30 focus:outline-none"
+                  variant="primary"
+                  size="lg"
+                  className="mt-6 w-full"
                 >
                   Apply Now
-                </a>
+                </Button>
+
+                <CallLeesa className="mt-3 w-full justify-center" />
 
                 <p className="mt-3 text-center font-body text-xs text-neutral-mid">
-                  Application handled securely through AppFolio
+                  Apply online or view the flier — the application is on the flier page.
                 </p>
               </div>
             </div>
           </div>
 
           {/* Back link */}
-          <div className="mt-12 border-t border-gray-200 pt-8">
+          <div className="mt-12 border-t border-neutral-200 pt-8">
             <Link
               href="/listings"
               className="inline-flex items-center gap-2 font-body text-sm font-medium text-primary transition-colors hover:text-primary-dark"
@@ -406,7 +418,7 @@ function StatCard({
       className={`rounded-lg border p-4 text-center ${
         highlight
           ? 'border-accent/30 bg-accent/5'
-          : 'border-gray-200 bg-white'
+          : 'border-neutral-200 bg-white'
       }`}
     >
       <p

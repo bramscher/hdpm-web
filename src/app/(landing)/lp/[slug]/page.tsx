@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import LeadForm from '@/components/forms/LeadForm'
+import Button from '@/components/ui/Button'
 import CampaignTracker from '@/components/CampaignTracker'
 import type { LandingPage, Media, Testimonial } from '@/payload-types'
 
@@ -53,29 +54,26 @@ export default async function LandingPageRoute({ params, searchParams }: PagePro
       <CampaignTracker campaign={campaign} />
 
       {/* Minimal top bar — no nav links, keep visitors on the page */}
-      <header className="border-b border-gray-100 bg-white">
+      <header className="border-b border-neutral-100 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <span className="font-heading text-lg font-bold text-neutral-dark">
             High Desert Property Management
           </span>
-          <a
-            href="tel:+15415480383"
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-          >
+          <Button href="tel:+15415480383" variant="primary" size="sm">
             (541) 548-0383
-          </a>
+          </Button>
         </div>
       </header>
 
-      <section className="bg-gradient-to-b from-gray-50 to-white">
+      <section className="bg-gradient-to-b from-neutral-50 to-white">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:gap-14 lg:py-16">
           {/* Left: message */}
           <div>
-            <h1 className="font-heading text-3xl font-extrabold leading-tight text-neutral-dark sm:text-4xl">
+            <h1 className="font-heading text-display-sm text-neutral-dark">
               {page.headline}
             </h1>
             {page.subheadline && (
-              <p className="mt-4 text-lg leading-relaxed text-gray-600">{page.subheadline}</p>
+              <p className="mt-4 text-body-lg text-neutral-600">{page.subheadline}</p>
             )}
 
             {(page.bullets?.length ?? 0) > 0 && (
@@ -102,7 +100,7 @@ export default async function LandingPageRoute({ params, searchParams }: PagePro
             )}
 
             {hero?.url && (
-              <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-2xl shadow-md">
+              <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-xl shadow-md">
                 <Image
                   src={hero.url}
                   alt={hero.alt || page.headline}
@@ -117,7 +115,7 @@ export default async function LandingPageRoute({ params, searchParams }: PagePro
 
           {/* Right: form */}
           <div>
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-lg sm:p-8">
+            <div className="rounded-xl border border-neutral-100 bg-white p-6 shadow-lg sm:p-8">
               <LeadForm
                 sourceDetail={sourceDetail}
                 analyticsTag={`lp_${slug}`}
@@ -127,7 +125,7 @@ export default async function LandingPageRoute({ params, searchParams }: PagePro
             </div>
 
             {testimonial && (
-              <figure className="mt-6 rounded-2xl bg-gray-50 p-6">
+              <figure className="mt-6 rounded-xl bg-neutral-50 p-6">
                 <div className="flex gap-1 text-amber-400" aria-hidden>
                   {Array.from({ length: testimonial.rating ?? 5 }).map((_, i) => (
                     <svg key={i} className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -135,7 +133,7 @@ export default async function LandingPageRoute({ params, searchParams }: PagePro
                     </svg>
                   ))}
                 </div>
-                <blockquote className="mt-3 text-sm leading-relaxed text-gray-700">
+                <blockquote className="mt-3 text-sm leading-relaxed text-neutral-700">
                   “{testimonial.text}”
                 </blockquote>
                 <figcaption className="mt-3 text-sm font-semibold text-neutral-dark">
@@ -147,8 +145,8 @@ export default async function LandingPageRoute({ params, searchParams }: PagePro
         </div>
       </section>
 
-      <footer className="border-t border-gray-100 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-6 text-sm text-gray-500 sm:flex-row sm:px-6">
+      <footer className="border-t border-neutral-100 bg-white">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-6 text-sm text-neutral-500 sm:flex-row sm:px-6">
           <span>© {new Date().getFullYear()} High Desert Property Management · Redmond, Oregon</span>
           <a href="tel:+15415480383" className="font-semibold text-neutral-dark">
             (541) 548-0383

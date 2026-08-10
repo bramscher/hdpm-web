@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { getPayload } from 'payload'
@@ -8,6 +7,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import { breadcrumbSchema } from '@/lib/schema'
 import type { Page, Media } from '@/payload-types'
 import { SITE_URL } from '@/lib/site-url'
+import Button from '@/components/ui/Button'
 
 // Slugs that are handled by dedicated routes — skip them here
 const RESERVED_SLUGS = [
@@ -155,7 +155,7 @@ export default async function CMSPage({
       {(!page.sections || page.sections.length === 0) && !hasRichContent(page) && (
         <section className="bg-primary px-4 pb-16 pt-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            <h1 className="font-heading text-display-sm sm:text-display text-white">
               {page.title}
             </h1>
           </div>
@@ -177,20 +177,20 @@ function RichContentPage({ page }: { page: Page }) {
     <>
       <section className="bg-primary px-4 pb-16 pt-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <h1 className="font-heading text-display-sm sm:text-display text-white">
             {rc?.heroHeading || page.title}
           </h1>
           {rc?.heroSubheading && (
-            <p className="mt-4 max-w-2xl text-lg text-white/80">
+            <p className="mt-4 max-w-2xl text-body-lg text-white/80">
               {rc.heroSubheading}
             </p>
           )}
         </div>
       </section>
       {rc?.body && (
-        <section className="bg-white py-16">
+        <section className="bg-white py-16 sm:py-24">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div className="prose prose-lg max-w-none font-body prose-headings:font-heading prose-headings:text-neutral-dark prose-p:text-neutral-mid prose-p:leading-relaxed prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-neutral-dark prose-li:text-neutral-mid prose-hr:border-gray-200">
+            <div className="prose prose-lg max-w-none font-body prose-headings:font-heading prose-headings:text-neutral-dark prose-p:text-neutral-mid prose-p:leading-relaxed prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-neutral-dark prose-li:text-neutral-mid prose-hr:border-neutral-200">
               <RichText data={rc.body} />
             </div>
           </div>
@@ -227,22 +227,19 @@ function HeroBlock({ block }: { block: HeroSection }) {
         </>
       )}
       <div className="relative mx-auto max-w-7xl">
-        <h1 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+        <h1 className="font-heading text-display-sm sm:text-display text-white">
           {block.heading}
         </h1>
         {block.subheading && (
-          <p className="mt-4 max-w-2xl text-lg text-white/80">
+          <p className="mt-4 max-w-2xl text-body-lg text-white/80">
             {block.subheading}
           </p>
         )}
         {block.ctaText && block.ctaLink && (
           <div className="mt-8">
-            <Link
-              href={block.ctaLink}
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
-            >
+            <Button href={block.ctaLink} variant="primary" size="lg" elevated>
               {block.ctaText}
-            </Link>
+            </Button>
           </div>
         )}
       </div>
@@ -254,9 +251,9 @@ function ContentBlock({ block }: { block: ContentSection }) {
   if (!block.body) return null
 
   return (
-    <section className="bg-white py-16">
+    <section className="bg-white py-16 sm:py-24">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="prose prose-lg max-w-none font-body prose-headings:font-heading prose-headings:text-neutral-dark prose-p:text-neutral-mid prose-p:leading-relaxed prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-neutral-dark prose-img:rounded-xl prose-img:shadow-md prose-blockquote:border-accent prose-blockquote:bg-accent/5 prose-blockquote:rounded-r-lg prose-blockquote:py-1 prose-blockquote:pr-4 prose-blockquote:not-italic prose-blockquote:text-neutral-dark/80 prose-li:text-neutral-mid prose-hr:border-gray-200">
+        <div className="prose prose-lg max-w-none font-body prose-headings:font-heading prose-headings:text-neutral-dark prose-p:text-neutral-mid prose-p:leading-relaxed prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-neutral-dark prose-img:rounded-xl prose-img:shadow-md prose-blockquote:border-accent prose-blockquote:bg-accent/5 prose-blockquote:rounded-r-lg prose-blockquote:py-1 prose-blockquote:pr-4 prose-blockquote:not-italic prose-blockquote:text-neutral-dark/80 prose-li:text-neutral-mid prose-hr:border-neutral-200">
           <RichText data={block.body} />
         </div>
       </div>
@@ -266,24 +263,21 @@ function ContentBlock({ block }: { block: ContentSection }) {
 
 function CTABlock({ block }: { block: CTASection }) {
   return (
-    <section className="bg-primary py-20">
-      <div className="mx-auto max-w-4xl px-6 text-center sm:px-8">
-        <h2 className="font-heading text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+    <section className="bg-primary py-16 sm:py-24">
+      <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+        <h2 className="font-heading text-title text-white">
           {block.heading}
         </h2>
         {block.description && (
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
+          <p className="mx-auto mt-6 max-w-2xl text-body-lg text-white/80">
             {block.description}
           </p>
         )}
         {block.buttonText && block.buttonLink && (
           <div className="mt-10">
-            <Link
-              href={block.buttonLink}
-              className="inline-flex items-center justify-center rounded-lg bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:bg-accent-dark hover:shadow-xl hover:-translate-y-0.5"
-            >
+            <Button href={block.buttonLink} variant="primary" size="lg" elevated>
               {block.buttonText}
-            </Link>
+            </Button>
           </div>
         )}
       </div>

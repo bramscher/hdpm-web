@@ -8,21 +8,21 @@ export default function TenantFAQ({ faqs }: { faqs?: FAQItem[] }) {
   const items = faqs && faqs.length > 0 ? faqs : defaultFaqs
 
   return (
-    <div className="divide-y divide-gray-200 rounded-xl border border-gray-200 bg-neutral-light">
+    <div className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-neutral-light">
       {items.map((faq, i) => {
         const isOpen = openIndex === i
         return (
           <div key={i}>
             <button
               onClick={() => setOpenIndex(isOpen ? null : i)}
-              className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-gray-50"
+              className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-neutral-50"
               aria-expanded={isOpen}
             >
               <span className="font-heading text-sm font-bold text-neutral-dark sm:text-base">
                 {faq.question}
               </span>
               <svg aria-hidden="true"
-                className={`h-5 w-5 flex-shrink-0 text-accent transition-transform duration-300 ${
+                className={`h-5 w-5 flex-shrink-0 text-accent transition-transform duration-300 motion-reduce:transform-none ${
                   isOpen ? 'rotate-180' : ''
                 }`}
                 fill="none"

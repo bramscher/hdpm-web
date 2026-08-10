@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import Reveal from '@/components/ui/Reveal'
+import Section from '@/components/ui/Section'
 
 const services = [
   {
@@ -49,29 +51,28 @@ const services = [
 
 export default function ServicesOverview() {
   return (
-    <section className="bg-neutral-light py-24">
-      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
-        {/* Section header */}
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="font-heading text-sm font-bold uppercase tracking-widest text-accent">
-            What We Do
-          </p>
-          <h2 className="mt-3 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark sm:text-4xl">
-            Full-Service Property Management
-          </h2>
-          <p className="mt-4 text-lg leading-relaxed text-neutral-mid">
-            From finding great tenants to handling midnight emergencies, we take care of
-            every detail so your investment thrives.
-          </p>
-        </div>
+    <Section tone="muted">
+      {/* Section header */}
+      <Reveal className="mx-auto max-w-2xl text-center">
+        <p className="font-heading text-overline uppercase text-accent">
+          What We Do
+        </p>
+        <h2 className="mt-3 font-heading text-title text-neutral-dark">
+          Full-Service Property Management
+        </h2>
+        <p className="mt-4 text-body-lg text-neutral-mid">
+          From finding great tenants to handling midnight emergencies, we take care of
+          every detail so your investment thrives.
+        </p>
+      </Reveal>
 
-        {/* Service cards */}
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service) => (
+      {/* Service cards */}
+      <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        {services.map((service, i) => (
+          <Reveal key={service.title} delay={Math.min(i, 3) * 0.07}>
             <Link
-              key={service.title}
               href={service.href}
-              className="group relative rounded-xl border border-gray-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/20"
+              className="group relative block h-full rounded-xl border border-neutral-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/20 active:scale-[0.99] motion-reduce:transform-none"
             >
               {/* Icon container */}
               <div className="mb-5 inline-flex items-center justify-center rounded-lg bg-accent/10 p-3 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
@@ -97,9 +98,9 @@ export default function ServicesOverview() {
               {/* Top accent bar on hover */}
               <div className="absolute inset-x-0 top-0 h-0.5 scale-x-0 rounded-t-xl bg-gradient-to-r from-accent to-accent-light transition-transform duration-300 group-hover:scale-x-100" />
             </Link>
-          ))}
-        </div>
+          </Reveal>
+        ))}
       </div>
-    </section>
+    </Section>
   )
 }

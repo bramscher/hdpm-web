@@ -17,7 +17,7 @@ export default function ShareListing({ url, title }: { url: string; title: strin
   const encodedTitle = encodeURIComponent(title)
 
   const iconClass =
-    'flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-neutral-dark transition-colors hover:border-accent hover:text-accent'
+    'flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 text-neutral-dark transition-colors hover:border-accent hover:text-accent'
 
   return (
     <div className="flex items-center gap-2">
