@@ -70,9 +70,10 @@ export default async function ListingDetailPage({
 
   const availableDate = formatAvailableDate(listing.AvailableOn)
 
-  // The unique RentZap application link lives in the marketing description;
-  // pull it out for the Apply button and hide it from the displayed copy.
-  const { rentZapUrl, cleanedDescription } = extractRentZapUrl(listing.MarketingDescription)
+  // The RentZap application link is pasted into the marketing description and
+  // is reachable from the flier (where Apply Now points); strip it from the
+  // displayed copy so the raw URL doesn't show up in the listing text.
+  const { cleanedDescription } = extractRentZapUrl(listing.MarketingDescription)
 
   const jsonLd = [
     listingSchema({ ...listing, MarketingDescription: cleanedDescription }),
@@ -340,7 +341,7 @@ export default async function ListingDetailPage({
                 </div>
 
                 <Button
-                  href={rentZapUrl ?? listing.ApplicationURL}
+                  href={listing.ApplicationURL}
                   target="_blank"
                   rel="noopener noreferrer"
                   variant="primary"
@@ -350,25 +351,10 @@ export default async function ListingDetailPage({
                   Apply Now
                 </Button>
 
-                {rentZapUrl && (
-                  <Button
-                    href={listing.ApplicationURL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    variant="outline"
-                    size="lg"
-                    className="mt-3 w-full"
-                  >
-                    View Flier
-                  </Button>
-                )}
-
                 <CallLeesa className="mt-3 w-full justify-center" />
 
                 <p className="mt-3 text-center font-body text-xs text-neutral-mid">
-                  {rentZapUrl
-                    ? 'Apply online through RentZap · flier hosted on AppFolio'
-                    : 'Application handled securely through AppFolio'}
+                  Apply online or view the flier — the application is on the flier page.
                 </p>
               </div>
             </div>
