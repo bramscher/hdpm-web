@@ -278,29 +278,17 @@ export default async function ContactPage() {
                 </div>
               </div>
 
-              {/* Map Placeholder */}
+              {/* Office Map */}
               <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
-                <div className="flex h-64 items-center justify-center bg-neutral-100 text-neutral-mid">
-                  <div className="text-center">
-                    <svg aria-hidden="true"
-                      className="mx-auto h-10 w-10 text-neutral-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"
-                      />
-                    </svg>
-                    <p className="mt-2 text-sm">Google Maps embed placeholder</p>
-                    <p className="text-xs text-neutral-400">
-                      1515 SW Reindeer Ave, Redmond, OR
-                    </p>
-                  </div>
-                </div>
+                <iframe
+                  title="High Desert Property Management office — 1515 SW Reindeer Ave, Redmond, OR"
+                  src="https://www.google.com/maps?q=1515%20SW%20Reindeer%20Ave%2C%20Redmond%2C%20OR%2097756&output=embed"
+                  className="block h-64 w-full"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                />
               </div>
             </div>
           </div>
