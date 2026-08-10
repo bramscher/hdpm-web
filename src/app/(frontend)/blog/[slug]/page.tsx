@@ -11,16 +11,29 @@ import LeadForm from '@/components/forms/LeadForm'
 import type { Post, Category, Media } from '@/payload-types'
 import { SITE_URL } from '@/lib/site-url'
 
+// Render on demand rather than pre-rendering every post at build time. The
+// blog is Payload/Postgres-backed, and a build should never depend on the
+// database being reachable and migrated — Preview deployments connect to a
+// DB without the Payload schema, which used to crash `next build` while
+// collecting page data. See generateStaticParams below.
+export const dynamic = 'force-dynamic'
+
 // ---------- Static params ----------
 export async function generateStaticParams() {
-  const payload = await getPayload({ config })
-  const posts = await payload.find({
-    collection: 'posts',
-    where: { status: { equals: 'published' } },
-    limit: 1000,
-    select: { slug: true },
-  })
-  return posts.docs.map((post) => ({ slug: post.slug }))
+  // Guarded so a missing/empty database (e.g. Preview) yields zero prerendered
+  // params instead of failing the build; pages are then rendered on demand.
+  try {
+    const payload = await getPayload({ config })
+    const posts = await payload.find({
+      collection: 'posts',
+      where: { status: { equals: 'published' } },
+      limit: 1000,
+      select: { slug: true },
+    })
+    return posts.docs.map((post) => ({ slug: post.slug }))
+  } catch {
+    return []
+  }
 }
 
 // ---------- Metadata ----------

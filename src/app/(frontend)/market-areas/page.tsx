@@ -7,6 +7,11 @@ import { breadcrumbSchema, localBusinessSchema } from '@/lib/schema'
 import Button from '@/components/ui/Button'
 import type { MarketArea, Media } from '@/payload-types'
 
+// Rendered on demand: this page reads CMS content from Payload/Postgres, and
+// the build must not depend on the database being reachable and migrated
+// (Preview deployments connect to a DB without the Payload schema).
+export const dynamic = 'force-dynamic'
+
 export const metadata = createMetadata({
   title: 'Property Management Across Central Oregon',
   description:

@@ -12,14 +12,24 @@ function getAreaImage(area: MarketArea): string {
 }
 
 export default async function MarketAreasSection() {
-  const payload = await getPayload({ config })
-  const { docs: areas } = await payload.find({
-    collection: 'market-areas',
-    where: { status: { equals: 'published' } },
-    limit: 100,
-    sort: '-population',
-    depth: 1,
-  })
+  // Guarded so the section (and the pages that render it, e.g. the home page)
+  // degrade to nothing rather than crashing the build when the database is
+  // unreachable or unmigrated — Preview deployments connect to a DB without
+  // the Payload schema.
+  let areas: MarketArea[] = []
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({
+      collection: 'market-areas',
+      where: { status: { equals: 'published' } },
+      limit: 100,
+      sort: '-population',
+      depth: 1,
+    })
+    areas = res.docs
+  } catch {
+    return null
+  }
 
   if (areas.length === 0) return null
 

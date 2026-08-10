@@ -9,6 +9,11 @@ import type { Media as MediaType } from '@/payload-types'
 import Button from '@/components/ui/Button'
 import OwnerRentalAnalysisForm from '@/components/forms/OwnerRentalAnalysisForm'
 
+// Rendered on demand: this page reads CMS content from Payload/Postgres, and
+// the build must not depend on the database being reachable and migrated
+// (Preview deployments connect to a DB without the Payload schema).
+export const dynamic = 'force-dynamic'
+
 export async function generateMetadata() {
   const page = await getPageBySlug('owners')
   return createMetadata({

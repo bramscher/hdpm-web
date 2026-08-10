@@ -1,6 +1,7 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import Link from 'next/link'
+import type { Testimonial } from '@/payload-types'
 import Reveal from '@/components/ui/Reveal'
 import Section from '@/components/ui/Section'
 
@@ -33,18 +34,27 @@ function GoogleIcon() {
 }
 
 export default async function TestimonialsSection() {
-  const payload = await getPayload({ config })
-
-  const { docs: testimonials } = await payload.find({
-    collection: 'testimonials',
-    where: {
-      approved: { equals: true },
-      rating: { equals: 5 },
-    },
-    sort: '-publishedAt',
-    limit: 10,
-    depth: 0,
-  })
+  // Guarded so the section (and the pages that render it, e.g. the home page)
+  // degrade to nothing rather than crashing the build when the database is
+  // unreachable or unmigrated — Preview deployments connect to a DB without
+  // the Payload schema.
+  let testimonials: Testimonial[] = []
+  try {
+    const payload = await getPayload({ config })
+    const res = await payload.find({
+      collection: 'testimonials',
+      where: {
+        approved: { equals: true },
+        rating: { equals: 5 },
+      },
+      sort: '-publishedAt',
+      limit: 10,
+      depth: 0,
+    })
+    testimonials = res.docs
+  } catch {
+    return null
+  }
 
   if (testimonials.length === 0) return null
 
