@@ -6,9 +6,40 @@ const LEESA_PHONE = '541-406-6409'
  * "Call Leesa" CTA — Leesa is HDPM's AI leasing agent, reachable by phone
  * 24/7. Rendered next to apply/browse actions (listing detail pages, the
  * For Tenants hero) so renters can call for leasing help any time. Pass
- * `className` (e.g. `w-full`) to fit the surrounding layout.
+ * `className` (e.g. `w-full`) to fit the surrounding layout. Use
+ * `compact` for tight spaces like listing cards.
  */
-export default function CallLeesa({ className = '' }: { className?: string }) {
+export default function CallLeesa({
+  className = '',
+  compact = false,
+}: {
+  className?: string
+  compact?: boolean
+}) {
+  if (compact) {
+    return (
+      <a
+        href={`tel:${LEESA_PHONE.replace(/\D/g, '')}`}
+        aria-label={`Call Leesa, our AI leasing agent, available 24/7, at ${LEESA_PHONE}`}
+        className={`group flex items-center justify-center gap-2 rounded-lg border border-accent/30 bg-white px-3 py-2 font-body text-sm font-semibold text-accent transition-colors hover:border-accent hover:bg-accent/5 ${className}`}
+      >
+        <span className="relative h-6 w-6 shrink-0 overflow-hidden rounded-full">
+          <Image
+            src="/agents/leesa.png"
+            alt=""
+            fill
+            sizes="24px"
+            className="object-cover object-top"
+          />
+        </span>
+        Call Leesa
+        <span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
+          24/7
+        </span>
+      </a>
+    )
+  }
+
   return (
     <a
       href={`tel:${LEESA_PHONE.replace(/\D/g, '')}`}

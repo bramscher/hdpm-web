@@ -4,6 +4,7 @@ import type { AppFolioListing } from '@/lib/appfolio'
 import { isListingPetFriendly, formatAvailableDate } from '@/lib/listing-utils'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import CallLeesa from '@/components/CallLeesa'
 import Card from '@/components/ui/Card'
 
 // Neutral placeholder while AppFolio photos stream in
@@ -124,8 +125,8 @@ export default function ListingCard({
           {formatAvailableDate(listing.AvailableOn)}
         </p>
 
-        {/* Apply button */}
-        <div className="mt-4 pt-1">
+        {/* Apply button + Call Leesa */}
+        <div className="mt-4 flex flex-col gap-2 pt-1">
           <Button
             href={listing.ApplicationURL}
             target="_blank"
@@ -139,6 +140,7 @@ export default function ListingCard({
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
             </svg>
           </Button>
+          <CallLeesa compact className="w-full" />
         </div>
       </div>
     </Card>
