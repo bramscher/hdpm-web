@@ -71,9 +71,14 @@ export default async function ListingDetailPage({
   const availableDate = formatAvailableDate(listing.AvailableOn)
 
   // The RentZap application link is pasted into the marketing description and
-  // is reachable from the flier (where Apply Now points); strip it from the
-  // displayed copy so the raw URL doesn't show up in the listing text.
+  // is the same link the flier's Apply Now points to; pull it out to drive the
+  // Apply Now button here too, and strip it from the displayed copy so the raw
+  // URL doesn't show up in the listing text. Fall back to the AppFolio
+  // application URL when a listing has no RentZap link in its description.
   const { cleanedDescription } = extractRentZapUrl(listing.MarketingDescription)
+  // getCachedListingById resolves the RentZap link from the description or,
+  // failing that, by scraping the AppFolio detail page.
+  const rentZapUrl = listing.RentZapURL ?? null
 
   const jsonLd = [
     listingSchema({ ...listing, MarketingDescription: cleanedDescription }),
@@ -340,21 +345,48 @@ export default async function ListingDetailPage({
                   </div>
                 </div>
 
-                <Button
-                  href={listing.ApplicationURL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="primary"
-                  size="lg"
-                  className="mt-6 w-full"
-                >
-                  Apply Now
-                </Button>
+                {rentZapUrl ? (
+                  <>
+                    <Button
+                      href={rentZapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="primary"
+                      size="lg"
+                      className="mt-6 w-full"
+                    >
+                      Apply on RentZap
+                    </Button>
+                    <Button
+                      href={listing.ApplicationURL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="outline"
+                      size="lg"
+                      className="mt-3 w-full"
+                    >
+                      Download Flyer
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    href={listing.ApplicationURL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variant="primary"
+                    size="lg"
+                    className="mt-6 w-full"
+                  >
+                    Apply Now
+                  </Button>
+                )}
 
                 <CallLeesa className="mt-3 w-full justify-center" />
 
                 <p className="mt-3 text-center font-body text-xs text-neutral-mid">
-                  Apply online or view the flier — the application is on the flier page.
+                  {rentZapUrl
+                    ? 'Apply online with RentZap, or open the flyer on AppFolio.'
+                    : 'Apply Now opens the online rental application in a new tab.'}
                 </p>
               </div>
             </div>

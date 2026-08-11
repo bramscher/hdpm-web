@@ -39,6 +39,9 @@ export interface AppFolioListing {
   PropertyType?: string
   PropertyId?: string
   AppFolioDetailId?: string
+  // Unique RentZap application link for this listing (from the marketing
+  // description or scraped from the AppFolio detail page). Undefined if none.
+  RentZapURL?: string
 }
 
 // ============================================
@@ -243,13 +246,25 @@ export async function fetchPublicListingPhotos(): Promise<Map<string, PublicList
  * Fetch all photos from a specific listing's detail page.
  * Returns an array of CDN image URLs.
  */
-export async function fetchDetailPagePhotos(
+// A real browser User-Agent — AppFolio omits the RentZap apply link (and some
+// markup) when the request looks like a bot, so scraping it needs this.
+const BROWSER_UA =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'
+
+const RENTZAP_APPLY_URL = /https?:\/\/(?:www\.)?rentzap\.com\/apply\/\d+/i
+
+/**
+ * Fetch a listing's public AppFolio detail page once and pull out both the
+ * gallery photos and the unique RentZap application link (which AppFolio only
+ * embeds for browser-looking requests).
+ */
+export async function fetchDetailPage(
   detailId: string,
-): Promise<{ Url: string; Caption?: string }[]> {
+): Promise<{ photos: { Url: string; Caption?: string }[]; rentZapUrl: string | null }> {
   try {
     const response = await fetch(`${APPFOLIO_PUBLIC_BASE}/listings/detail/${detailId}`, {
       headers: {
-        'User-Agent': 'HDPM-Website/1.0',
+        'User-Agent': BROWSER_UA,
         Accept: 'text/html',
       },
       next: { revalidate: 900 },
@@ -257,7 +272,7 @@ export async function fetchDetailPagePhotos(
 
     if (!response.ok) {
       console.warn(`[AppFolio] Detail page ${detailId} returned ${response.status}`)
-      return []
+      return { photos: [], rentZapUrl: null }
     }
 
     const html = await response.text()
@@ -275,12 +290,24 @@ export async function fetchDetailPagePhotos(
       Caption: i === 0 ? 'Primary photo' : `Photo ${i + 1}`,
     }))
 
-    console.log(`[AppFolio] Detail page ${detailId}: found ${photos.length} photos`)
-    return photos
+    const rentZapUrl = html.match(RENTZAP_APPLY_URL)?.[0] ?? null
+
+    console.log(
+      `[AppFolio] Detail page ${detailId}: found ${photos.length} photos${rentZapUrl ? ', rentzap link' : ''}`,
+    )
+    return { photos, rentZapUrl }
   } catch (err) {
     console.warn(`[AppFolio] Failed to fetch detail page ${detailId}:`, err)
-    return []
+    return { photos: [], rentZapUrl: null }
   }
+}
+
+/** Photos-only wrapper (used by the sync cron). */
+export async function fetchDetailPagePhotos(
+  detailId: string,
+): Promise<{ Url: string; Caption?: string }[]> {
+  const { photos } = await fetchDetailPage(detailId)
+  return photos
 }
 
 // ============================================
@@ -1039,16 +1066,25 @@ export async function getCachedListingById(id: string): Promise<AppFolioListing 
 
     const listing = rowToListing(data as WebListingRow)
 
-    // For detail pages, fetch ALL photos from the public detail page
+    // Prefer a RentZap link pasted into the marketing description…
+    const descRentZap = listing.MarketingDescription.match(RENTZAP_APPLY_URL)?.[0]
+    if (descRentZap) listing.RentZapURL = descRentZap
+
+    // For detail pages, fetch ALL photos from the public detail page — and,
+    // while we have the HTML, the RentZap link for listings (e.g. 1400) whose
+    // description doesn't include it.
     const detailId = (data as WebListingRow).appfolio_detail_id
     if (detailId) {
       try {
-        const detailPhotos = await fetchDetailPagePhotos(detailId)
-        if (detailPhotos.length > 0) {
-          listing.UnitPhotos = detailPhotos
+        const { photos, rentZapUrl } = await fetchDetailPage(detailId)
+        if (photos.length > 0) {
+          listing.UnitPhotos = photos
         }
-      } catch (photoErr) {
-        console.warn(`[AppFolio] Failed to fetch detail page photos for ${id}:`, photoErr)
+        if (!listing.RentZapURL && rentZapUrl) {
+          listing.RentZapURL = rentZapUrl
+        }
+      } catch (detailErr) {
+        console.warn(`[AppFolio] Failed to fetch detail page for ${id}:`, detailErr)
       }
     }
 
