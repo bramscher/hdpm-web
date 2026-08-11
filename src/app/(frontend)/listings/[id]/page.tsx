@@ -365,7 +365,7 @@ export default async function ListingDetailPage({
                       size="lg"
                       className="mt-3 w-full"
                     >
-                      Download Flyer
+                      View Flier
                     </Button>
                   </>
                 ) : (
@@ -385,7 +385,7 @@ export default async function ListingDetailPage({
 
                 <p className="mt-3 text-center font-body text-xs text-neutral-mid">
                   {rentZapUrl
-                    ? 'Apply online with RentZap, or open the flyer on AppFolio.'
+                    ? 'Apply online with RentZap, or view the flier on AppFolio.'
                     : 'Apply Now opens the online rental application in a new tab.'}
                 </p>
               </div>
