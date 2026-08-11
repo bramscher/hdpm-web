@@ -24,11 +24,34 @@ export function isListingPetFriendly(listing: Pick<AppFolioListing, 'CatsAllowed
  */
 const RENTZAP_URL = /https?:\/\/(?:www\.)?rentzap\.com\/apply\/\d+/i
 
+/**
+ * AppFolio's public-page HTML (og:description) arrives HTML-encoded, so text
+ * like "Month's" shows up as "Month&#39;s". Decode the common named and numeric
+ * entities so the copy reads as plain text. Named-entity decode runs last so a
+ * literal "&amp;#39;" resolves to "&#39;" rather than being over-decoded.
+ */
+const NAMED_ENTITIES: Record<string, string> = {
+  '&quot;': '"',
+  '&apos;': "'",
+  '&lt;': '<',
+  '&gt;': '>',
+  '&nbsp;': ' ',
+  '&amp;': '&',
+}
+
+export function decodeHtmlEntities(input: string | null | undefined): string {
+  if (!input) return ''
+  return input
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&(?:quot|apos|lt|gt|nbsp|amp);/g, (m) => NAMED_ENTITIES[m])
+}
+
 export function extractRentZapUrl(description: string | null | undefined): {
   rentZapUrl: string | null
   cleanedDescription: string
 } {
-  const text = description ?? ''
+  const text = decodeHtmlEntities(description)
   const match = text.match(RENTZAP_URL)
   const cleanedDescription = text
     .replace(/\r\n/g, '\n')

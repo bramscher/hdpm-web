@@ -13,6 +13,8 @@
  *   APPFOLIO_DEVELOPER_ID
  */
 
+import { decodeHtmlEntities } from './listing-utils'
+
 // ============================================
 // Public Interface (consumed by all pages/components)
 // ============================================
@@ -702,7 +704,7 @@ async function fetchDetailPageData(detailId: string): Promise<{
 
     // Description from og:description
     const descMatch = html.match(/property="og:description"\s+content="([^"]*)"/)
-    const description = descMatch ? descMatch[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"') : ''
+    const description = descMatch ? decodeHtmlEntities(descMatch[1]) : ''
 
     // Pet policy
     const dogMatch = html.match(/(?:Dogs?\s+(?:not\s+)?allowed[^<]*)/i)
