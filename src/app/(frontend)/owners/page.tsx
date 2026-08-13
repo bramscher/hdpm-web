@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
-import { breadcrumbSchema } from '@/lib/schema'
+import { breadcrumbSchema, localBusinessSchema } from '@/lib/schema'
 import { getPageBySlug } from '@/lib/page-content'
 import type { Media as MediaType, Testimonial } from '@/payload-types'
 import Button from '@/components/ui/Button'
@@ -17,13 +17,15 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata() {
   const page = await getPageBySlug('owners')
   return createMetadata({
+    // The root layout applies a `%s | High Desert Property Management` title
+    // template, so this fallback must NOT include the brand suffix itself.
     title:
       page?.meta?.title ??
       page?.title ??
-      'Property Management for Central Oregon Owners',
+      'Property Management for Owners in Central Oregon',
     description:
       page?.meta?.description ??
-      'Full-service property management in Bend, Redmond, Sisters, and Central Oregon. Tenant placement, maintenance coordination, financial reporting, and more. Get a free rental analysis.',
+      'Full-service property management for rental owners and investors in Bend, Redmond, Sisters, and Central Oregon. Leasing, tenant screening, maintenance, rent collection, and owner reporting. Get a free rental analysis.',
     path: '/owners',
   })
 }
@@ -209,10 +211,13 @@ export default async function OwnersPage() {
     ownerTestimonials = []
   }
 
-  const jsonLd = breadcrumbSchema([
-    { name: 'Home', url: '/' },
-    { name: 'Property Owners', url: '/owners' },
-  ])
+  const jsonLd = [
+    breadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Property Owners', url: '/owners' },
+    ]),
+    localBusinessSchema(),
+  ]
 
   return (
     <>
@@ -485,6 +490,43 @@ export default async function OwnersPage() {
                   )}
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== AREAS WE SERVE ==================== */}
+      <section className="border-t border-neutral-100 bg-neutral-light py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="font-heading text-overline uppercase text-accent">
+              Areas We Serve
+            </p>
+            <h2 className="mt-3 font-heading text-title text-neutral-dark">
+              Local Property Management Across Central Oregon
+            </h2>
+            <p className="mt-4 text-body-lg text-neutral-mid">
+              We manage rentals for owners throughout the region. Explore the
+              market you own in:
+            </p>
+          </div>
+
+          <div className="mx-auto mt-10 flex max-w-3xl flex-wrap justify-center gap-3">
+            {[
+              { slug: 'bend', city: 'Bend' },
+              { slug: 'redmond', city: 'Redmond' },
+              { slug: 'sisters', city: 'Sisters' },
+              { slug: 'prineville', city: 'Prineville' },
+              { slug: 'madras', city: 'Madras' },
+              { slug: 'culver', city: 'Culver' },
+            ].map((area) => (
+              <Link
+                key={area.slug}
+                href={`/market-areas/${area.slug}`}
+                className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-dark shadow-sm transition-colors hover:border-accent hover:bg-accent/5 hover:text-accent"
+              >
+                {area.city} property management
+              </Link>
             ))}
           </div>
         </div>

@@ -13,6 +13,7 @@ const navLinks = [
   { href: '/owners', label: 'For Owners' },
   { href: '/tenants', label: 'For Tenants' },
   { href: '/listings', label: 'Listings' },
+  { href: '/market-areas', label: 'Areas' },
   { href: '/about', label: 'About' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },

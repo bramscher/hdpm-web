@@ -63,8 +63,12 @@ export async function generateMetadata({
   if (!area) return {}
 
   return createMetadata({
-    title: area.seoTitle || `Property Management in ${area.city}, Oregon`,
-    description: area.seoDescription || `Professional property management in ${area.city}, OR.`,
+    // The root layout applies a `%s | High Desert Property Management` title
+    // template, so titles here must NOT include the brand suffix themselves.
+    title: area.seoTitle || `${area.city} Property Management`,
+    description:
+      area.seoDescription ||
+      `Property management in ${area.city}, Oregon for rental owners and investors — leasing, tenant screening, maintenance, rent collection, and owner support across Central Oregon.`,
     path: `/market-areas/${area.slug}`,
   })
 }
@@ -96,6 +100,21 @@ export default async function MarketAreaPage({
 
   const listings = await getCachedListingsByCity(area.city)
   const featuredListings = listings.slice(0, 3)
+
+  // Sibling market areas for internal cross-linking (Redmond ↔ Bend, etc.).
+  // Natural anchor text ("Bend property management") consolidates ranking
+  // signal onto each city's canonical /market-areas/{slug} page.
+  const { docs: siblingAreas } = await payload.find({
+    collection: 'market-areas',
+    where: {
+      status: { equals: 'published' },
+      slug: { not_equals: slug },
+    },
+    sort: 'city',
+    limit: 12,
+    depth: 0,
+    select: { city: true, slug: true },
+  })
 
   const jsonLd = [
     breadcrumbSchema([
@@ -162,11 +181,11 @@ export default async function MarketAreaPage({
           </nav>
 
           <h1 className="font-heading text-display-sm sm:text-display lg:text-display-xl text-white">
-            Property Management in{' '}
             <span className="relative">
               {area.city}
               <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-accent opacity-80" />
-            </span>
+            </span>{' '}
+            Property Management
           </h1>
           {area.tagline && (
             <p className="mt-4 max-w-2xl text-body-lg text-white/80 italic">
@@ -485,6 +504,42 @@ export default async function MarketAreaPage({
           </div>
         </div>
       </section>
+
+      {/* Other market areas — internal links with natural anchor text */}
+      {siblingAreas.length > 0 && (
+        <section className="border-t border-neutral-100 bg-white py-14 sm:py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 className="font-heading text-heading text-neutral-dark">
+              Property Management Across Central Oregon
+            </h2>
+            <p className="mt-3 max-w-2xl text-neutral-mid">
+              We manage rentals for owners throughout the region. Explore our
+              other local markets:
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {siblingAreas.map((sibling) => (
+                <Link
+                  key={sibling.slug}
+                  href={`/market-areas/${sibling.slug}`}
+                  className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-light px-4 py-2 text-sm font-medium text-neutral-dark transition-colors hover:border-accent hover:bg-accent/5 hover:text-accent"
+                >
+                  {sibling.city} property management
+                </Link>
+              ))}
+            </div>
+            <p className="mt-6 text-sm text-neutral-mid">
+              Ready to get started?{' '}
+              <Link
+                href="/owners"
+                className="font-semibold text-accent underline-offset-2 hover:underline"
+              >
+                See how we work with property owners
+              </Link>
+              .
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Contact CTA */}
       <section className="relative overflow-hidden py-24">
