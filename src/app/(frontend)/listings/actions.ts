@@ -3,27 +3,37 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { findDuplicateLead } from '@/lib/crm/dedup'
-import { normalizeEmail, normalizePhone, splitName } from '../../../lib/crm/normalization'
-import { sendLeadNotification } from '@/lib/notify'
+import { normalizeEmail, normalizePhone, splitName } from '@/lib/crm/normalization'
 import { pushToAppFolio } from '@/lib/crm/appfolio-handoff'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyPayload = any
 
-export type ContactFormState = {
+export type ListingInquiryState = {
   success: boolean
   error: string | null
 }
 
-export async function submitContactForm(
-  _prevState: ContactFormState,
+/**
+ * Handle a "Request info / I'm interested" submission from a listing detail
+ * page. Creates (or appends to) a tenant lead, records the property interest,
+ * and emails a formatted guest card to staff for manual AppFolio entry (via
+ * pushToAppFolio — the interim handoff until AppFolio grants write access).
+ */
+export async function submitListingInquiry(
+  _prevState: ListingInquiryState,
   formData: FormData,
-): Promise<ContactFormState> {
+): Promise<ListingInquiryState> {
   const name = formData.get('name') as string
   const email = formData.get('email') as string
   const phone = (formData.get('phone') as string) || undefined
-  const propertyInterest = (formData.get('propertyInterest') as string) || undefined
-  const message = formData.get('message') as string
+  const message = (formData.get('message') as string) || ''
+  const desiredMoveInDate = (formData.get('desiredMoveInDate') as string) || undefined
+
+  // Property context (hidden fields injected by the form)
+  const propertyExternalId = (formData.get('propertyExternalId') as string) || undefined
+  const propertyAddress = (formData.get('propertyAddress') as string) || undefined
+  const listingUrl = (formData.get('listingUrl') as string) || undefined
 
   // Honeypot: bots fill every field. Pretend success, create nothing.
   if (formData.get('hp_check')) {
@@ -40,12 +50,9 @@ export async function submitContactForm(
     landingPage: (formData.get('landingPage') as string) || undefined,
   }
 
-  // Basic validation
-  if (!name || !email || !message) {
-    return { success: false, error: 'Please fill in all required fields.' }
+  if (!name || !email) {
+    return { success: false, error: 'Please provide your name and email.' }
   }
-
-  // Simple email validation
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { success: false, error: 'Please enter a valid email address.' }
   }
@@ -57,13 +64,7 @@ export async function submitContactForm(
     const normalizedEmail = normalizeEmail(email)
     const normalizedPhone = phone ? normalizePhone(phone) : undefined
 
-    // Map propertyInterest to leadType
-    const leadTypeMap: Record<string, string> = {
-      owner: 'owner',
-      tenant: 'tenant',
-      general: 'other',
-    }
-    const leadType = propertyInterest ? leadTypeMap[propertyInterest] || 'other' : undefined
+    const propertyLabel = propertyAddress || propertyExternalId || 'a listing'
     const existingLeadId = await findDuplicateLead(payload, normalizedEmail, normalizedPhone)
 
     let leadId: number
@@ -75,14 +76,10 @@ export async function submitContactForm(
           lead: existingLeadId,
           type: 'note' as const,
           direction: 'inbound' as const,
-          body: `Website contact form inquiry${message ? `: ${message}` : ''}`,
-          metadata: {
-            source: 'website',
-            propertyInterest: propertyInterest || undefined,
-          },
+          body: `Listing inquiry — ${propertyLabel}${message ? `: ${message}` : ''}`,
+          metadata: { source: 'website', propertyExternalId, propertyAddress },
         },
       })
-
       await payload.update({
         collection: 'leads',
         id: existingLeadId,
@@ -93,12 +90,14 @@ export async function submitContactForm(
         collection: 'leads',
         data: {
           firstName,
-          lastName: lastName || '—', // fallback when only one name was provided
+          lastName: lastName || '—',
           email: normalizedEmail,
           phone: normalizedPhone,
-          leadType: leadType as 'tenant' | 'owner' | 'vendor' | 'other' | undefined,
-          message,
+          leadType: 'tenant' as const,
+          message: message || undefined,
+          desiredMoveInDate: desiredMoveInDate || undefined,
           source: 'website' as const,
+          sourceDetail: `Listing inquiry — ${propertyLabel}`,
           lastInboundAt: new Date().toISOString(),
           attribution,
         },
@@ -106,42 +105,40 @@ export async function submitContactForm(
       leadId = created.id
     }
 
-    if (propertyInterest === 'tenant') {
-      // Prospective tenant → email a guest card to staff for AppFolio entry.
-      // (Contact-form inquiries carry no specific unit; the guest card is
-      // still worth creating so the prospect is tracked in AppFolio.)
-      await pushToAppFolio(payload, {
-        id: leadId,
-        firstName,
-        lastName,
-        email: normalizedEmail,
-        phone: normalizedPhone,
-        preferredLanguage: 'en',
-        source: 'website',
-        sourceDetail: 'Contact form — prospective tenant',
-        message,
-      })
-    } else {
-      await sendLeadNotification({
-        subject: `New contact form message — ${name}`,
-        fields: [
-          ['Name', name],
-          ['Email', normalizedEmail],
-          ['Phone', normalizedPhone],
-          ['Inquiry type', propertyInterest],
-          ['Message', message],
-          ['Repeat contact', existingLeadId ? 'Yes — existing CRM lead' : undefined],
-          ['UTM source / medium', [attribution.utmSource, attribution.utmMedium].filter(Boolean).join(' / ')],
-          ['UTM campaign', attribution.utmCampaign],
-          ['Referrer', attribution.referrer],
-          ['Landing page', attribution.landingPage],
-        ],
+    // Record the property interest
+    if (propertyExternalId || propertyAddress) {
+      await payload.create({
+        collection: 'properties-interest',
+        data: {
+          lead: leadId,
+          propertyExternalId: propertyExternalId || '',
+          address: propertyAddress || '',
+          sourceUrl: listingUrl || '',
+          status: 'interested' as const,
+        },
       })
     }
 
+    // Interim AppFolio handoff: email a formatted guest card to staff.
+    await pushToAppFolio(payload, {
+      id: leadId,
+      firstName,
+      lastName,
+      email: normalizedEmail,
+      phone: normalizedPhone,
+      preferredLanguage: 'en',
+      source: 'website',
+      sourceDetail: 'Listing inquiry',
+      desiredMoveInDate,
+      message,
+      propertyAddress,
+      propertyExternalId,
+      listingUrl,
+    })
+
     return { success: true, error: null }
   } catch (err) {
-    console.error('Failed to create lead:', err)
+    console.error('Failed to submit listing inquiry:', err)
     return {
       success: false,
       error: 'Something went wrong. Please try again or call us directly.',

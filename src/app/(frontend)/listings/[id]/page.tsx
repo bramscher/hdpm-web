@@ -8,6 +8,7 @@ import { isDogFriendlyPolicy, formatAvailableDate, extractRentZapUrl } from '@/l
 import ShareListing from '@/components/listings/ShareListing'
 import PhotoGallery from '@/components/listings/PhotoGallery'
 import CallLeesa from '@/components/CallLeesa'
+import ListingInquiryForm from '@/components/listings/ListingInquiryForm'
 import Button from '@/components/ui/Button'
 
 // Use dynamic rendering — listing data from AppFolio v0 API is too large to SSG all at build time
@@ -300,6 +301,26 @@ export default async function ListingDetailPage({
                   </span>
                 </p>
               </section>
+
+              {/* Inquiry form */}
+              <section id="inquire" className="mt-10 scroll-mt-24">
+                <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+                  <h2 className="font-heading text-subtitle text-neutral-dark">
+                    Interested in this home?
+                  </h2>
+                  <p className="mt-2 font-body text-sm text-neutral-mid">
+                    Send us your info and our team will follow up about{' '}
+                    {listing.Address1}.
+                  </p>
+                  <div className="mt-6">
+                    <ListingInquiryForm
+                      propertyExternalId={String(listing.Id)}
+                      propertyAddress={`${listing.Address1}, ${listing.City}, ${listing.State} ${listing.Zip}`}
+                      listingUrl={`${SITE_URL}/listings/${listing.Id}`}
+                    />
+                  </div>
+                </div>
+              </section>
             </div>
 
             {/* Right column: CTA sidebar */}
@@ -380,6 +401,15 @@ export default async function ListingDetailPage({
                     Apply Now
                   </Button>
                 )}
+
+                <Button
+                  href="#inquire"
+                  variant="outline"
+                  size="lg"
+                  className="mt-3 w-full"
+                >
+                  Request Info
+                </Button>
 
                 <CallLeesa className="mt-3 w-full justify-center" />
 

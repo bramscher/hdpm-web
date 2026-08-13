@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { normalizeEmail, normalizePhone, splitName } from '@/lib/crm/normalization'
 import { findDuplicateLead } from '@/lib/crm/dedup'
+import { pushToAppFolio } from '@/lib/crm/appfolio-handoff'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyPayload = any
@@ -120,6 +121,28 @@ export async function POST(req: NextRequest) {
           sourceUrl: body.sourceUrl || '',
           status: 'interested' as const,
         },
+      })
+    }
+
+    // Interim AppFolio handoff: email a formatted guest card to staff for
+    // manual entry (guest cards are for prospective tenants). Never throws.
+    if ((body.leadType || 'tenant') === 'tenant') {
+      await pushToAppFolio(payload, {
+        id: lead.id,
+        firstName: firstName || 'Unknown',
+        lastName,
+        email: email || undefined,
+        phone: phone || undefined,
+        preferredLanguage: body.preferredLanguage,
+        source: body.source,
+        sourceDetail: body.sourceDetail,
+        desiredMoveInDate: body.desiredMoveInDate,
+        monthlyBudgetMin: body.monthlyBudgetMin,
+        monthlyBudgetMax: body.monthlyBudgetMax,
+        message: body.message,
+        propertyAddress: body.propertyAddress,
+        propertyExternalId: body.propertyExternalId,
+        listingUrl: body.sourceUrl,
       })
     }
 
