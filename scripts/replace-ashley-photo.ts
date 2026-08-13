@@ -11,7 +11,8 @@ import { getPayload } from 'payload'
 import config from '../src/payload.config'
 
 const NAME = 'Ashley Bessey'
-const SRC = process.argv[2] || '/Users/cab_1/Desktop/IMG_2992.jpeg'
+const SRC = process.argv[2] || '/Users/cab_1/Desktop/ashley.jpg'
+const UPLOAD_NAME = 'ashley-bessey-cropped.jpg'
 
 async function main() {
   if (!fs.existsSync(SRC)) {
@@ -42,7 +43,7 @@ async function main() {
     data: { alt: `${NAME} — High Desert Property Management` },
     file: {
       data: buffer,
-      name: 'ashley-bessey-headshot.jpg',
+      name: UPLOAD_NAME,
       mimetype,
       size: buffer.length,
     },
