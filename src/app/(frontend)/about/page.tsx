@@ -6,6 +6,7 @@ import config from '@payload-config'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema } from '@/lib/schema'
 import { getPageBySlug } from '@/lib/page-content'
+import { AGENTS, telHref, smsHref } from '@/lib/agents'
 import { FOUNDED_YEAR, SERVING_SINCE } from '@/lib/constants'
 import type { Media as MediaType, TeamMember } from '@/payload-types'
 
@@ -83,31 +84,24 @@ const defaultIcon = (
 
 const serviceAreas = ['Bend', 'Redmond', 'Sisters', 'Prineville', 'Culver', 'Metolius', 'Madras']
 
+// Names, numbers, and text greetings come from the shared registry (@/lib/agents)
+// so every call/text CTA site-wide stays in sync; the copy below is page-specific.
 const aiAgents = [
   {
-    name: 'Leesa',
-    role: 'Leasing',
-    image: '/agents/leesa.png',
+    ...AGENTS.leesa,
     availability: 'After hours',
-    phone: '541-406-6409',
     description:
       'Ask for Leesa for anything leasing — current availability, application questions, and scheduling tours — whenever our leasing team is away.',
   },
   {
-    name: 'Sally',
-    role: 'General Questions',
-    image: '/agents/sally.png',
+    ...AGENTS.sally,
     availability: 'After hours',
-    phone: '541-548-0383',
     description:
       'Sally is a friendly first stop for general questions about our services, your account, and how we work — perfect for when the office is closed or everyone is on another call.',
   },
   {
-    name: 'Max',
-    role: 'Maintenance',
-    image: '/agents/max.png',
+    ...AGENTS.max,
     availability: '24/7',
-    phone: '541-600-2592',
     description:
       'Max is here around the clock for maintenance requests and emergencies, so urgent issues never have to wait until morning.',
   },
@@ -415,20 +409,37 @@ export default async function AboutPage() {
                 <p className="mt-3 text-sm leading-relaxed text-neutral-mid">
                   {agent.description}
                 </p>
-                <a
-                  href={`tel:${agent.phone.replace(/\D/g, '')}`}
-                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-full border border-accent/20 bg-accent/5 px-4 py-2 text-sm font-semibold text-accent transition-colors hover:border-accent hover:bg-accent hover:text-white"
-                  aria-label={`Call ${agent.name} at ${agent.phone}`}
-                >
-                  <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
-                    />
-                  </svg>
-                  {agent.phone}
-                </a>
+                <div className="mt-4 flex items-center justify-center gap-2">
+                  <a
+                    href={telHref(agent.phone)}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-dark"
+                    aria-label={`Call ${agent.name} at ${agent.phone}`}
+                  >
+                    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
+                      />
+                    </svg>
+                    Call
+                  </a>
+                  <a
+                    href={smsHref(agent.phone, agent.smsGreeting)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/5 px-4 py-2 text-sm font-semibold text-accent transition-colors hover:border-accent hover:bg-accent hover:text-white"
+                    aria-label={`Text ${agent.name} at ${agent.phone}`}
+                  >
+                    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
+                      />
+                    </svg>
+                    Text
+                  </a>
+                </div>
+                <p className="mt-2 text-xs text-neutral-mid">{agent.phone}</p>
               </div>
             ))}
           </div>
