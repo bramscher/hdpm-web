@@ -33,6 +33,7 @@ High Desert Property Management (HDPM) manages residential rental properties for
 - [For Property Owners](${SITE_URL}/owners): services, pricing conversation, and the free rental analysis request form
 - [Available Rentals](${SITE_URL}/listings): current rental listings across Central Oregon, updated every 15 minutes
 - [For Tenants](${SITE_URL}/tenants): applications, maintenance requests, and tenant resources
+- [AI Agents](${SITE_URL}/ai-agents): HDPM's AI phone agents — Leesa (leasing), Max (24/7 maintenance), Sally (general questions) — that answer overflow and after-hours calls, with human follow-up
 - [About](${SITE_URL}/about): company history and team
 - [Contact](${SITE_URL}/contact): office contact details and hours
 - [Blog](${SITE_URL}/blog): property management guidance for Central Oregon owners and tenants

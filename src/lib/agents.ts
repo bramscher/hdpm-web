@@ -14,6 +14,10 @@ export interface Agent {
   name: string
   role: string
   image: string
+  /** Talking-avatar intro video (16:9), poster falls back to `image`. */
+  video: string
+  /** One-line description of what this agent helps with. */
+  tagline: string
   /** Marketing availability label — only Max is genuinely 24/7. */
   availability: '24/7' | 'After hours'
   /** Human-formatted number, e.g. '541-406-6409'. */
@@ -28,6 +32,8 @@ export const AGENTS: Record<AgentId, Agent> = {
     name: 'Leesa',
     role: 'Leasing',
     image: '/agents/leesa.png',
+    video: '/agents/leesa.mp4',
+    tagline: 'Current availability, applications, and booking tours.',
     availability: 'After hours',
     phone: '541-406-6409',
     smsGreeting: 'Hi Leesa, I have a question about a rental.',
@@ -37,6 +43,8 @@ export const AGENTS: Record<AgentId, Agent> = {
     name: 'Sally',
     role: 'General Questions',
     image: '/agents/sally.png',
+    video: '/agents/sally.mp4',
+    tagline: 'General questions, plus routing to Leesa or Max.',
     availability: 'After hours',
     phone: '541-548-0383',
     smsGreeting: 'Hi Sally, I have a question for High Desert Property Management.',
@@ -46,6 +54,8 @@ export const AGENTS: Record<AgentId, Agent> = {
     name: 'Max',
     role: 'Maintenance',
     image: '/agents/max.png',
+    video: '/agents/max.mp4',
+    tagline: 'Maintenance requests and emergencies, day or night.',
     availability: '24/7',
     phone: '541-600-2592',
     smsGreeting: "Hi Max, I'd like to report a maintenance issue.",

@@ -16,6 +16,7 @@ const staticRoutes: Array<{
   { path: '/tenants', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/listings', changeFrequency: 'daily', priority: 0.9 },
   { path: '/market-areas', changeFrequency: 'monthly', priority: 0.8 },
+  { path: '/ai-agents', changeFrequency: 'monthly', priority: 0.7 },
   { path: '/about', changeFrequency: 'monthly', priority: 0.7 },
   { path: '/blog', changeFrequency: 'weekly', priority: 0.7 },
   { path: '/contact', changeFrequency: 'yearly', priority: 0.6 },
