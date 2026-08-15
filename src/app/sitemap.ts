@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getCachedListings } from '@/lib/appfolio'
 import { SITE_URL } from '@/lib/site-url'
+import { TOOLS, TOOLS_BASE } from '@/lib/tools/registry'
 
 const staticRoutes: Array<{
   path: string
@@ -30,6 +31,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }))
+
+  // Free tools hub + individual calculators (static, code-defined routes).
+  const toolEntries: MetadataRoute.Sitemap = [
+    { url: `${SITE_URL}${TOOLS_BASE}`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    ...TOOLS.map((tool) => ({
+      url: `${SITE_URL}${TOOLS_BASE}/${tool.slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
+  ]
 
   let marketAreaEntries: MetadataRoute.Sitemap = []
   try {
@@ -120,6 +132,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticEntries,
+    ...toolEntries,
     ...marketAreaEntries,
     ...blogEntries,
     ...pageEntries,
