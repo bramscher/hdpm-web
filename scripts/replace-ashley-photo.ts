@@ -27,7 +27,7 @@ async function main() {
     limit: 1,
     depth: 0,
   })
-  const member = docs[0] as Record<string, unknown> | undefined
+  const member = docs[0] as unknown as Record<string, unknown> | undefined
   if (!member) {
     console.error(`ERR team member not found: ${NAME}`)
     process.exit(1)

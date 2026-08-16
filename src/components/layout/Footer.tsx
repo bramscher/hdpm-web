@@ -8,6 +8,7 @@ const quickLinks = [
   { href: '/owner-portal', label: 'Owner Login' },
   { href: '/tenants', label: 'Current Tenants' },
   { href: '/listings', label: 'Available Rentals' },
+  { href: '/ai-agents', label: 'AI Agents' },
   { href: '/about', label: 'About Us' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },

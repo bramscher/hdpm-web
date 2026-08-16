@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getCachedListings } from '@/lib/appfolio'
 import { SITE_URL } from '@/lib/site-url'
+import { TOOLS, TOOLS_BASE } from '@/lib/tools/registry'
 
 const staticRoutes: Array<{
   path: string
@@ -15,6 +16,7 @@ const staticRoutes: Array<{
   { path: '/tenants', changeFrequency: 'monthly', priority: 0.9 },
   { path: '/listings', changeFrequency: 'daily', priority: 0.9 },
   { path: '/market-areas', changeFrequency: 'monthly', priority: 0.8 },
+  { path: '/ai-agents', changeFrequency: 'monthly', priority: 0.7 },
   { path: '/about', changeFrequency: 'monthly', priority: 0.7 },
   { path: '/blog', changeFrequency: 'weekly', priority: 0.7 },
   { path: '/contact', changeFrequency: 'yearly', priority: 0.6 },
@@ -30,6 +32,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }))
+
+  // Free tools hub + individual calculators (static, code-defined routes).
+  const toolEntries: MetadataRoute.Sitemap = [
+    { url: `${SITE_URL}${TOOLS_BASE}`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    ...TOOLS.map((tool) => ({
+      url: `${SITE_URL}${TOOLS_BASE}/${tool.slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
+  ]
 
   let marketAreaEntries: MetadataRoute.Sitemap = []
   try {
@@ -120,6 +133,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticEntries,
+    ...toolEntries,
     ...marketAreaEntries,
     ...blogEntries,
     ...pageEntries,
