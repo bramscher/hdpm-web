@@ -9,16 +9,40 @@ import Button from '@/components/ui/Button'
 import { springGentle } from '@/lib/motion'
 import { cn } from '@/lib/cn'
 
-const navLinks = [
-  { href: '/owners', label: 'For Owners' },
-  { href: '/tenants', label: 'For Tenants' },
-  { href: '/listings', label: 'Listings' },
-  { href: '/market-areas', label: 'Areas' },
-  { href: '/ai-agents', label: 'AI Agents' },
-  { href: '/tools', label: 'Tools' },
-  { href: '/about', label: 'About' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/contact', label: 'Contact' },
+type NavChild = { href: string; label: string; external?: boolean }
+type NavItem = { label: string; href?: string; children?: NavChild[] }
+
+const nav: NavItem[] = [
+  {
+    label: 'Owners',
+    children: [
+      { href: '/owners', label: 'Owner Services' },
+      { href: '/tools', label: 'Investor Tools' },
+      { href: '/owner-portal', label: 'Owner Login' },
+    ],
+  },
+  {
+    label: 'Tenants',
+    children: [
+      { href: '/tenants', label: 'For Tenants' },
+      { href: '/listings', label: 'Available Rentals' },
+      {
+        href: 'https://highdesertpm.appfolio.com/connect/users/sign_in',
+        label: 'Tenant Portal',
+        external: true,
+      },
+    ],
+  },
+  { label: 'Areas', href: '/market-areas' },
+  { label: 'AI Agents', href: '/ai-agents' },
+  {
+    label: 'About',
+    children: [
+      { href: '/about', label: 'About Us' },
+      { href: '/blog', label: 'Blog' },
+      { href: '/contact', label: 'Contact' },
+    ],
+  },
 ]
 
 export default function Header() {
@@ -29,6 +53,9 @@ export default function Header() {
 
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`)
+
+  const groupActive = (item: NavItem) =>
+    item.children?.some((c) => !c.external && isActive(c.href)) ?? false
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
@@ -65,30 +92,68 @@ export default function Header() {
 
         {/* Desktop Nav */}
         <nav className="hidden items-center gap-1 lg:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              aria-current={isActive(link.href) ? 'page' : undefined}
-              className={cn(
-                'relative rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-accent active:bg-white/10',
-                isActive(link.href) ? 'text-accent' : 'text-white/90',
-              )}
-            >
-              {link.label}
-              {isActive(link.href) && (
-                <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-accent" />
-              )}
-            </Link>
-          ))}
-          <Button
-            href="/owner-portal"
-            variant="outline-light"
-            size="sm"
-            className="ml-3"
-          >
-            Owner Login
-          </Button>
+          {nav.map((item) =>
+            item.children ? (
+              <div key={item.label} className="group relative">
+                <button
+                  type="button"
+                  aria-haspopup="true"
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-accent group-focus-within:text-accent',
+                    groupActive(item) ? 'text-accent' : 'text-white/90',
+                  )}
+                >
+                  {item.label}
+                  <ChevronIcon />
+                </button>
+                {/* Panel — pt-2 keeps the hover bridge gapless */}
+                <div className="invisible absolute left-0 top-full pt-2 opacity-0 transition-all duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                  <div className="min-w-[210px] rounded-xl border border-white/10 bg-primary p-1.5 shadow-xl">
+                    {item.children.map((child) =>
+                      child.external ? (
+                        <a
+                          key={child.href + child.label}
+                          href={child.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block rounded-lg px-3 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-accent"
+                        >
+                          {child.label}
+                        </a>
+                      ) : (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          aria-current={isActive(child.href) ? 'page' : undefined}
+                          className={cn(
+                            'block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-white/10 hover:text-accent',
+                            isActive(child.href) ? 'text-accent' : 'text-white/90',
+                          )}
+                        >
+                          {child.label}
+                        </Link>
+                      ),
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href!}
+                aria-current={isActive(item.href!) ? 'page' : undefined}
+                className={cn(
+                  'relative rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-accent active:bg-white/10',
+                  isActive(item.href!) ? 'text-accent' : 'text-white/90',
+                )}
+              >
+                {item.label}
+                {isActive(item.href!) && (
+                  <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-accent" />
+                )}
+              </Link>
+            ),
+          )}
           <Button href="/owners#get-started" variant="primary" size="md" className="ml-3">
             Free Rental Analysis
           </Button>
@@ -148,20 +213,55 @@ export default function Header() {
       >
         <div className="flex-1 overflow-y-auto px-6 pt-20 pb-8">
           <div className="flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                aria-current={isActive(link.href) ? 'page' : undefined}
-                className={cn(
-                  'rounded-lg px-3 py-3 text-base font-medium transition-colors hover:text-accent active:bg-white/10',
-                  isActive(link.href) ? 'text-accent' : 'text-white/90',
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {nav.map((item) =>
+              item.children ? (
+                <div key={item.label} className="pt-3 first:pt-0">
+                  <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wide text-white/40">
+                    {item.label}
+                  </p>
+                  {item.children.map((child) =>
+                    child.external ? (
+                      <a
+                        key={child.href + child.label}
+                        href={child.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setMobileOpen(false)}
+                        className="block rounded-lg px-3 py-2.5 text-base font-medium text-white/90 transition-colors hover:text-accent active:bg-white/10"
+                      >
+                        {child.label}
+                      </a>
+                    ) : (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        onClick={() => setMobileOpen(false)}
+                        aria-current={isActive(child.href) ? 'page' : undefined}
+                        className={cn(
+                          'block rounded-lg px-3 py-2.5 text-base font-medium transition-colors hover:text-accent active:bg-white/10',
+                          isActive(child.href) ? 'text-accent' : 'text-white/90',
+                        )}
+                      >
+                        {child.label}
+                      </Link>
+                    ),
+                  )}
+                </div>
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href!}
+                  onClick={() => setMobileOpen(false)}
+                  aria-current={isActive(item.href!) ? 'page' : undefined}
+                  className={cn(
+                    'rounded-lg px-3 py-3 text-base font-medium transition-colors hover:text-accent active:bg-white/10',
+                    isActive(item.href!) ? 'text-accent' : 'text-white/90',
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
           </div>
           <div className="mt-6 space-y-3 border-t border-white/10 pt-6">
             <Button
@@ -172,15 +272,6 @@ export default function Header() {
               onClick={() => setMobileOpen(false)}
             >
               Free Rental Analysis
-            </Button>
-            <Button
-              href="/owner-portal"
-              variant="outline-light"
-              size="md"
-              className="w-full"
-              onClick={() => setMobileOpen(false)}
-            >
-              Owner Login
             </Button>
           </div>
           <div className="mt-8 space-y-3 text-sm text-white/60">
@@ -202,6 +293,23 @@ export default function Header() {
         </div>
       </motion.nav>
     </header>
+  )
+}
+
+function ChevronIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180 motion-reduce:transform-none"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path
+        fillRule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+        clipRule="evenodd"
+      />
+    </svg>
   )
 }
 

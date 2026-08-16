@@ -59,7 +59,14 @@ export default function OwnerPortalPage() {
             any time, from any device.
           </p>
           <div className="mt-8">
-            <Button href={OWNER_PORTAL_URL} variant="primary" size="lg" elevated>
+            <Button
+              href={OWNER_PORTAL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="primary"
+              size="lg"
+              elevated
+            >
               Log In to the Owner Portal
             </Button>
           </div>
