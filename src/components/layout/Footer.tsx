@@ -3,16 +3,37 @@ import Link from 'next/link'
 import { FOUNDED_YEAR } from '@/lib/constants'
 import Button from '@/components/ui/Button'
 
-const quickLinks = [
-  { href: '/owners', label: 'Property Owners' },
-  { href: '/owner-portal', label: 'Owner Login' },
-  { href: '/tenants', label: 'Current Tenants' },
-  { href: '/listings', label: 'Available Rentals' },
-  { href: '/ai-agents', label: 'AI Agents' },
-  { href: '/tools', label: 'Free Tools' },
-  { href: '/about', label: 'About Us' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/contact', label: 'Contact' },
+// Grouped to mirror the header nav.
+const linkGroups = [
+  {
+    heading: 'Owners',
+    links: [
+      { href: '/owners', label: 'Owner Services' },
+      { href: '/tools', label: 'Investor Tools' },
+      { href: '/owner-portal', label: 'Owner Login' },
+    ],
+  },
+  {
+    heading: 'Tenants',
+    links: [
+      { href: '/tenants', label: 'For Tenants' },
+      { href: '/listings', label: 'Available Rentals' },
+      {
+        href: 'https://highdesertpm.appfolio.com/connect/users/sign_in',
+        label: 'Tenant Portal',
+        external: true,
+      },
+    ],
+  },
+  {
+    heading: 'Company',
+    links: [
+      { href: '/ai-agents', label: 'AI Agents' },
+      { href: '/about', label: 'About Us' },
+      { href: '/blog', label: 'Blog' },
+      { href: '/contact', label: 'Contact' },
+    ],
+  },
 ]
 
 const marketAreas = [
@@ -75,23 +96,40 @@ export default function Footer() {
             </a>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="mb-4 text-overline text-accent uppercase">
-              Quick Links
-            </h3>
-            <ul className="space-y-2.5">
-              {quickLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-white/70 transition-colors hover:text-accent"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Grouped Links (mirrors header nav) */}
+          <div className="space-y-6">
+            {linkGroups.map((group) => (
+              <div key={group.heading}>
+                <h3 className="mb-4 text-overline text-accent uppercase">
+                  {group.heading}
+                </h3>
+                <ul className="space-y-2.5">
+                  {group.links.map((link) =>
+                    'external' in link && link.external ? (
+                      <li key={link.href + link.label}>
+                        <a
+                          href={link.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-white/70 transition-colors hover:text-accent"
+                        >
+                          {link.label}
+                        </a>
+                      </li>
+                    ) : (
+                      <li key={link.href}>
+                        <Link
+                          href={link.href}
+                          className="text-sm text-white/70 transition-colors hover:text-accent"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              </div>
+            ))}
           </div>
 
           {/* Market Areas */}
