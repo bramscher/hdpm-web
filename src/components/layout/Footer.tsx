@@ -9,6 +9,7 @@ const quickLinks = [
   { href: '/tenants', label: 'Current Tenants' },
   { href: '/listings', label: 'Available Rentals' },
   { href: '/ai-agents', label: 'AI Agents' },
+  { href: '/tools', label: 'Free Tools' },
   { href: '/about', label: 'About Us' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },

@@ -15,6 +15,7 @@ const navLinks = [
   { href: '/listings', label: 'Listings' },
   { href: '/market-areas', label: 'Areas' },
   { href: '/ai-agents', label: 'AI Agents' },
+  { href: '/tools', label: 'Tools' },
   { href: '/about', label: 'About' },
   { href: '/blog', label: 'Blog' },
   { href: '/contact', label: 'Contact' },
