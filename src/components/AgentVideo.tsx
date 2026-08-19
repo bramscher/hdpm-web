@@ -7,7 +7,7 @@ import type { Agent } from '@/lib/agents'
 export default function AgentVideo({ agent, className = '' }: { agent: Agent; className?: string }) {
   return (
     <video
-      className={`aspect-video w-full rounded-xl border border-neutral-200 bg-neutral-100 object-cover shadow-sm ${className}`}
+      className={`aspect-video w-full rounded-xl border border-neutral-200 bg-neutral-100 object-cover object-top shadow-sm ${className}`}
       poster={agent.image}
       preload="metadata"
       controls
