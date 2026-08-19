@@ -2,7 +2,12 @@ import type { CollectionConfig } from 'payload'
 
 export const Users: CollectionConfig = {
   slug: 'users',
-  auth: true,
+  // 8-hour admin session (Payload default is 2h). Matches hdpm-chat's Auth.js
+  // maxAge so admins aren't silently logged out mid-session — an expired token
+  // leaves the admin SPA rendered but makes every /api action return Unauthorized.
+  auth: {
+    tokenExpiration: 28800, // 8 hours, in seconds
+  },
   admin: {
     useAsTitle: 'email',
     group: 'Admin',
