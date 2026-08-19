@@ -22,13 +22,13 @@ const nav: NavItem[] = [
     ],
   },
   {
-    label: 'Tenants',
+    label: 'Renters',
     children: [
-      { href: '/tenants', label: 'For Tenants' },
+      { href: '/tenants', label: 'For Renters' },
       { href: '/listings', label: 'Available Rentals' },
       {
         href: 'https://highdesertpm.appfolio.com/connect/users/sign_in',
-        label: 'Tenant Portal',
+        label: 'Renter Portal',
         external: true,
       },
     ],
@@ -154,7 +154,14 @@ export default function Header() {
               </Link>
             ),
           )}
-          <Button href="/owners#get-started" variant="primary" size="md" className="ml-3">
+          {/* Extra convenience button — the /listings link also lives in the
+              Renters dropdown, so hide this below xl to avoid crowding the row. */}
+          <div className="ml-3 hidden items-center xl:flex">
+            <Button href="/listings" variant="outline" size="md">
+              Available Rentals
+            </Button>
+          </div>
+          <Button href="/owners#get-started" variant="primary" size="md" className="ml-3 xl:ml-2">
             Free Rental Analysis
           </Button>
         </nav>
@@ -264,6 +271,15 @@ export default function Header() {
             )}
           </div>
           <div className="mt-6 space-y-3 border-t border-white/10 pt-6">
+            <Button
+              href="/listings"
+              variant="outline"
+              size="md"
+              className="w-full"
+              onClick={() => setMobileOpen(false)}
+            >
+              Available Rentals
+            </Button>
             <Button
               href="/owners#get-started"
               variant="primary"
