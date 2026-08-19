@@ -504,8 +504,8 @@ export default function AutomationsView() {
         {/* Listings Sync */}
         <ActionCard
           title="Sync Listings from AppFolio"
-          description="Pull the latest available rental listings from AppFolio and update the local cache. This normally runs automatically via cron."
-          buttonLabel="Sync Now"
+          description="Pull the latest available rental listings and photos from AppFolio and update the local cache. Forces a fresh pull (bypasses the 15-minute cache), so use this if a listing's photo is missing or out of date. This normally runs automatically every 15 minutes via cron."
+          buttonLabel="Refresh from AppFolio"
           icon={
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819" />

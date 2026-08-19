@@ -126,6 +126,25 @@ export interface PublicListingInfo {
   allPhotoUrls?: string[]
 }
 
+// ============================================
+// Fetch freshness
+// ============================================
+
+/** Default ISR window for AppFolio fetches (15 minutes). */
+const LISTINGS_REVALIDATE = 900
+
+/**
+ * Build the Next.js caching options for an AppFolio fetch.
+ *
+ * Normal (scheduled) reads use the 15-minute ISR cache to stay cheap. A manual
+ * admin "Sync Now" passes `forceFresh` to bypass the cache entirely, so it
+ * genuinely re-pulls from AppFolio instead of replaying the last cached response
+ * (which is why a corrected primary image wouldn't otherwise show up on demand).
+ */
+function freshnessOpts(forceFresh?: boolean): RequestInit {
+  return forceFresh ? { cache: 'no-store' } : { next: { revalidate: LISTINGS_REVALIDATE } }
+}
+
 /**
  * Fetch the public AppFolio listings page and extract:
  * - Address -> primary CDN image URL
@@ -133,7 +152,9 @@ export interface PublicListingInfo {
  *
  * Returns a Map keyed by the raw address string from the public page.
  */
-export async function fetchPublicListingPhotos(): Promise<Map<string, PublicListingInfo>> {
+export async function fetchPublicListingPhotos(
+  forceFresh = false,
+): Promise<Map<string, PublicListingInfo>> {
   const result = new Map<string, PublicListingInfo>()
 
   try {
@@ -142,7 +163,7 @@ export async function fetchPublicListingPhotos(): Promise<Map<string, PublicList
         'User-Agent': 'HDPM-Website/1.0',
         Accept: 'text/html',
       },
-      next: { revalidate: 900 },
+      ...freshnessOpts(forceFresh),
     })
 
     if (!response.ok) {
@@ -262,6 +283,7 @@ const RENTZAP_APPLY_URL = /https?:\/\/(?:www\.)?rentzap\.com\/apply\/\d+/i
  */
 export async function fetchDetailPage(
   detailId: string,
+  forceFresh = false,
 ): Promise<{ photos: { Url: string; Caption?: string }[]; rentZapUrl: string | null }> {
   try {
     const response = await fetch(`${APPFOLIO_PUBLIC_BASE}/listings/detail/${detailId}`, {
@@ -269,7 +291,7 @@ export async function fetchDetailPage(
         'User-Agent': BROWSER_UA,
         Accept: 'text/html',
       },
-      next: { revalidate: 900 },
+      ...freshnessOpts(forceFresh),
     })
 
     if (!response.ok) {
@@ -307,8 +329,9 @@ export async function fetchDetailPage(
 /** Photos-only wrapper (used by the sync cron). */
 export async function fetchDetailPagePhotos(
   detailId: string,
+  forceFresh = false,
 ): Promise<{ Url: string; Caption?: string }[]> {
-  const { photos } = await fetchDetailPage(detailId)
+  const { photos } = await fetchDetailPage(detailId, forceFresh)
   return photos
 }
 
@@ -327,6 +350,7 @@ async function v0Fetch<T>(
   clientId: string,
   clientSecret: string,
   developerId: string,
+  forceFresh = false,
 ): Promise<V0ListResponse<T>> {
   const url = new URL(`${APPFOLIO_V0_BASE}${path}`)
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v))
@@ -340,7 +364,7 @@ async function v0Fetch<T>(
       'X-AppFolio-Developer-ID': developerId,
       Accept: 'application/json',
     },
-    next: { revalidate: 900 }, // 15-minute ISR cache
+    ...freshnessOpts(forceFresh), // 15-minute ISR cache unless a manual sync forces fresh
   })
 
   const text = await response.text()
@@ -356,7 +380,7 @@ async function v0Fetch<T>(
         'X-AppFolio-Developer-ID': developerId,
         Accept: 'application/json',
       },
-      next: { revalidate: 900 },
+      ...freshnessOpts(forceFresh),
     })
     const retryText = await retryResponse.text()
     if (!retryResponse.ok) {
@@ -500,6 +524,7 @@ async function fetchAllProperties(
   clientId: string,
   clientSecret: string,
   developerId: string,
+  forceFresh = false,
 ): Promise<V0Property[]> {
   const allProperties: V0Property[] = []
   let pageNumber = 1
@@ -517,6 +542,7 @@ async function fetchAllProperties(
       clientId,
       clientSecret,
       developerId,
+      forceFresh,
     )
 
     const properties = res.data || []
@@ -545,6 +571,7 @@ async function fetchAllUnits(
   clientId: string,
   clientSecret: string,
   developerId: string,
+  forceFresh = false,
 ): Promise<V0Unit[]> {
   const allUnits: V0Unit[] = []
   let pageNumber = 1
@@ -562,6 +589,7 @@ async function fetchAllUnits(
       clientId,
       clientSecret,
       developerId,
+      forceFresh,
     )
 
     const units = res.data || []
@@ -657,7 +685,10 @@ interface PublicPageListing {
 /**
  * Parse detail page HTML for availability, pets, deposit, description, and amenities.
  */
-async function fetchDetailPageData(detailId: string): Promise<{
+async function fetchDetailPageData(
+  detailId: string,
+  forceFresh = false,
+): Promise<{
   availableOn: string
   description: string
   catsAllowed: boolean
@@ -676,7 +707,7 @@ async function fetchDetailPageData(detailId: string): Promise<{
   try {
     const response = await fetch(`${APPFOLIO_PUBLIC_BASE}/listings/detail/${detailId}`, {
       headers: { 'User-Agent': 'HDPM-Website/1.0', Accept: 'text/html' },
-      next: { revalidate: 900 },
+      ...freshnessOpts(forceFresh),
     })
     if (!response.ok) return defaults
     const html = await response.text()
@@ -735,11 +766,11 @@ async function fetchDetailPageData(detailId: string): Promise<{
  * basic data (address, rent, beds/baths/sqft, photo, detail ID) and
  * optionally enriches from detail pages.
  */
-async function getListingsFromPublicPage(): Promise<AppFolioListing[]> {
+async function getListingsFromPublicPage(forceFresh = false): Promise<AppFolioListing[]> {
   try {
     const response = await fetch(`${APPFOLIO_PUBLIC_BASE}/listings`, {
       headers: { 'User-Agent': 'HDPM-Website/1.0', Accept: 'text/html' },
-      next: { revalidate: 900 },
+      ...freshnessOpts(forceFresh),
     })
     if (!response.ok) {
       console.error(`[AppFolio] Public page returned ${response.status}`)
@@ -808,7 +839,7 @@ async function getListingsFromPublicPage(): Promise<AppFolioListing[]> {
         amenities: [] as string[],
       }
       if (detailId) {
-        detailData = await fetchDetailPageData(detailId)
+        detailData = await fetchDetailPageData(detailId, forceFresh)
         if (!detailData.deposit) detailData.deposit = rent
         // Brief delay to avoid hammering the server
         await new Promise((r) => setTimeout(r, 500))
@@ -849,22 +880,22 @@ async function getListingsFromPublicPage(): Promise<AppFolioListing[]> {
 // Public: Get all available listings
 // ============================================
 
-export async function getListings(): Promise<AppFolioListing[]> {
+export async function getListings(forceFresh = false): Promise<AppFolioListing[]> {
   const config = getConfig()
   if (!config) {
     console.warn('[AppFolio] Missing API credentials, falling back to public page scrape')
-    return getListingsFromPublicPage()
+    return getListingsFromPublicPage(forceFresh)
   }
 
   const { clientId, clientSecret, developerId } = config
 
   try {
     // Step 1: Fetch public page to get CDN image URLs and detail IDs
-    const publicData = await fetchPublicListingPhotos()
+    const publicData = await fetchPublicListingPhotos(forceFresh)
     console.log(`[AppFolio] Public page: ${publicData.size} listings with images`)
 
     // Step 2: Fetch all properties from v0 API
-    const allProperties = await fetchAllProperties(clientId, clientSecret, developerId)
+    const allProperties = await fetchAllProperties(clientId, clientSecret, developerId, forceFresh)
     console.log(`[AppFolio] Total properties: ${allProperties.length}`)
 
     // Filter out hidden properties
@@ -877,7 +908,7 @@ export async function getListings(): Promise<AppFolioListing[]> {
     }
 
     // Step 3: Fetch all units from v0 API
-    const allUnits = await fetchAllUnits(clientId, clientSecret, developerId)
+    const allUnits = await fetchAllUnits(clientId, clientSecret, developerId, forceFresh)
     console.log(`[AppFolio] Total units: ${allUnits.length}`)
 
     // Step 4: Filter to available units only
@@ -927,7 +958,7 @@ export async function getListings(): Promise<AppFolioListing[]> {
   } catch (err) {
     console.error('[AppFolio] Failed to fetch listings via v0 API:', err)
     console.log('[AppFolio] Falling back to public page scrape...')
-    return getListingsFromPublicPage()
+    return getListingsFromPublicPage(forceFresh)
   }
 }
 

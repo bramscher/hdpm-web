@@ -27,11 +27,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  // A manual admin "Sync Now" passes ?fresh=1 to bypass the 15-minute ISR cache
+  // and genuinely re-pull from AppFolio (e.g. after a listing's primary photo was
+  // fixed). The scheduled cron omits it and uses the cache to stay cheap.
+  const forceFresh = ['1', 'true'].includes(
+    (request.nextUrl.searchParams.get('fresh') || '').toLowerCase(),
+  )
+
   try {
     const startTime = Date.now()
 
     // 1. Fetch all listings from AppFolio (v0 API + public page CDN images)
-    const listings = await getListings()
+    const listings = await getListings(forceFresh)
     if (!listings.length) {
       return NextResponse.json(
         { error: 'No listings returned from AppFolio — skipping sync to avoid data loss' },
@@ -44,7 +51,7 @@ export async function GET(request: NextRequest) {
     for (const listing of listings) {
       if (listing.AppFolioDetailId) {
         try {
-          const detailPhotos = await fetchDetailPagePhotos(listing.AppFolioDetailId)
+          const detailPhotos = await fetchDetailPagePhotos(listing.AppFolioDetailId, forceFresh)
           if (detailPhotos.length > 0) {
             listing.UnitPhotos = detailPhotos
           }
@@ -139,6 +146,10 @@ export async function GET(request: NextRequest) {
       synced: rows.length,
       removed: removedIds.length,
       elapsed_ms: elapsed,
+      fresh: forceFresh,
+      message: `${forceFresh ? 'Fresh pull: synced' : 'Synced'} ${rows.length} listings${
+        removedIds.length ? `, removed ${removedIds.length}` : ''
+      }`,
     })
   } catch (err) {
     console.error('[sync-listings] Sync failed:', err)
