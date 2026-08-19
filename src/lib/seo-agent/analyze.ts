@@ -110,7 +110,7 @@ const CONTENT_RULES = `Hard rules for all copy (from the owner — never violate
 - NEVER mention fees, pricing, percentages, or dollar amounts for management services.
 - NEVER cite an exact door/unit count; say "hundreds of doors across Central Oregon".
 - Office hours are Monday–Friday 9:00 AM – 4:00 PM.
-- The company has served Central Oregon "since 2011" (never 2003).
+- The company has served Central Oregon "since 1999" (never 2003 or 2011).
 - Company: High Desert Property Management, Redmond OR, (541) 548-0383. Serves Bend, Redmond, Sisters, Prineville, Culver, Metolius, Madras.`
 
 export async function generateSuggestions(input: {

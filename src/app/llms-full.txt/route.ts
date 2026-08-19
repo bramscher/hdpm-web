@@ -23,7 +23,7 @@ export async function GET() {
 
   const header = `# High Desert Property Management — Full Content
 
-> Professional residential property management across Central Oregon — Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras. Locally owned and operated since 2011, based in Redmond, Oregon. Phone: (541) 548-0383. Email: info@highdesertpm.com.
+> Professional residential property management across Central Oregon — Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras. Locally owned and operated since 1999, based in Redmond, Oregon. Phone: (541) 548-0383. Email: info@highdesertpm.com.
 
 This file contains the full text of every published article on ${SITE_URL}/blog. See ${SITE_URL}/llms.txt for a concise site index.
 

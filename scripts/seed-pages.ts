@@ -26,7 +26,7 @@ const PAGES: Array<{ title: string; slug: string; layout: PageLayout; [key: stri
     slug: 'home',
     layout: 'home',
     homeContent: {
-      heroBadge: 'Serving Central Oregon Since 2011',
+      heroBadge: 'Serving Central Oregon Since 1999',
       heroHeading: 'Central Oregon Property Management You Can Trust',
       heroSubheading:
         'Maximize your rental income and protect your investment with full-service property management in Bend, Redmond, Sisters, Prineville, Culver, Metolius, and Madras.',
@@ -44,7 +44,7 @@ const PAGES: Array<{ title: string; slug: string; layout: PageLayout; [key: stri
       heroHeading: 'About High Desert Property Management',
       heroSubheading: 'Trusted by Central Oregon property owners for over a decade.',
       storyLabel: 'Our Story',
-      storyHeading: 'Serving Central Oregon Since 2011',
+      storyHeading: 'Serving Central Oregon Since 1999',
       storyParagraphs: [
         {
           text: 'High Desert Property Management operates with a simple mission: to provide Central Oregon property owners with professional, reliable management they can trust. Over the years, we\'ve grown into one of the region\'s most respected property management companies.',

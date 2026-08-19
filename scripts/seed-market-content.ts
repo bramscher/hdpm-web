@@ -186,7 +186,7 @@ const CONTENT: Record<string, { sections: Section[]; seoTitle?: string; seoDescr
         heading: 'About Redmond, Oregon',
         paragraphs: p(
           'Redmond sits at the geographic center of Central Oregon, where Highways 97 and 126 cross — everything in the region is a short drive. The city has more than doubled in size since the early 2000s and continues to add households every year, supported by the airport, healthcare expansion, manufacturing, and its role as the region’s crossroads.',
-          'High Desert Property Management has been part of this community since 2011. It’s our home market, and no one manages it with more local depth.',
+          'High Desert Property Management has been part of this community since 1999. It’s our home market, and no one manages it with more local depth.',
         ),
       },
     ],

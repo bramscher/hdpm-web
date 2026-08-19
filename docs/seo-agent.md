@@ -22,7 +22,7 @@ weekly (`vercel.json` cron, Mondays 14:00 UTC / 6am Pacific) at
    `content` suggestions are advisory prose only — never auto-applied.
 
 Content guardrails are baked into the agent's prompt: no fees/pricing, no
-exact door counts, hours 9–4, "since 2011".
+exact door counts, hours 9–4, "since 1999".
 
 ## Setup (one time)
 

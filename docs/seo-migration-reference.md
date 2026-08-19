@@ -99,7 +99,7 @@
 
 ### About Page
 **Keywords:** Central Oregon property management company, professional property management, ethical service, long-term partnerships
-**History claims (from old site):** Founded 2011 as "Free Property Management," purchased "High Desert Property Management" in 2015, merging both companies
+**History claims:** Founded 1999; the "High Desert Property Management" brand was acquired in 2015. (Founding year corrected to 1999 on 2026-08-19 per Craig, superseding the old site's "since 2011.")
 **Team members listed on old site:** Cheryl Waterman (Maintenance Coordinator), Jennifer Bertran (Property Manager), Bianca Nyseth (Office Support), Mathew Free (Property Manager), Penny Free (Property Manager), Craig Bramscher (President)
 
 ### Contact Page
