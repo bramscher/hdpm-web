@@ -279,6 +279,11 @@ const BROWSER_UA =
 
 const RENTZAP_APPLY_URL = /https?:\/\/(?:www\.)?rentzap\.com\/apply\/\d+/i
 
+/** The stable AppFolio image UUID from a CDN URL (…/images/<uuid>/large.jpeg). */
+function imageIdFromUrl(url: string): string | null {
+  return url.match(/\/images\/([a-f0-9-]+)\//)?.[1] ?? null
+}
+
 /**
  * Fetch a listing's public AppFolio detail page once and pull out both the
  * gallery photos and the unique RentZap application link (which AppFolio only
@@ -311,8 +316,23 @@ export async function fetchDetailPage(
     while ((match = CDN_IMAGE_REGEX.exec(html)) !== null) {
       urls.add(match[0])
     }
+    const ordered = Array.from(urls)
 
-    const photos = Array.from(urls).map((url, i) => ({
+    // Force AppFolio's designated default/cover photo to position 0. The default
+    // is the detail page's og:image (its image UUID matches the grid's
+    // default_photo_url), which is more reliable than gallery HTML order. og:image
+    // is usually a medium.* variant, so match on the stable image UUID, not the URL.
+    const ogTag = html.match(/<meta[^>]+property=["']og:image["'][^>]*>/i)?.[0]
+    const ogId = ogTag ? imageIdFromUrl(ogTag.match(/content=["']([^"']+)["']/i)?.[1] ?? '') : null
+    if (ogId) {
+      const idx = ordered.findIndex((u) => imageIdFromUrl(u) === ogId)
+      if (idx > 0) {
+        const [primary] = ordered.splice(idx, 1)
+        ordered.unshift(primary)
+      }
+    }
+
+    const photos = ordered.map((url, i) => ({
       Url: url,
       Caption: i === 0 ? 'Primary photo' : `Photo ${i + 1}`,
     }))
