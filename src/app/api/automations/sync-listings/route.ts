@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api-auth'
+import { runListingsSync } from '@/lib/sync-listings'
 
-const CRON_SECRET = process.env.CRON_SECRET
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+export const dynamic = 'force-dynamic'
+export const maxDuration = 300 // 5 minutes — large dataset
 
 /**
  * POST /api/automations/sync-listings
  *
- * Admin-only proxy that calls the cron sync-listings endpoint
- * with the CRON_SECRET, so the admin UI doesn't need to know it.
+ * Admin-triggered "Refresh from AppFolio". Runs the sync in-process (no internal
+ * HTTP call to the cron endpoint, so no CRON_SECRET handshake that can fail
+ * behind a www redirect or a trailing-newline secret). Always forces a fresh
+ * pull so a corrected/added photo shows up immediately.
  */
 export async function POST() {
   const auth = await requireAuth({ roles: ['admin', 'editor'] })
@@ -16,25 +19,12 @@ export async function POST() {
     return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
 
-  if (!CRON_SECRET) {
-    return NextResponse.json(
-      { error: 'CRON_SECRET not configured' },
-      { status: 500 },
-    )
-  }
-
   try {
-    // fresh=1 → bypass the 15-minute ISR cache so the manual sync genuinely
-    // re-pulls listings and photos from AppFolio (not a replayed cached response).
-    const res = await fetch(`${BASE_URL}/api/cron/sync-listings?fresh=1`, {
-      headers: { Authorization: `Bearer ${CRON_SECRET}` },
-      cache: 'no-store',
-    })
-    const data = await res.json()
-    return NextResponse.json(data, { status: res.status })
+    const result = await runListingsSync(true)
+    return NextResponse.json(result)
   } catch (err) {
     return NextResponse.json(
-      { error: 'Sync failed', details: String(err) },
+      { error: 'Sync failed', details: err instanceof Error ? err.message : String(err) },
       { status: 500 },
     )
   }
