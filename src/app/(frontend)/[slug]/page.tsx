@@ -7,6 +7,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import { breadcrumbSchema } from '@/lib/schema'
 import type { Page, Media } from '@/payload-types'
 import { SITE_URL } from '@/lib/site-url'
+import { FOUNDED_YEAR } from '@/lib/constants'
 import Button from '@/components/ui/Button'
 
 // Slugs that are handled by dedicated routes — skip them here
@@ -68,7 +69,7 @@ export async function generateMetadata({
   // terms, …) still ship a sensible one instead of an empty tag.
   const description =
     page.meta?.description ||
-    `${page.title} — High Desert Property Management, serving Central Oregon property owners and tenants since 2011.`
+    `${page.title} — High Desert Property Management, serving Central Oregon property owners and tenants since ${FOUNDED_YEAR}.`
   const metaImage =
     typeof page.meta?.image === 'object' ? (page.meta.image as Media) : null
 

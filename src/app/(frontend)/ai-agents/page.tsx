@@ -3,6 +3,7 @@ import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema, faqSchema } from '@/lib/schema'
 import { SITE_URL } from '@/lib/site-url'
 import { AGENT_LIST } from '@/lib/agents'
+import { FOUNDED_YEAR } from '@/lib/constants'
 import Section from '@/components/ui/Section'
 import Card from '@/components/ui/Card'
 import Reveal from '@/components/ui/Reveal'
@@ -218,7 +219,7 @@ export default function AiAgentsPage() {
             <p className="mt-3 leading-relaxed text-neutral-mid">
               We believe in being straight with you: Leesa, Max, and Sally are AI. They’re a way to make
               sure you’re never stuck on hold or sent to voicemail — not a way to hide behind a machine.
-              Behind every agent is the same Central Oregon team that’s managed local homes since 2011,
+              Behind every agent is the same Central Oregon team that’s managed local homes since {FOUNDED_YEAR},
               and a real person always follows up.
             </p>
           </Card>

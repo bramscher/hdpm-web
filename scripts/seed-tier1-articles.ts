@@ -10,7 +10,7 @@
  * admin-only until an editor reviews and publishes them.
  *
  * Editorial guardrails (matches the blog/SEO agents): no specific fee numbers
- * or door counts, "since 2011", owner-focused and constructive.
+ * or door counts, "since 1999", owner-focused and constructive.
  *
  * Idempotent: skips a slug that already exists.
  *
@@ -161,7 +161,7 @@ const ARTICLES: Article[] = [
         a(REDMOND, 'Redmond property management'),
         t(' team will walk you through exactly what’s included, and a free '),
         a(OWNERS, 'rental analysis'),
-        t(' gives you a realistic rent range and days-on-market estimate with no obligation. High Desert Property Management has managed Redmond rentals from our office here since 2011.'),
+        t(' gives you a realistic rent range and days-on-market estimate with no obligation. High Desert Property Management has managed Redmond rentals from our office here since 1999.'),
       ),
     ],
   },
@@ -202,7 +202,7 @@ const ARTICLES: Article[] = [
         a(REDMOND, 'Redmond property management'),
         t(' services, or '),
         a(OWNERS, 'request a free rental analysis'),
-        t(' for your property. We’ve managed Redmond rentals from our local office since 2011.'),
+        t(' for your property. We’ve managed Redmond rentals from our local office since 1999.'),
       ),
     ],
   },
@@ -243,7 +243,7 @@ const ARTICLES: Article[] = [
         a(BEND, 'Bend property management'),
         t(' team applies these standards for local owners, or '),
         a(OWNERS, 'get a free rental analysis'),
-        t(' for your Bend property. High Desert Property Management has served Central Oregon owners since 2011.'),
+        t(' for your Bend property. High Desert Property Management has served Central Oregon owners since 1999.'),
       ),
     ],
   },
@@ -284,7 +284,7 @@ const ARTICLES: Article[] = [
         a(BEND, 'Bend property management'),
         t(' services, or start with a free '),
         a(OWNERS, 'rental analysis'),
-        t(' — a realistic rent range and management plan with no obligation. Serving Central Oregon since 2011.'),
+        t(' — a realistic rent range and management plan with no obligation. Serving Central Oregon since 1999.'),
       ),
     ],
   },

@@ -100,7 +100,7 @@ const POSTS = [
       ),
       heading('Where Professional Management Pays For Itself'),
       paragraph(
-        'A local management company earns its fee in the gaps: pricing the home correctly the first time, marketing it professionally, screening consistently, coordinating maintenance through established vendors, and keeping every notice and lease clause inside Oregon’s rules. High Desert Property Management has managed Redmond rentals from our Redmond office since 2011 — it’s our home market. If you’d rather own the asset than run the business, that’s exactly the job we do.',
+        'A local management company earns its fee in the gaps: pricing the home correctly the first time, marketing it professionally, screening consistently, coordinating maintenance through established vendors, and keeping every notice and lease clause inside Oregon’s rules. High Desert Property Management has managed Redmond rentals from our Redmond office since 1999 — it’s our home market. If you’d rather own the asset than run the business, that’s exactly the job we do.',
       ),
       heading('Bottom Line'),
       paragraph(
