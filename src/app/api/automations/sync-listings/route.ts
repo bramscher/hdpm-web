@@ -24,8 +24,11 @@ export async function POST() {
   }
 
   try {
-    const res = await fetch(`${BASE_URL}/api/cron/sync-listings`, {
+    // fresh=1 → bypass the 15-minute ISR cache so the manual sync genuinely
+    // re-pulls listings and photos from AppFolio (not a replayed cached response).
+    const res = await fetch(`${BASE_URL}/api/cron/sync-listings?fresh=1`, {
       headers: { Authorization: `Bearer ${CRON_SECRET}` },
+      cache: 'no-store',
     })
     const data = await res.json()
     return NextResponse.json(data, { status: res.status })
