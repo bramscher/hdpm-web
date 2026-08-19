@@ -52,7 +52,10 @@ export interface AppFolioListing {
 
 const APPFOLIO_V0_BASE = 'https://api.appfolio.com/api/v0'
 const APPFOLIO_PUBLIC_BASE = 'https://highdesertpm.appfolio.com'
-const CDN_IMAGE_REGEX = /https:\/\/images\.cdn\.appfolio\.com\/highdesertpm\/images\/[a-f0-9-]+\/large\.(?:jpg|png)/g
+// AppFolio serves photos as large.jpeg (most), large.jpg, or large.png — match all,
+// plus webp defensively. Missing "jpeg" here silently dropped every photo on
+// jpeg-only listings (e.g. /listings/1403).
+const CDN_IMAGE_REGEX = /https:\/\/images\.cdn\.appfolio\.com\/highdesertpm\/images\/[a-f0-9-]+\/large\.(?:jpe?g|png|webp)/g
 
 function getConfig() {
   const clientId = process.env.APPFOLIO_CLIENT_ID
@@ -233,7 +236,7 @@ export async function fetchPublicListingPhotos(
     if (result.size === 0) {
       // Try a more general approach: find listing blocks with both detail links and images
       // Pattern: blocks containing /listings/detail/{id} near CDN image URLs
-      const listingBlockRegex = /\/listings\/detail\/([a-f0-9-]+)[\s\S]*?(?:images\.cdn\.appfolio\.com\/highdesertpm\/images\/[a-f0-9-]+\/large\.jpg)/g
+      const listingBlockRegex = /\/listings\/detail\/([a-f0-9-]+)[\s\S]*?(?:images\.cdn\.appfolio\.com\/highdesertpm\/images\/[a-f0-9-]+\/large\.(?:jpe?g|png|webp))/g
       let blockMatch
       while ((blockMatch = listingBlockRegex.exec(html)) !== null) {
         const blockDetailId = blockMatch[1]
