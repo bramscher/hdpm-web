@@ -14,7 +14,7 @@ export const SeoSuggestions: CollectionConfig = {
     defaultColumns: ['pagePath', 'field', 'status', 'outcome', 'createdAt'],
     group: 'SEO',
     description:
-      'Approve a suggestion to apply it to the page. Outcomes are measured automatically ~4 weeks after applying.',
+      'Set a suggestion’s status to "Applied" to write it onto the page (or use "Apply All Pending" on the Automations page). Outcomes are measured automatically ~4 weeks after applying.',
   },
   access: {
     read: ({ req: { user } }) => Boolean(user),
@@ -78,11 +78,13 @@ export const SeoSuggestions: CollectionConfig = {
       index: true,
       options: [
         { label: 'Pending review', value: 'pending' },
-        { label: 'Approved (apply now)', value: 'approved' },
-        { label: 'Applied', value: 'applied' },
+        { label: 'Applied (writes to the page)', value: 'applied' },
         { label: 'Rejected', value: 'rejected' },
       ],
-      admin: { position: 'sidebar' },
+      admin: {
+        position: 'sidebar',
+        description: 'Set to "Applied" to write the suggested value onto the page.',
+      },
     },
     { name: 'appliedAt', type: 'date', admin: { position: 'sidebar', readOnly: true } },
     {
@@ -110,32 +112,42 @@ export const SeoSuggestions: CollectionConfig = {
   hooks: {
     beforeChange: [
       async ({ data, originalDoc, req }) => {
-        // Apply on the save that transitions a suggestion into "approved".
-        // Run in beforeChange (not afterChange) so both the target write and
-        // the self status flip happen inside this save's transaction — an
-        // afterChange self-update runs outside the still-open transaction,
-        // which on Postgres deadlocks against the locked row and silently
-        // fails to persist. The admin form submits every field, but fall back
-        // to originalDoc so a partial (API) update still resolves them.
+        // Applying == setting status to "Applied". Do the page write in the
+        // SAME save (beforeChange, with `req`) so it shares this save's
+        // transaction — an out-of-transaction write to the same/other row
+        // deadlocks on Postgres and silently fails. The admin form submits
+        // every field, but fall back to originalDoc for partial (API/bulk)
+        // updates that only send `status`.
+        const becomingApplied =
+          data.status === 'applied' && originalDoc?.status !== 'applied'
+        if (!becomingApplied) return data
+
+        // Stamp when it was applied regardless of what kind of suggestion it is.
+        data.appliedAt = new Date().toISOString()
+
         const field = data.field ?? originalDoc?.field
         const target = data.target ?? originalDoc?.target
         const suggestedValue = data.suggestedValue ?? originalDoc?.suggestedValue
         const pagePath = data.pagePath ?? originalDoc?.pagePath
 
-        const becomingApproved =
-          data.status === 'approved' && originalDoc?.status !== 'approved'
-        if (
-          !becomingApproved ||
-          field === 'content' || // content suggestions are advisory, never auto-applied
-          !target?.collection ||
-          !target?.docId
-        ) {
+        // Content suggestions are advisory, and a suggestion with no target has
+        // nothing to write — mark them applied without touching a page.
+        if (field === 'content' || !target?.collection || !target?.docId) {
+          req.payload.logger.info(
+            `[seo-agent] marked ${field} applied (advisory, no page write) for ${pagePath}`,
+          )
           return data
         }
 
-        // `pages` and `posts` render SEO fields from the seo-plugin's `meta`
-        // group; `market-areas` has flat seoTitle/seoDescription. Let a failed
-        // write throw so the admin sees the error instead of a silent no-op.
+        // docId is stored as a string (String(target.id)); coerce back to a
+        // number for Postgres integer-PK collections so the update resolves.
+        const targetId =
+          typeof target.docId === 'string' && /^\d+$/.test(target.docId)
+            ? Number(target.docId)
+            : target.docId
+
+        // `pages`/`posts` store SEO via the seo-plugin `meta` group;
+        // `market-areas` has flat seoTitle/seoDescription.
         const targetData =
           target.collection === 'market-areas'
             ? { [field]: suggestedValue }
@@ -144,19 +156,26 @@ export const SeoSuggestions: CollectionConfig = {
                   [field === 'seoTitle' ? 'title' : 'description']: suggestedValue,
                 },
               }
-        await req.payload.update({
-          collection: target.collection,
-          id: target.docId,
-          data: targetData,
-          req, // join this save's transaction
-        })
-        req.payload.logger.info(
-          `[seo-agent] applied ${field} to ${target.collection}/${target.docId} (${pagePath})`,
-        )
 
-        // Persist as "applied" in this same save — no second write needed.
-        data.status = 'applied'
-        data.appliedAt = new Date().toISOString()
+        try {
+          await req.payload.update({
+            collection: target.collection,
+            id: targetId,
+            data: targetData,
+            req, // join this save's transaction
+          })
+        } catch (err) {
+          // Surface a clear, actionable error in the admin instead of a raw
+          // stack — the save fails so the suggestion is NOT falsely marked
+          // applied when the page didn't actually change.
+          const detail = err instanceof Error ? err.message : String(err)
+          throw new Error(
+            `Couldn't write ${field} to ${target.collection}#${targetId} for ${pagePath}: ${detail}`,
+          )
+        }
+        req.payload.logger.info(
+          `[seo-agent] applied ${field} to ${target.collection}/${targetId} (${pagePath})`,
+        )
         return data
       },
     ],

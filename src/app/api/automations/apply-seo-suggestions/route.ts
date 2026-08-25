@@ -9,12 +9,12 @@ export const maxDuration = 120
 /**
  * POST /api/automations/apply-seo-suggestions
  *
- * Admin-triggered "Apply all pending". Approves every pending suggestion that
- * targets a real document, which fires the seo-suggestions beforeChange hook
- * that applies the change and marks it `applied` — same code path as approving
- * one by hand, so there's a single source of truth for how a suggestion is
- * applied. Content suggestions are advisory and left pending. Runs in-process
- * (no internal cron HTTP call / CRON_SECRET handshake).
+ * Admin-triggered "Apply all pending". Marks every pending suggestion that
+ * targets a real document as `applied`, which fires the seo-suggestions
+ * beforeChange hook that writes the change onto the page — same code path as
+ * setting one to "Applied" by hand, so there's a single source of truth for
+ * how a suggestion is applied. Content suggestions are advisory and left
+ * pending. Runs in-process (no internal cron HTTP call / CRON_SECRET handshake).
  */
 export async function POST() {
   const auth = await requireAuth({ roles: ['admin', 'editor'] })
@@ -47,7 +47,7 @@ export async function POST() {
       await payload.update({
         collection: 'seo-suggestions',
         id: doc.id,
-        data: { status: 'approved' }, // hook applies + flips to `applied`
+        data: { status: 'applied' }, // hook writes the change onto the page
       })
       applied++
     } catch (err) {
