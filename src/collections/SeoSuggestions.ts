@@ -108,48 +108,56 @@ export const SeoSuggestions: CollectionConfig = {
     },
   ],
   hooks: {
-    afterChange: [
-      async ({ doc, previousDoc, req }) => {
-        // Apply on approve: pending/other → approved
+    beforeChange: [
+      async ({ data, originalDoc, req }) => {
+        // Apply on the save that transitions a suggestion into "approved".
+        // Run in beforeChange (not afterChange) so both the target write and
+        // the self status flip happen inside this save's transaction — an
+        // afterChange self-update runs outside the still-open transaction,
+        // which on Postgres deadlocks against the locked row and silently
+        // fails to persist. The admin form submits every field, but fall back
+        // to originalDoc so a partial (API) update still resolves them.
+        const field = data.field ?? originalDoc?.field
+        const target = data.target ?? originalDoc?.target
+        const suggestedValue = data.suggestedValue ?? originalDoc?.suggestedValue
+        const pagePath = data.pagePath ?? originalDoc?.pagePath
+
+        const becomingApproved =
+          data.status === 'approved' && originalDoc?.status !== 'approved'
         if (
-          doc.status !== 'approved' ||
-          previousDoc?.status === 'approved' ||
-          doc.field === 'content' || // content suggestions are advisory, never auto-applied
-          !doc.target?.collection ||
-          !doc.target?.docId
+          !becomingApproved ||
+          field === 'content' || // content suggestions are advisory, never auto-applied
+          !target?.collection ||
+          !target?.docId
         ) {
-          return
+          return data
         }
-        try {
-          // `pages` and `posts` render SEO fields from the seo-plugin's
-          // `meta` group; `market-areas` has flat seoTitle/seoDescription.
-          const data =
-            doc.target.collection === 'market-areas'
-              ? { [doc.field]: doc.suggestedValue }
-              : {
-                  meta: {
-                    [doc.field === 'seoTitle' ? 'title' : 'description']:
-                      doc.suggestedValue,
-                  },
-                }
-          await req.payload.update({
-            collection: doc.target.collection,
-            id: doc.target.docId,
-            data,
-          })
-          await req.payload.update({
-            collection: 'seo-suggestions',
-            id: doc.id,
-            data: { status: 'applied', appliedAt: new Date().toISOString() },
-          })
-          req.payload.logger.info(
-            `[seo-agent] applied ${doc.field} to ${doc.target.collection}/${doc.target.docId} (${doc.pagePath})`,
-          )
-        } catch (err) {
-          req.payload.logger.error(
-            `[seo-agent] failed to apply suggestion ${doc.id}: ${err instanceof Error ? err.message : err}`,
-          )
-        }
+
+        // `pages` and `posts` render SEO fields from the seo-plugin's `meta`
+        // group; `market-areas` has flat seoTitle/seoDescription. Let a failed
+        // write throw so the admin sees the error instead of a silent no-op.
+        const targetData =
+          target.collection === 'market-areas'
+            ? { [field]: suggestedValue }
+            : {
+                meta: {
+                  [field === 'seoTitle' ? 'title' : 'description']: suggestedValue,
+                },
+              }
+        await req.payload.update({
+          collection: target.collection,
+          id: target.docId,
+          data: targetData,
+          req, // join this save's transaction
+        })
+        req.payload.logger.info(
+          `[seo-agent] applied ${field} to ${target.collection}/${target.docId} (${pagePath})`,
+        )
+
+        // Persist as "applied" in this same save — no second write needed.
+        data.status = 'applied'
+        data.appliedAt = new Date().toISOString()
+        return data
       },
     ],
   },
