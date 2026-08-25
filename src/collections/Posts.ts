@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { revalidateHooks } from '@/lib/revalidate'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -10,6 +11,9 @@ export const Posts: CollectionConfig = {
   access: {
     read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
   },
+  // Bust /blog/[slug] and the blog index on change (the detail route is
+  // already force-dynamic; this keeps the index and future caching correct).
+  hooks: revalidateHooks('posts'),
   fields: [
     {
       name: 'title',

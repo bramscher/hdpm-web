@@ -2,10 +2,12 @@ import type { CollectionConfig } from 'payload'
 
 /**
  * Suggestions produced by the SEO agent (api/cron/seo-agent). Human-in-the-
- * loop: the agent writes `pending` suggestions; an admin flips status to
- * `approved`, and the afterChange hook applies the change to the target
- * document and marks it `applied`. Four weeks later the agent measures the
- * result and records the outcome, which feeds its future suggestions.
+ * loop: the agent writes `pending` suggestions; an admin sets status to
+ * `applied`, and the beforeChange hook writes the change onto the target
+ * document in the same save. The target collection's own revalidate hook then
+ * busts the affected frontend path so the change shows up live. Four weeks
+ * later the agent measures the result and records the outcome, which feeds its
+ * future suggestions.
  */
 export const SeoSuggestions: CollectionConfig = {
   slug: 'seo-suggestions',

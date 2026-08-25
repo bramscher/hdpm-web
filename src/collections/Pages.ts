@@ -1,4 +1,5 @@
 import type { CollectionConfig, Field } from 'payload'
+import { revalidateHooks } from '@/lib/revalidate'
 
 /* ------------------------------------------------------------------ */
 /*  Shared helpers                                                     */
@@ -221,6 +222,9 @@ export const Pages: CollectionConfig = {
   access: {
     read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
   },
+  // Bust the statically-generated page (/, /[slug], and dedicated routes like
+  // /contact and /listings that read this doc) when it changes.
+  hooks: revalidateHooks('pages'),
   fields: [
     {
       name: 'title',
