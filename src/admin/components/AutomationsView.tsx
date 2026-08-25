@@ -251,6 +251,7 @@ export default function AutomationsView() {
   const [creatingPosts, setCreatingPosts] = useState<Record<number, boolean>>({})
   const [createdPosts, setCreatedPosts] = useState<Record<number, { id: number; slug: string; adminUrl: string }>>({})
   const [blogAgentResult, setBlogAgentResult] = useState<ActionResult>({ status: 'idle' })
+  const [seoApplyResult, setSeoApplyResult] = useState<ActionResult>({ status: 'idle' })
 
   async function syncReviews() {
     setReviewResult({ status: 'loading' })
@@ -346,6 +347,25 @@ export default function AutomationsView() {
       }
     } catch (err) {
       setBlogAgentResult({ status: 'error', message: String(err) })
+    }
+  }
+
+  async function applySeoSuggestions() {
+    setSeoApplyResult({ status: 'loading' })
+    try {
+      const res = await fetch('/api/automations/apply-seo-suggestions', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) {
+        setSeoApplyResult({ status: 'error', message: data.error || 'Request failed', data })
+      } else {
+        setSeoApplyResult({
+          status: 'success',
+          message: data.message || 'Done',
+          data: data.failed?.length ? data : undefined,
+        })
+      }
+    } catch (err) {
+      setSeoApplyResult({ status: 'error', message: String(err) })
     }
   }
 
@@ -499,6 +519,20 @@ export default function AutomationsView() {
           }
           onRun={runBlogAgent}
           result={blogAgentResult}
+        />
+
+        {/* Apply SEO Suggestions */}
+        <ActionCard
+          title="Apply All SEO Suggestions"
+          description="Approve and apply every pending SEO suggestion at once — writes each suggested SEO title/description onto its target page and marks it applied. Content suggestions are advisory and left pending for manual review."
+          buttonLabel="Apply All Pending"
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+          onRun={applySeoSuggestions}
+          result={seoApplyResult}
         />
 
         {/* Listings Sync */}
