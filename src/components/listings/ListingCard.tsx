@@ -75,6 +75,20 @@ export default function ListingCard({
           <span className="text-xs text-neutral-mid">/mo</span>
         </div>
 
+        {/* Video badge — signals the detail page has a video tour */}
+        {listing.VideoURL && (
+          <div
+            className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1 text-xs font-semibold text-white shadow-md"
+            title="Video tour available"
+          >
+            <svg aria-hidden="true" className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            Video
+            <span className="sr-only"> tour available</span>
+          </div>
+        )}
+
         {/* Pet badge */}
         {petFriendly && (
           <Badge variant="solid" size="sm" className="absolute right-3 top-3 gap-1">

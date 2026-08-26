@@ -13,7 +13,7 @@
  *   APPFOLIO_DEVELOPER_ID
  */
 
-import { decodeHtmlEntities } from './listing-utils'
+import { decodeHtmlEntities, extractYouTubeId, youTubeWatchUrl } from './listing-utils'
 
 // ============================================
 // Public Interface (consumed by all pages/components)
@@ -44,6 +44,9 @@ export interface AppFolioListing {
   // Unique RentZap application link for this listing (from the marketing
   // description or scraped from the AppFolio detail page). Undefined if none.
   RentZapURL?: string
+  // YouTube video URL for the property tour, scraped from the AppFolio detail
+  // page gallery (AppFolio's "Marketing Video" field). Undefined if none.
+  VideoURL?: string
 }
 
 // ============================================
@@ -292,7 +295,11 @@ function imageIdFromUrl(url: string): string | null {
 export async function fetchDetailPage(
   detailId: string,
   forceFresh = false,
-): Promise<{ photos: { Url: string; Caption?: string }[]; rentZapUrl: string | null }> {
+): Promise<{
+  photos: { Url: string; Caption?: string }[]
+  rentZapUrl: string | null
+  videoUrl: string | null
+}> {
   try {
     const response = await fetch(`${APPFOLIO_PUBLIC_BASE}/listings/detail/${detailId}`, {
       headers: {
@@ -304,7 +311,7 @@ export async function fetchDetailPage(
 
     if (!response.ok) {
       console.warn(`[AppFolio] Detail page ${detailId} returned ${response.status}`)
-      return { photos: [], rentZapUrl: null }
+      return { photos: [], rentZapUrl: null, videoUrl: null }
     }
 
     const html = await response.text()
@@ -339,13 +346,17 @@ export async function fetchDetailPage(
 
     const rentZapUrl = html.match(RENTZAP_APPLY_URL)?.[0] ?? null
 
+    // AppFolio's "Marketing Video" renders as a gallery link to YouTube.
+    const videoId = extractYouTubeId(html)
+    const videoUrl = videoId ? youTubeWatchUrl(videoId) : null
+
     console.log(
-      `[AppFolio] Detail page ${detailId}: found ${photos.length} photos${rentZapUrl ? ', rentzap link' : ''}`,
+      `[AppFolio] Detail page ${detailId}: found ${photos.length} photos${rentZapUrl ? ', rentzap link' : ''}${videoUrl ? ', video' : ''}`,
     )
-    return { photos, rentZapUrl }
+    return { photos, rentZapUrl, videoUrl }
   } catch (err) {
     console.warn(`[AppFolio] Failed to fetch detail page ${detailId}:`, err)
-    return { photos: [], rentZapUrl: null }
+    return { photos: [], rentZapUrl: null, videoUrl: null }
   }
 }
 
@@ -1039,6 +1050,9 @@ interface WebListingRow {
   lease_terms: string | null
   property_id: string | null
   appfolio_detail_id: string | null
+  // Optional so reads still work before the `video_url` column is added to
+  // web_listings (see scripts/sql/add-video-url-to-web-listings.sql).
+  video_url?: string | null
   synced_at: string
   updated_at: string
 }
@@ -1065,6 +1079,7 @@ function rowToListing(row: WebListingRow): AppFolioListing {
     Deposit: Number(row.deposit),
     PropertyType: row.property_type || undefined,
     AppFolioDetailId: row.appfolio_detail_id || undefined,
+    VideoURL: row.video_url || undefined,
   }
 }
 
@@ -1132,13 +1147,15 @@ export async function getCachedListingById(id: string): Promise<AppFolioListing 
     const detailId = (data as WebListingRow).appfolio_detail_id
     if (detailId) {
       try {
-        const { photos, rentZapUrl } = await fetchDetailPage(detailId)
+        const { photos, rentZapUrl, videoUrl } = await fetchDetailPage(detailId)
         if (photos.length > 0) {
           listing.UnitPhotos = photos
         }
         if (!listing.RentZapURL && rentZapUrl) {
           listing.RentZapURL = rentZapUrl
         }
+        // Prefer the freshly-scraped video; fall back to the stored value.
+        if (videoUrl) listing.VideoURL = videoUrl
       } catch (detailErr) {
         console.warn(`[AppFolio] Failed to fetch detail page for ${id}:`, detailErr)
       }

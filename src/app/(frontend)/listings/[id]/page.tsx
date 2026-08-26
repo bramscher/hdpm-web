@@ -7,6 +7,7 @@ import { listingSchema, breadcrumbSchema } from '@/lib/schema'
 import { isDogFriendlyPolicy, formatAvailableDate, extractRentZapUrl } from '@/lib/listing-utils'
 import ShareListing from '@/components/listings/ShareListing'
 import PhotoGallery from '@/components/listings/PhotoGallery'
+import VideoTour from '@/components/listings/VideoTour'
 import CallLeesa from '@/components/CallLeesa'
 import ListingInquiryForm from '@/components/listings/ListingInquiryForm'
 import Button from '@/components/ui/Button'
@@ -215,6 +216,21 @@ export default async function ListingDetailPage({
                   {cleanedDescription}
                 </p>
               </section>
+
+              {/* Video tour */}
+              {listing.VideoURL && (
+                <section className="mt-10">
+                  <h2 className="font-heading text-subtitle text-neutral-dark">
+                    Video Tour
+                  </h2>
+                  <div className="mt-4">
+                    <VideoTour
+                      url={listing.VideoURL}
+                      title={`Video tour of ${listing.Address1}`}
+                    />
+                  </div>
+                </section>
+              )}
 
               {/* Amenities */}
               {listing.UnitAmenities.length > 0 && (

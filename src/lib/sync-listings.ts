@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase'
-import { getListings, fetchDetailPagePhotos, type AppFolioListing } from '@/lib/appfolio'
+import { getListings, fetchDetailPage, type AppFolioListing } from '@/lib/appfolio'
 import { isListingPetFriendly } from '@/lib/listing-utils'
 
 export interface SyncListingsResult {
@@ -35,17 +35,21 @@ export async function runListingsSync(forceFresh = false): Promise<SyncListingsR
     throw new Error('No listings returned from AppFolio — skipping sync to avoid data loss')
   }
 
-  // 2. For each listing with a detail page ID, fetch all photos
+  // 2. For each listing with a detail page ID, fetch all photos (and, from the
+  //    same HTML, the marketing video URL if the property has one).
   //    Rate limit: 1 second delay between detail page fetches
   for (const listing of listings) {
     if (listing.AppFolioDetailId) {
       try {
-        const detailPhotos = await fetchDetailPagePhotos(listing.AppFolioDetailId, forceFresh)
-        if (detailPhotos.length > 0) {
-          listing.UnitPhotos = detailPhotos
+        const { photos, videoUrl } = await fetchDetailPage(listing.AppFolioDetailId, forceFresh)
+        if (photos.length > 0) {
+          listing.UnitPhotos = photos
+        }
+        if (videoUrl) {
+          listing.VideoURL = videoUrl
         }
       } catch (err) {
-        console.warn(`[sync-listings] Failed to fetch detail photos for ${listing.Id}:`, err)
+        console.warn(`[sync-listings] Failed to fetch detail page for ${listing.Id}:`, err)
       }
       await new Promise((r) => setTimeout(r, 1000))
     }
@@ -76,6 +80,7 @@ export async function runListingsSync(forceFresh = false): Promise<SyncListingsR
     property_type: l.PropertyType || null,
     property_id: l.PropertyId || null,
     appfolio_detail_id: l.AppFolioDetailId || null,
+    video_url: l.VideoURL || null,
     status: 'available',
     deposit: l.Deposit,
     lease_terms: null,
@@ -83,13 +88,42 @@ export async function runListingsSync(forceFresh = false): Promise<SyncListingsR
     updated_at: now,
   }))
 
-  // Upsert in batches of 500
+  // Upsert in batches of 500. `video_url` is a newer column; if it hasn't been
+  // added to web_listings yet, Postgres/PostgREST rejects the write with a
+  // missing-column error (42703 / PGRST204). Rather than break the whole sync,
+  // detect that once, drop the field, and retry without it — videos simply
+  // won't be stored until the column exists (see
+  // scripts/sql/add-video-url-to-web-listings.sql).
   const BATCH_SIZE = 500
+  const isMissingVideoColumn = (err: { code?: string; message?: string }) =>
+    err?.code === '42703' ||
+    err?.code === 'PGRST204' ||
+    /video_url/.test(err?.message ?? '')
+
   for (let i = 0; i < rows.length; i += BATCH_SIZE) {
     const batch = rows.slice(i, i + BATCH_SIZE)
     const { error } = await supabaseAdmin.from('web_listings').upsert(batch, { onConflict: 'id' })
 
     if (error) {
+      if (isMissingVideoColumn(error)) {
+        console.warn(
+          '[sync-listings] web_listings.video_url column missing — retrying without it. ' +
+            'Run scripts/sql/add-video-url-to-web-listings.sql to enable video badges.',
+        )
+        const stripped = batch.map((row) => {
+          const rest = { ...row }
+          delete (rest as { video_url?: unknown }).video_url
+          return rest
+        })
+        const { error: retryError } = await supabaseAdmin
+          .from('web_listings')
+          .upsert(stripped, { onConflict: 'id' })
+        if (retryError) {
+          console.error(`[sync-listings] Upsert batch ${i} retry error:`, retryError)
+          throw retryError
+        }
+        continue
+      }
       console.error(`[sync-listings] Upsert batch ${i} error:`, error)
       throw error
     }

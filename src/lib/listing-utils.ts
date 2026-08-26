@@ -70,6 +70,35 @@ export function extractRentZapUrl(description: string | null | undefined): {
 }
 
 /**
+ * Pull a YouTube video id out of any of the URL shapes AppFolio emits — the
+ * marketing "video" is a link in the detail-page gallery
+ * (`youtube.com/watch?v=…`, `youtu.be/…`, or an `youtube.com/embed/…`).
+ * Returns the 11-char id or null. Accepts a full URL or a blob of HTML/text.
+ */
+export function extractYouTubeId(input: string | null | undefined): string | null {
+  if (!input) return null
+  const m = input.match(
+    /(?:youtube\.com\/(?:watch\?(?:[^"'\s]*&)?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i,
+  )
+  return m ? m[1] : null
+}
+
+/** Privacy-friendly (no-cookie) embed URL for a YouTube video id. */
+export function youTubeEmbedUrl(id: string): string {
+  return `https://www.youtube-nocookie.com/embed/${id}`
+}
+
+/** Canonical watch URL for a YouTube video id. */
+export function youTubeWatchUrl(id: string): string {
+  return `https://www.youtube.com/watch?v=${id}`
+}
+
+/** High-quality thumbnail for a YouTube video id. */
+export function youTubeThumb(id: string): string {
+  return `https://img.youtube.com/vi/${id}/hqdefault.jpg`
+}
+
+/**
  * AppFolio's `AvailableOn` may be empty, the literal string `"Now"`, or a date
  * string in any of several formats. Render whatever was supplied if it can't
  * parse; show a graceful fallback when nothing was supplied.
