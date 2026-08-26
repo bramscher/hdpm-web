@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { revalidateHooks } from '@/lib/revalidate'
 
 export const MarketAreas: CollectionConfig = {
   slug: 'market-areas',
@@ -10,6 +11,8 @@ export const MarketAreas: CollectionConfig = {
   access: {
     read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
   },
+  // Bust the statically-generated /market-areas/[slug] page when it changes.
+  hooks: revalidateHooks('market-areas'),
   fields: [
     {
       name: 'city',
