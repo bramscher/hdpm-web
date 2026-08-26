@@ -2,6 +2,22 @@ import type { Metadata } from 'next'
 import { SITE_URL } from '@/lib/site-url'
 const SITE_NAME = 'High Desert Property Management'
 
+/**
+ * The root layout (src/app/layout.tsx) applies a
+ * `%s | High Desert Property Management` title template, so a page title must
+ * NOT carry its own brand suffix or the brand renders twice
+ * ("… | High Desert PM | High Desert Property Management"). The SEO agent and
+ * some older stored `meta.title` values include one anyway; strip a trailing
+ * "| High Desert…" / "- High Desert…" fragment defensively so the template is
+ * the single source of the brand. Idempotent — a clean title is returned
+ * unchanged.
+ */
+export function stripBrandSuffix(title: string): string {
+  return title
+    .replace(/\s*[|\-–—]\s*High Desert(?:\s+(?:PM|Property Management))?\.?\s*$/i, '')
+    .trim()
+}
+
 export function createMetadata({
   title,
   description,
@@ -15,15 +31,16 @@ export function createMetadata({
 }): Metadata {
   const url = `${SITE_URL}${path}`
   const ogImage = image || `${SITE_URL}/og-default.jpg`
+  const cleanTitle = stripBrandSuffix(title)
 
   return {
-    title,
+    title: cleanTitle,
     description,
     alternates: {
       canonical: url,
     },
     openGraph: {
-      title,
+      title: cleanTitle,
       description,
       url,
       siteName: SITE_NAME,
@@ -32,7 +49,7 @@ export function createMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: cleanTitle,
       description,
       images: [ogImage],
     },

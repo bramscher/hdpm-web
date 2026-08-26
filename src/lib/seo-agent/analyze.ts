@@ -111,7 +111,8 @@ const CONTENT_RULES = `Hard rules for all copy (from the owner — never violate
 - NEVER cite an exact door/unit count; say "hundreds of doors across Central Oregon".
 - Office hours are Monday–Friday 9:00 AM – 4:00 PM.
 - The company has served Central Oregon "since 1999" (never 2003 or 2011).
-- Company: High Desert Property Management, Redmond OR, (541) 548-0383. Serves Bend, Redmond, Sisters, Prineville, Culver, Metolius, Madras.`
+- Company: High Desert Property Management, Redmond OR, (541) 548-0383. Serves Bend, Redmond, Sisters, Prineville, Culver, Metolius, Madras.
+- SEO titles must NOT include the brand/company name or a "| High Desert…" suffix — the site automatically appends "| High Desert Property Management". Return only the distinctive part (e.g. "Bend Property Management for Owners"), and keep it under 60 characters INCLUDING that appended brand.`
 
 export async function generateSuggestions(input: {
   opportunity: PageOpportunity
