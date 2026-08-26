@@ -902,7 +902,7 @@ export interface AutomationRule {
   createdAt: string;
 }
 /**
- * Approve a suggestion to apply it to the page. Outcomes are measured automatically ~4 weeks after applying.
+ * Set a suggestion’s status to "Applied" to write it onto the page (or use "Apply All Pending" on the Automations page). Outcomes are measured automatically ~4 weeks after applying.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "seo-suggestions".
@@ -939,7 +939,10 @@ export interface SeoSuggestion {
     ctr?: number | null;
     position?: number | null;
   };
-  status?: ('pending' | 'approved' | 'applied' | 'rejected') | null;
+  /**
+   * Set to "Applied" to write the suggested value onto the page.
+   */
+  status?: ('pending' | 'applied' | 'rejected') | null;
   appliedAt?: string | null;
   /**
    * 28-day GSC metrics measured after applying

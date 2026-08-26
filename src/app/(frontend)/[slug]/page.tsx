@@ -7,6 +7,7 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import { breadcrumbSchema } from '@/lib/schema'
 import type { Page, Media } from '@/payload-types'
 import { SITE_URL } from '@/lib/site-url'
+import { stripBrandSuffix } from '@/lib/seo'
 import { FOUNDED_YEAR } from '@/lib/constants'
 import Button from '@/components/ui/Button'
 
@@ -64,7 +65,9 @@ export async function generateMetadata({
   const page = docs[0]
   if (!page) return { title: 'Page Not Found' }
 
-  const title = page.meta?.title || page.title
+  // Strip any brand suffix so the root layout's title template is the single
+  // source of the brand (see stripBrandSuffix).
+  const title = stripBrandSuffix(page.meta?.title || page.title)
   // Fallback so CMS pages without a curated meta description (privacy,
   // terms, …) still ship a sensible one instead of an empty tag.
   const description =

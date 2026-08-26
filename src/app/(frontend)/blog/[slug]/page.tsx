@@ -6,6 +6,7 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { breadcrumbSchema } from '@/lib/schema'
+import { stripBrandSuffix } from '@/lib/seo'
 import BlogPostCard from '@/components/blog/BlogPostCard'
 import LeadForm from '@/components/forms/LeadForm'
 import type { Post, Category, Media } from '@/payload-types'
@@ -57,7 +58,9 @@ export async function generateMetadata({
   const post = docs[0]
   if (!post) return { title: 'Post Not Found' }
 
-  const title = post.meta?.title || post.title
+  // Strip any brand suffix so the root layout's title template is the single
+  // source of the brand (see stripBrandSuffix).
+  const title = stripBrandSuffix(post.meta?.title || post.title)
   const description =
     post.meta?.description ||
     `Read "${post.title}" on the High Desert Property Management blog. Insights for Central Oregon property owners and tenants.`
