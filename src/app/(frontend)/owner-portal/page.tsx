@@ -59,10 +59,12 @@ export default function OwnerPortalPage() {
             any time, from any device.
           </p>
           <div className="mt-8">
+            {/* Navigate in the SAME tab. A `target="_blank"` login button can be
+                swallowed by popup blockers / background-tab behavior, which
+                reads as "the button does nothing" — a same-tab anchor always
+                navigates on click. */}
             <Button
               href={OWNER_PORTAL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
               variant="primary"
               size="lg"
               elevated
