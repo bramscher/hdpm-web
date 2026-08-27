@@ -1,10 +1,56 @@
 # Scope: Microsoft 365 (Entra ID) SSO for the hdpm-web admin
 
-**Status:** proposal for review · **Author:** Claude Code · **Date:** 2026-08-19
+**Status:** decided — ready to build · **Author:** Claude Code · **Date:** 2026-08-19
 
 Goal: let staff sign into the hdpm-web **Payload admin** (`/admin`) with their
 `@highdesertpm.com` Microsoft 365 account instead of a Payload email+password —
 mirroring how **hdpm-chat** authenticates.
+
+---
+
+## 0. Decisions (locked 2026-08-19) & build plan
+
+**Decisions:** reuse hdpm-chat's Entra app (add a redirect URI + hdpm-web's own
+client secret) · plugin-first · default new-user role **viewer** · **prod-only**
+for v1 · keep password login enabled with **Craig as break-glass** admin.
+
+**Chosen plugin: `payload-authjs`** (CrawlerCode), Payload `^3.16` / Next `^15` /
+next-auth `^5`. It wraps Auth.js v5 (reuse hdpm-chat's MicrosoftEntraID provider
++ `signIn` domain gate + `jwt`/`session` callbacks) and registers a Payload
+**custom auth strategy** so `req.user` / `payload.auth()` / `requireAuth` and the
+admin keep working unchanged. Rejected: `payload-auth-plugin` (authsmith docs
+domain lapsed → maintenance risk); `payload-oauth2` (native but hand-rolled MS
+endpoints + provisioning, more code for no gain over reusing chat's config).
+
+**Files to add/modify**
+- `src/auth.config.ts` — port hdpm-chat's authConfig: `MicrosoftEntraID` provider
+  (`id: "azure-ad"`, issuer pinned to `AZURE_AD_TENANT_ID`, scopes `openid profile
+  email`), `callbacks.signIn` rejecting non-`@highdesertpm.com`, jwt/session.
+- `src/auth.ts` — `getAuthjsInstance(payload)` → export `handlers, signIn, signOut, auth`.
+- `src/app/api/auth/[...nextauth]/route.ts` — `export const { GET, POST } = handlers`.
+- `src/payload.config.ts` — add `authjsPlugin({ authjsConfig })` to `plugins`.
+- `src/collections/Users.ts` — default new SSO users to `role: 'viewer'` via the
+  Auth.js `events.signIn` (adapter.updateUser) and/or a Users `beforeChange` hook;
+  keep `auth` (local password) enabled for break-glass, add `disableLocalStrategy`
+  only later once every admin has signed in via SSO.
+- Admin login button — add a "Sign in with Microsoft" component to the admin login
+  (`admin.components.beforeLogin` / custom login view) pointing at the Auth.js
+  sign-in; verify whether the plugin injects this or we add it.
+
+**Azure (needs M365 admin — Craig/whoever holds it):** on hdpm-chat's existing
+single-tenant app registration, add redirect URI
+`https://www.highdesertpm.com/api/auth/callback/azure-ad`, issue a **new client
+secret** for hdpm-web, confirm `openid profile email` are consented.
+
+**Vercel env (prod):** `AZURE_AD_CLIENT_ID`, `AZURE_AD_CLIENT_SECRET`,
+`AZURE_AD_TENANT_ID`, `AUTH_SECRET`, `NEXTAUTH_URL=https://www.highdesertpm.com`.
+`.trim()` every value on read (Vercel trailing-`\n` gotcha). `PAYLOAD_SECRET`
+unchanged.
+
+**Open items to resolve during build:** exact admin-login-button injection,
+break-glass coexistence of local + authjs strategies, and the users role-default
+hook. Build happens on a branch; **cannot be verified end-to-end until the Azure
+redirect URI + Vercel envs exist**, so it ships behind those.
 
 ---
 

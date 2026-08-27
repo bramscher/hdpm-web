@@ -727,6 +727,7 @@ export interface User {
    * Maximum number of open leads this user can be assigned
    */
   maxLeads?: number | null;
+  sub?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -1817,6 +1818,7 @@ export interface UsersSelect<T extends boolean = true> {
   isAssignable?: T;
   speaksSpanish?: T;
   maxLeads?: T;
+  sub?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
