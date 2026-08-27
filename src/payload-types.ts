@@ -615,7 +615,7 @@ export interface Lead {
         | 'archived'
       )
     | null;
-  assignedTo?: (number | null) | User;
+  assignedTo?: (string | null) | User;
   nextFollowUpAt?: string | null;
   firstName: string;
   lastName: string;
@@ -711,10 +711,21 @@ export interface Lead {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
-  role: 'admin' | 'editor' | 'viewer' | 'api';
+  id: string;
+  emailVerified?: string | null;
+  name?: string | null;
+  image?: string | null;
   firstName?: string | null;
   lastName?: string | null;
+  accounts?:
+    | {
+        provider: string;
+        providerAccountId: string;
+        type: 'oidc' | 'oauth' | 'email' | 'webauthn';
+        id?: string | null;
+      }[]
+    | null;
+  role: 'admin' | 'editor' | 'viewer' | 'api';
   /**
    * If checked, this user can be assigned leads via round-robin
    */
@@ -736,13 +747,6 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
   password?: string | null;
   collection: 'users';
 }
@@ -777,7 +781,7 @@ export interface LeadActivity {
     | number
     | boolean
     | null;
-  performedBy?: (number | null) | User;
+  performedBy?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -801,7 +805,7 @@ export interface LeadTask {
   status?: ('open' | 'in_progress' | 'complete' | 'canceled' | 'overdue') | null;
   dueAt: string;
   completedAt?: string | null;
-  assignedTo: number | User;
+  assignedTo: string | User;
   priority?: ('low' | 'medium' | 'high' | 'urgent') | null;
   updatedAt: string;
   createdAt: string;
@@ -821,7 +825,7 @@ export interface LeadConversation {
   /**
    * Null for inbound messages from the lead
    */
-  sentBy?: (number | null) | User;
+  sentBy?: (string | null) | User;
   latestMessageAt?: string | null;
   metadata?:
     | {
@@ -1153,12 +1157,12 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -1171,7 +1175,7 @@ export interface PayloadPreference {
   id: number;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -1811,9 +1815,21 @@ export interface ListingGeocodesSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  role?: T;
+  id?: T;
+  emailVerified?: T;
+  name?: T;
+  image?: T;
   firstName?: T;
   lastName?: T;
+  accounts?:
+    | T
+    | {
+        provider?: T;
+        providerAccountId?: T;
+        type?: T;
+        id?: T;
+      };
+  role?: T;
   isAssignable?: T;
   speaksSpanish?: T;
   maxLeads?: T;
@@ -1826,13 +1842,6 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
