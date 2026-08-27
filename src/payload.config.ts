@@ -2,8 +2,7 @@ import { buildConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { seoPlugin } from '@payloadcms/plugin-seo'
-import { authjsPlugin } from 'payload-authjs'
-import { authConfig } from './auth.config'
+import { microsoftSsoPlugin } from './lib/microsoft-sso'
 import { supabaseStorage } from './lib/supabase-storage-adapter'
 import { SITE_URL } from './lib/site-url'
 import sharp from 'sharp'
@@ -40,6 +39,9 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
     components: {
+      beforeLogin: [
+        './admin/components/MicrosoftLoginButton',
+      ],
       beforeNavLinks: [
         './admin/components/NavGroupIcons',
       ],
@@ -119,17 +121,13 @@ export default buildConfig({
           }),
         ]
       : []),
-    // Microsoft 365 (Entra ID) SSO for the admin. Adds a "Sign in with Microsoft"
-    // button to /admin/login and surfaces the Auth.js session as a Payload user
-    // (so requireAuth/payload.auth keep working). enableLocalStrategy keeps
-    // email+password login available as a break-glass path.
-    authjsPlugin({
-      authjsConfig: authConfig,
-      enableLocalStrategy: true,
-      components: {
-        SignInButton: { text: 'Sign in with Microsoft 365' },
-      },
-    }),
+    // Microsoft 365 (Entra ID) SSO for the admin via native OIDC. Runs the code
+    // flow, then find-or-creates a normal Payload user (matched by email) and
+    // mints the standard Payload session cookie — so requireAuth/payload.auth
+    // and the admin keep working unchanged, and the integer users.id is
+    // preserved. Local email+password login stays enabled as a break-glass path
+    // (the plugin adds its strategy alongside, it doesn't disable the local one).
+    microsoftSsoPlugin(),
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

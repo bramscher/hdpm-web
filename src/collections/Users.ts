@@ -15,6 +15,21 @@ export const Users: CollectionConfig = {
   access: {
     read: ({ req: { user } }) => Boolean(user),
   },
+  hooks: {
+    beforeChange: [
+      // New users provisioned via Microsoft SSO default to least-privilege
+      // 'viewer' (an admin elevates them afterward). Only the OAuth callback
+      // sets `sub` on create, so this never touches manually-created users or
+      // existing accounts (SSO logins for existing users are an update, not a
+      // create, and never re-run this branch).
+      ({ operation, data }) => {
+        if (operation === 'create' && data?.sub) {
+          data.role = 'viewer'
+        }
+        return data
+      },
+    ],
+  },
   fields: [
     {
       name: 'role',
