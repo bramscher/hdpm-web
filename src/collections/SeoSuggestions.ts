@@ -17,6 +17,11 @@ export const SeoSuggestions: CollectionConfig = {
     group: 'SEO',
     description:
       'Set a suggestion’s status to "Applied" to write it onto the page (or use "Apply All Pending" on the Automations page). Outcomes are measured automatically ~4 weeks after applying.',
+    components: {
+      // "Needs review" banner above the list: a live count + one-click filter to
+      // the pending subset, without hiding the applied/rejected history.
+      beforeListTable: ['./admin/components/SeoNeedsReviewBanner'],
+    },
   },
   access: {
     read: ({ req: { user } }) => Boolean(user),

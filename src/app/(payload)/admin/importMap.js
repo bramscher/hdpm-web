@@ -29,6 +29,7 @@ import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 }
 import { default as default_2212c90818c434474974243664d5f97a } from '../../../admin/components/AdminNav'
 import { default as default_dd0c8adde91fd4e2ddcddb6d3f31e14d } from '../../../admin/components/MicrosoftLoginButton'
 import { default as default_6f8eca1e8d6fa5c28d59ebf9f72d3592 } from '../../../admin/components/NavGroupIcons'
+import { default as default_seoNeedsReviewBanner } from '../../../admin/components/SeoNeedsReviewBanner'
 import { default as default_bbbbc2425c08d01e826efb4f411bc456 } from '../../../admin/components/ImageBrowserView'
 import { default as default_bd4862e92e519d9042ef4a0acd14c27f } from '../../../admin/components/crm/CrmDashboardView'
 import { default as default_28aa1833b7ff933ab80ad130d38aa80d } from '../../../admin/components/crm/InboxView'
@@ -69,6 +70,7 @@ export const importMap = {
   "./admin/components/AdminNav#default": default_2212c90818c434474974243664d5f97a,
   "./admin/components/MicrosoftLoginButton#default": default_dd0c8adde91fd4e2ddcddb6d3f31e14d,
   "./admin/components/NavGroupIcons#default": default_6f8eca1e8d6fa5c28d59ebf9f72d3592,
+  "./admin/components/SeoNeedsReviewBanner#default": default_seoNeedsReviewBanner,
   "./admin/components/ImageBrowserView#default": default_bbbbc2425c08d01e826efb4f411bc456,
   "./admin/components/crm/CrmDashboardView#default": default_bd4862e92e519d9042ef4a0acd14c27f,
   "./admin/components/crm/InboxView#default": default_28aa1833b7ff933ab80ad130d38aa80d,
