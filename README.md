@@ -16,7 +16,9 @@ Public-facing website, CMS, and lead/CRM system for **High Desert Property Manag
 - [API Routes](#api-routes)
 - [AppFolio Integration](#appfolio-integration)
 - [Media Storage (Supabase)](#media-storage-supabase)
+- [Owner Rental Analysis Flow](#owner-rental-analysis-flow)
 - [Blog Automation (Claude)](#blog-automation-claude)
+- [SEO Automation (Claude + Google Search Console)](#seo-automation-claude--google-search-console)
 - [Google Reviews Sync](#google-reviews-sync)
 - [Cron Jobs](#cron-jobs)
 - [Supabase (Shared Database)](#supabase-shared-database)
@@ -62,11 +64,12 @@ Public-facing website, CMS, and lead/CRM system for **High Desert Property Manag
                          ┌────────┴───────────────┴─────────┐
                          │          Shared Services          │
                          │                                   │
-                         │  - Azure AD (Entra ID) SSO        │
+                         │  - Microsoft 365 (Entra) SSO      │
                          │  - AppFolio v0 Database API       │
                          │  - Supabase Storage (media)       │
-                         │  - Anthropic Claude (blog AI)     │
+                         │  - Anthropic Claude (blog + SEO)  │
                          │  - Google Places (reviews)        │
+                         │  - Google Search Console (SEO)    │
                          │  - Vercel Hosting + Cron          │
                          └───────────────────────────────────┘
 ```
@@ -85,12 +88,13 @@ Public-facing website, CMS, and lead/CRM system for **High Desert Property Manag
 | Fonts          | Plus Jakarta Sans (headings), Inter (body)      |
 | Image CDN      | Next.js Image + AppFolio CDN + Supabase Storage |
 | Media Storage  | Custom Supabase Storage adapter (@payloadcms/plugin-cloud-storage) |
-| SEO            | @payloadcms/plugin-seo (tabbed UI) + JSON-LD    |
-| AI             | @anthropic-ai/sdk (blog research + generation)  |
+| Admin SSO      | Microsoft 365 (Entra ID) via `payload-oauth2` (native OIDC) |
+| SEO            | @payloadcms/plugin-seo + JSON-LD + a GSC-driven self-improving SEO agent |
+| AI             | @anthropic-ai/sdk (Claude) — blog agent + SEO agent |
 | Reviews        | Google Places API (New)                         |
 | Deployment     | Vercel (auto-deploy from `main`)                |
-| Cron           | Vercel Cron (every 15 minutes)                  |
-| External APIs  | AppFolio v0 Database API + public page scraping |
+| Cron           | Vercel Cron (listings 15m · CRM hourly · SEO + blog agents weekly) |
+| External APIs  | AppFolio v0 Database API + public page scraping · Google Search Console |
 | Cache Layer    | Supabase `web_listings` table                   |
 
 ---
@@ -118,33 +122,31 @@ hdpm-web/
 │   │       ├── graphql/          # Payload GraphQL endpoint
 │   │       ├── listings/         # Custom listings API
 │   │       ├── crm/              # CRM endpoints (leads, reports, cron)
-│   │       ├── automations/      # Blog research + generation + listings sync
+│   │       ├── automations/      # In-process triggers (blog/seo/listings/reviews)
+│   │       ├── campaigns/        # Landing-page visit tracking + stats
 │   │       ├── image-search/     # Wikimedia/Unsplash search
 │   │       ├── image-import/     # Import external images to Media
 │   │       ├── sync-reviews/     # Google Places review sync
-│   │       └── cron/
-│   │           └── sync-listings/# Cron: AppFolio -> Supabase sync
+│   │       └── cron/             # Vercel Cron: sync-listings, seo-agent, blog-agent
 │   ├── admin/                    # Custom Payload admin views/components
 │   │   └── components/
 │   │       ├── crm/              # CRM dashboard, inbox, reporting
-│   │       ├── AutomationsView   # Blog research + generation UI
+│   │       ├── AutomationsView   # Manual triggers (blog/SEO/listings/CRM)
+│   │       ├── CampaignsView     # Paid-ads campaign dashboard
 │   │       ├── ImageBrowserView  # Media library browser
+│   │       ├── SeoNeedsReviewBanner  # "Needs review" banner on seo-suggestions
+│   │       ├── MicrosoftLoginButton  # SSO button on /admin/login
 │   │       └── AdminNav, NavGroupIcons
 │   ├── collections/              # Payload CMS collection configs
-│   │   ├── Users.ts
+│   │   ├── Users.ts              # + Microsoft 365 SSO (sub column)
 │   │   ├── Media.ts
-│   │   ├── Posts.ts
-│   │   ├── Pages.ts
-│   │   ├── Categories.ts
-│   │   ├── MarketAreas.ts
-│   │   ├── Testimonials.ts
-│   │   ├── TeamMembers.ts
-│   │   ├── Leads.ts
-│   │   ├── LeadActivities.ts
-│   │   ├── LeadTasks.ts
-│   │   ├── LeadConversations.ts
-│   │   ├── PropertiesInterest.ts
-│   │   ├── AutomationRules.ts
+│   │   ├── Posts.ts, Pages.ts, Categories.ts
+│   │   ├── MarketAreas.ts, Testimonials.ts, TeamMembers.ts
+│   │   ├── Leads.ts, LeadActivities.ts, LeadTasks.ts, LeadConversations.ts
+│   │   ├── PropertiesInterest.ts, AutomationRules.ts
+│   │   ├── SeoSuggestions.ts     # SEO agent output (human-in-the-loop)
+│   │   ├── Campaigns.ts, CampaignVisits.ts, LandingPages.ts  # paid-ads system
+│   │   ├── ListingGeocodes.ts    # cached lat/lng for the listings map
 │   │   └── hooks/                # Lead hooks (assignment, activity log, etc.)
 │   ├── lib/
 │   │   ├── appfolio.ts           # AppFolio API client + scraper
@@ -154,7 +156,12 @@ hdpm-web/
 │   │   ├── listing-utils.ts      # Listing normalization helpers
 │   │   ├── page-content.ts       # CMS page rendering helpers
 │   │   ├── schema.ts             # JSON-LD / SEO helpers
-│   │   ├── seo.ts                # SEO metadata utilities
+│   │   ├── seo.ts                # SEO metadata utilities (createMetadata)
+│   │   ├── site-url.ts           # single source of truth for the public origin
+│   │   ├── revalidate.ts         # ISR revalidate hooks (SEO apply → live)
+│   │   ├── microsoft-sso.ts      # Microsoft 365 SSO (payload-oauth2) config
+│   │   ├── seo-agent/            # GSC-driven weekly SEO agent
+│   │   ├── blog-agent/           # twice-weekly blog agent (research/gen/image)
 │   │   └── crm/                  # CRM business logic
 │   │       ├── pipeline.ts
 │   │       ├── assignment.ts
@@ -209,9 +216,23 @@ hdpm-web/
 
 **AutomationRules** — Trigger/condition/action rules executed by the automation engine.
 
+### SEO & Marketing
+
+**SeoSuggestions** — Metadata/content suggestions produced by the weekly SEO agent. Human-in-the-loop: the agent writes `pending` rows; an admin sets status to `applied` and a `beforeChange` hook writes the value onto the target page in the same transaction. Kept as an audit log so the agent can measure each applied suggestion's outcome ~4 weeks later. A "Needs review" banner on the list surfaces the pending subset. (Content suggestions are advisory — applying them does not auto-edit the page.)
+
+**Campaigns** — One row per paid-ad campaign (slug = `utm_campaign`); the `/admin/campaigns` dashboard shows copy-ready Ads Manager URLs and stats.
+
+**CampaignVisits** — Per-session visit beacon for landing pages; dedupes per session and ignores unknown campaigns.
+
+**LandingPages** — Standalone `/lp/<slug>` ad landing pages (no nav, `noindex`), decoupled from the main site Pages.
+
+### Listings support
+
+**ListingGeocodes** — Cached lat/lng per AppFolio listing, backing the listings map view.
+
 ### Admin
 
-**Users** — Auth-enabled. Roles: `admin`, `editor`, `viewer`, `api`.
+**Users** — Auth-enabled. Roles: `admin`, `editor`, `viewer`, `api`. Microsoft 365 SSO auto-provisions new users as `viewer` (see [Authentication](#authentication)); a `sub` column stores the OIDC subject id.
 
 ---
 
@@ -242,8 +263,11 @@ Custom React views are mounted at these admin URLs (defined in `payload.config.t
 | `/admin/crm`          | CRM dashboard (lead pipeline)     |
 | `/admin/crm/inbox`    | Conversations inbox               |
 | `/admin/crm/reporting`| Aggregated CRM reports            |
-| `/admin/automations`  | Blog research + generation UI     |
+| `/admin/automations`  | Manual triggers: blog agent, apply SEO suggestions, sync listings/reviews, CRM cycle |
+| `/admin/campaigns`    | Paid-ad campaign dashboard (Ads Manager URLs + stats) |
 | `/admin/image-browser`| Media library browser             |
+
+The Payload admin login (`/admin/login`) also carries a **"Sign in with Microsoft 365"** button (SSO), with email + password kept as a break-glass path.
 
 ---
 
@@ -253,17 +277,25 @@ Custom React views are mounted at these admin URLs (defined in `payload.config.t
 | ------------------------ | ---------------------------------------------- |
 | `/`                      | Home — hero, services, featured listings, CTAs |
 | `/[slug]`                | CMS-managed dynamic page (Pages collection)    |
-| `/listings`              | All available rentals with filters             |
-| `/listings/[id]`         | Listing detail with photo gallery              |
+| `/listings`              | All available rentals with filters + map       |
+| `/listings/[id]`         | Listing detail with photo gallery + video tour |
 | `/blog`                  | Blog post listing                              |
 | `/blog/[slug]`           | Individual blog post                           |
 | `/market-areas`          | All service areas                              |
 | `/market-areas/[slug]`   | Market area detail (Bend, Redmond, etc.)       |
+| `/tools`                 | Investor calculator hub                        |
+| `/tools/roi-calculator`  | Rental ROI calculator                          |
+| `/tools/cap-rate-calculator` | Cap-rate calculator                        |
+| `/tools/rent-vs-sell`    | Rent-vs-sell calculator                        |
+| `/owners`                | Property owner services + rental-analysis intake |
+| `/owner-portal`          | Owner portal login (AppFolio)                  |
+| `/residents` · `/tenants`| Tenant/resident resources + FAQ                |
+| `/ai-agents`             | AI capabilities marketing page                 |
 | `/about`                 | About the company                              |
 | `/contact`               | Contact form (creates Leads)                   |
-| `/owners`                | Property owner services                        |
-| `/tenants`               | Tenant resources + FAQ                         |
-| `/admin`                 | Payload CMS admin panel                        |
+| `/privacy`               | Privacy policy (CMS-seeded)                    |
+| `/lp/[slug]`             | Paid-ad landing pages (no nav, `noindex`)      |
+| `/admin`                 | Payload CMS admin panel (Microsoft 365 SSO)    |
 
 ---
 
@@ -275,6 +307,7 @@ Custom React views are mounted at these admin URLs (defined in `payload.config.t
 | ------ | ---- | ----------- |
 | GET    | `/api/listings`               | Cached listings from Supabase, `?city=` filter |
 | GET    | `/api/listings/[id]`          | Single listing by AppFolio ID with detail photos |
+| GET    | `/api/listings/map`           | Geocoded listing points for the listings map |
 | GET    | `/api/cron/sync-listings`     | Vercel Cron: AppFolio → Supabase sync (Bearer `CRON_SECRET`) |
 
 ### CRM
@@ -299,7 +332,30 @@ Custom React views are mounted at these admin URLs (defined in `payload.config.t
 | ------ | ---- | ----------- |
 | GET    | `/api/automations/blog-research` | Reddit-based topic suggestions for blog posts |
 | POST   | `/api/automations/generate-blog` | Claude-generated blog post draft → Posts collection |
-| GET    | `/api/automations/sync-listings` | On-demand listings sync trigger |
+| POST   | `/api/automations/blog-agent`    | Runs the full blog pipeline in-process (research → draft → image → digest email) |
+| POST   | `/api/automations/apply-seo-suggestions` | Applies all pending `seo-suggestions` (metadata writes to pages; content left advisory) |
+| POST   | `/api/automations/sync-listings` | On-demand listings sync trigger |
+
+### SEO agent (cron)
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| GET    | `/api/cron/seo-agent`         | Weekly self-improving SEO agent — measures past experiments via GSC, picks opportunities, generates metadata suggestions with Claude, stores as pending `seo-suggestions`, emails a digest (Bearer `CRON_SECRET`) |
+| GET    | `/api/cron/blog-agent`        | Twice-weekly blog agent — research → Claude draft → featured image → digest email with social copy (Bearer `CRON_SECRET`) |
+
+### Campaigns / Landing pages
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| POST   | `/api/campaigns/track`        | Session-deduped visit beacon for `/lp/*` landing pages |
+| GET    | `/api/campaigns/stats`        | Aggregated campaign visit stats for the admin dashboard |
+
+### Admin SSO (Microsoft 365)
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| GET    | `/api/users/oauth/authorize`  | Starts the Entra OIDC flow (302 → Microsoft) — `payload-oauth2` |
+| GET    | `/api/users/oauth/callback`   | OIDC callback: verifies the `@highdesertpm.com` gate, find-or-creates the Payload user, mints the session |
 
 ### Media
 
@@ -406,12 +462,33 @@ Address-lookup data shape is intentionally identical to `hdpm-chatbot/lib/addres
 
 ## Blog Automation (Claude)
 
-Two endpoints power the **Automations** admin view:
+The blog agent (`src/lib/blog-agent/`) runs **twice weekly** (Tue & Fri, 15:00 UTC crons) and is **draft-first — it never auto-publishes**. Each run:
 
-1. `GET /api/automations/blog-research` — pulls trending posts from r/Bend, r/CentralOregon, r/RealEstate and surfaces topic ideas with audience targeting.
-2. `POST /api/automations/generate-blog` — uses `@anthropic-ai/sdk` (Claude) to draft a full post, converts to Lexical, and creates a draft in the Posts collection ready for review.
+1. **Researches** trending topics (Reddit OAuth across r/Bend, r/CentralOregon, r/RealEstate + Tavily web search).
+2. **Drafts** a full post with Claude (`@anthropic-ai/sdk`), converts to Lexical, creates a `draft` in the Posts collection.
+3. **Attaches** a license-safe featured image (Wikimedia).
+4. **Emails** `info@` a digest with the draft link plus Facebook/Instagram captions and a short-video hook (for social repurposing).
 
-Seed scripts in `scripts/seed-blog.ts` and `scripts/seed-blog-ai.ts` produced the initial 20-post corpus.
+Editorial rule enforced in the agent: **no tenant-grievance/conflict content** — tenant-facing posts must stay constructive/service-oriented.
+
+The same pipeline is runnable on demand from `/admin/automations` (**Run Blog Agent**) and via `POST /api/automations/blog-agent`. Legacy endpoints `blog-research` / `generate-blog` remain for the older two-step flow. Seed scripts produced the initial post corpus.
+
+---
+
+## SEO Automation (Claude + Google Search Console)
+
+A self-improving SEO agent (`src/lib/seo-agent/`, `GET /api/cron/seo-agent`) runs **weekly** (Mon 14:00 UTC):
+
+1. **Measures** past experiments — for suggestions applied ~4 weeks ago, pulls before/after 28-day metrics from **Google Search Console** and records an outcome (improved / no change / worse).
+2. **Picks opportunities** from GSC query/page performance.
+3. **Generates** SEO title/description (and advisory content) suggestions with Claude, stored as **pending** `seo-suggestions`.
+4. **Emails** a digest.
+
+**Human-in-the-loop apply:** an admin sets a suggestion's status to *Applied* (individually, or **Apply All Pending** on `/admin/automations`). A `beforeChange` hook writes the value onto the target page **in the same transaction**; the target collection's revalidate hook (`src/lib/revalidate.ts`, wired on `pages`/`posts`/`market-areas`) then busts the affected path so the change is live immediately. A **"Needs review"** banner on the `seo-suggestions` list shows the pending count and one-click filters to it.
+
+Requires `GSC_CLIENT_EMAIL` / `GSC_PRIVATE_KEY` / `GSC_SITE_URL` (a GCP service account added as a user on the Search Console property). If unset, the agent cleanly no-ops.
+
+On-page SEO (per-page metadata + canonicals via `src/lib/seo.ts`, dynamic `sitemap.ts` / `robots.ts`, and JSON-LD from `src/lib/schema.ts`) is independent of the agent and always on.
 
 ---
 
@@ -425,12 +502,14 @@ Seed scripts in `scripts/seed-blog.ts` and `scripts/seed-blog-ai.ts` produced th
 
 Configured in `vercel.json`:
 
-| Schedule        | Endpoint                   | Description                                         |
-| --------------- | -------------------------- | --------------------------------------------------- |
-| Every 15 min    | `/api/cron/sync-listings`  | Sync AppFolio listings to Supabase                  |
-| Hourly (`:00`)  | `/api/crm/cron`            | Mark overdue tasks, run CRM automation rules        |
+| Schedule            | Endpoint                   | Description                                         |
+| ------------------- | -------------------------- | --------------------------------------------------- |
+| Every 15 min        | `/api/cron/sync-listings`  | Sync AppFolio listings to Supabase                  |
+| Hourly (`:00`)      | `/api/crm/cron`            | Mark overdue tasks, run CRM automation rules        |
+| Mon 14:00 UTC       | `/api/cron/seo-agent`      | Weekly SEO agent (GSC measure → suggest)            |
+| Tue & Fri 15:00 UTC | `/api/cron/blog-agent`     | Twice-weekly blog agent (research → draft → digest) |
 
-Both cron endpoints require `Authorization: Bearer $CRON_SECRET` and have a 5-minute Vercel max duration.
+All cron endpoints require `Authorization: Bearer $CRON_SECRET` and have a 5-minute Vercel max duration.
 
 ---
 
@@ -473,11 +552,16 @@ Protected by Payload's built-in auth system (Users collection). Roles:
 
 CRM and automation API routes use `requireAuth({ roles: [...] })` from `src/lib/api-auth.ts` for role-gated access.
 
-### Azure AD (Shared with hdpm-chatbot)
-Both projects share the same Azure AD (Entra ID) tenant for internal team authentication:
-- **Tenant**: High Desert Property Management
-- **Allowed domain**: `@highdesertpm.com`
-- Used by hdpm-chatbot for team login; available to hdpm-web if internal SSO is added later
+### Microsoft 365 (Entra ID) SSO — live
+Admins sign in with their `@highdesertpm.com` Microsoft 365 account via **`payload-oauth2`** (native OIDC), configured in `src/lib/microsoft-sso.ts` and registered in `payload.config.ts`:
+- Reuses hdpm-chat's single-tenant Entra app registration (same `AZURE_AD_CLIENT_ID` / `AZURE_AD_TENANT_ID`; hdpm-web has its own client secret).
+- The plugin runs the OIDC code flow (PKCE), enforces the `@highdesertpm.com` domain gate, then **find-or-creates a normal Payload user by email** and mints the standard Payload session — so `payload.auth()` / `requireAuth` / the admin keep working unchanged and the integer `users.id` is preserved. The only schema delta is one added `sub` column (migration `20260827_120000_add_users_sub_for_sso`).
+- First-time SSO users are auto-provisioned as **`viewer`** (identity ≠ authorization; an admin promotes). Existing users keep their id + role.
+- **Break-glass:** email + password login stays enabled (`disableLocalStrategy` is not set), so a broken OIDC config can't lock everyone out.
+- Endpoints: `/api/users/oauth/authorize` and `/api/users/oauth/callback`. The Azure redirect URI is `https://www.highdesertpm.com/api/users/oauth/callback`.
+- SSO is **prod-only** for v1 (previews point at the prod DB but the redirect URI is not registered for `*.vercel.app`).
+
+> ⚠️ The Entra **client secret** expires — rotate `AZURE_AD_CLIENT_SECRET` in Azure + Vercel before it lapses.
 
 ---
 
@@ -508,10 +592,9 @@ The HDPM platform consists of three applications that share infrastructure but r
 | --------------------- | ------------------------- | ----------------------------- |
 | Supabase Postgres     | `payload_web` schema + `web_listings` | `public` schema tables |
 | Supabase Storage      | `media` bucket            | —                             |
-| Azure AD Tenant       | Available (Payload auth used now) | Active (NextAuth SSO)  |
+| Azure AD Tenant       | Active (M365 SSO via `payload-oauth2`) | Active (NextAuth SSO) |
 | AppFolio API          | Listings sync + lead handoff | Work orders, vendors, properties |
 | Vercel Hosting        | Yes                       | Yes                           |
-| NextAuth Secret       | Shared (for future SSO)   | Active                        |
 
 ### Data Flow Between Projects
 ```
@@ -566,10 +649,20 @@ The projects do **not** directly call each other's APIs. They communicate indire
 
 | Variable | Description |
 | -------- | ----------- |
-| `CLAUDE_API_KEY` (a.k.a. `ANTHROPIC_API_KEY`) | Anthropic API key for blog generation |
+| `CLAUDE_API_KEY` (a.k.a. `ANTHROPIC_API_KEY`) | Anthropic API key for the blog + SEO agents |
+| `TAVILY_API_KEY` | Web search for blog-agent research |
+| `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | Reddit OAuth for blog-agent topic research |
 | `GOOGLE_PLACES_API_KEY` | Google Places API (New) — used for review sync **and** the owner rental-analysis address lookup |
 | `GOOGLE_PLACE_ID` | Place ID for HDPM Google Business listing |
 | `RENTCAST_API_KEY` | Optional — RentCast property record enrichment for the owner rental-analysis form |
+
+### SEO agent (Google Search Console)
+
+| Variable | Description |
+| -------- | ----------- |
+| `GSC_CLIENT_EMAIL` | GCP service-account email (added as a user on the Search Console property) |
+| `GSC_PRIVATE_KEY` | Service-account private key (JWT signing) |
+| `GSC_SITE_URL` | Search Console property, e.g. `https://www.highdesertpm.com/` |
 
 ### Service-to-service (hdpm-chatbot)
 
@@ -584,12 +677,14 @@ The projects do **not** directly call each other's APIs. They communicate indire
 | -------- | ----------- |
 | `RESEND_API_KEY` | Resend transactional email (lead notifications) |
 
-### Azure AD (reserved for future SSO)
+### Microsoft 365 SSO (Entra ID) — active
+
+Reuses hdpm-chat's single-tenant app registration; hdpm-web has its own client secret. Values are `.trim()`-ed on read (Vercel trailing-`\n` guard).
 
 | Variable | Description |
 | -------- | ----------- |
-| `AZURE_AD_CLIENT_ID` | Azure app registration client ID |
-| `AZURE_AD_CLIENT_SECRET` | Azure app registration secret |
+| `AZURE_AD_CLIENT_ID` | Azure app registration client ID (shared with hdpm-chat) |
+| `AZURE_AD_CLIENT_SECRET` | hdpm-web's own client secret (**rotate before expiry**) |
 | `AZURE_AD_TENANT_ID` | Azure AD tenant ID |
 
 ---
