@@ -134,6 +134,19 @@ export default async function ListingDetailPage({
           </nav>
         </div>
 
+        {/* Featured video tour — when a listing has one, lead with it and
+            show the photo mosaic directly below. */}
+        {listing.VideoURL && (
+          <section id="video" className="scroll-mt-4 bg-primary/5">
+            <div className="mx-auto max-w-7xl px-2 pt-2 sm:px-4 sm:pt-4">
+              <VideoTour
+                url={listing.VideoURL}
+                title={`Video tour of ${listing.Address1}`}
+              />
+            </div>
+          </section>
+        )}
+
         {/* Photo gallery */}
         <PhotoGallery photos={listing.UnitPhotos} address={listing.Address1} />
 
@@ -219,21 +232,6 @@ export default async function ListingDetailPage({
                   {cleanedDescription}
                 </p>
               </section>
-
-              {/* Video tour */}
-              {listing.VideoURL && (
-                <section className="mt-10">
-                  <h2 className="font-heading text-subtitle text-neutral-dark">
-                    Video Tour
-                  </h2>
-                  <div className="mt-4">
-                    <VideoTour
-                      url={listing.VideoURL}
-                      title={`Video tour of ${listing.Address1}`}
-                    />
-                  </div>
-                </section>
-              )}
 
               {/* Amenities */}
               {listing.UnitAmenities.length > 0 && (

@@ -75,20 +75,6 @@ export default function ListingCard({
           <span className="text-xs text-neutral-mid">/mo</span>
         </div>
 
-        {/* Video badge — signals the detail page has a video tour */}
-        {listing.VideoURL && (
-          <div
-            className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1 text-xs font-semibold text-white shadow-md"
-            title="Video tour available"
-          >
-            <svg aria-hidden="true" className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            Video
-            <span className="sr-only"> tour available</span>
-          </div>
-        )}
-
         {/* Pet badge */}
         {petFriendly && (
           <Badge variant="solid" size="sm" className="absolute right-3 top-3 gap-1">
@@ -99,6 +85,23 @@ export default function ListingCard({
           </Badge>
         )}
       </Link>
+
+      {/* Video badge — its own link straight to the featured video at the top
+          of the detail page. Kept as a sibling of the image Link (not nested)
+          so we don't put an anchor inside an anchor. */}
+      {listing.VideoURL && (
+        <Link
+          href={`/listings/${listing.Id}#video`}
+          className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1 text-xs font-semibold text-white shadow-md transition-colors hover:bg-red-700"
+          title="Watch the video tour"
+        >
+          <svg aria-hidden="true" className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          Video
+          <span className="sr-only"> tour — watch</span>
+        </Link>
+      )}
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-5">
