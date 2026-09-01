@@ -11,16 +11,26 @@ import { extractYouTubeId, youTubeEmbedUrl, youTubeThumb } from '@/lib/listing-u
 export default function VideoTour({
   url,
   title = 'Property video tour',
+  fill = false,
 }: {
   url: string
   title?: string
+  /** Fill the parent element instead of enforcing a 16:9 box. Used when the
+   *  video occupies a fixed gallery cell (e.g. the mosaic hero slot). */
+  fill?: boolean
 }) {
   const [playing, setPlaying] = useState(false)
   const id = extractYouTubeId(url)
   if (!id) return null
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-900 shadow-sm">
+    <div
+      className={
+        fill
+          ? 'absolute inset-0 h-full w-full overflow-hidden bg-neutral-900'
+          : 'relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-900 shadow-sm'
+      }
+    >
       {playing ? (
         <iframe
           className="absolute inset-0 h-full w-full"

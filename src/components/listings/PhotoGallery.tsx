@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import VideoTour from './VideoTour'
 
 type Photo = { Url: string; Caption?: string }
 
@@ -18,13 +19,24 @@ type Photo = { Url: string; Caption?: string }
 export default function PhotoGallery({
   photos,
   address,
+  videoUrl,
 }: {
   photos: Photo[]
   address: string
+  /** When present, the video tour takes the mosaic's hero slot and the
+   *  photos flow into the thumbnails beside it. */
+  videoUrl?: string
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const hasPhotos = photos.length > 0
   const total = photos.length
+
+  // When the video owns the hero, thumbnails start at the first photo and the
+  // mosaic shows 4 photos; otherwise the first photo is the hero and the mosaic
+  // shows 5. This drives the thumbnail photo offset and the "+N View all" count.
+  const hasVideo = !!videoUrl
+  const thumbStart = hasVideo ? 0 : 1
+  const mosaicPhotoCount = hasVideo ? 4 : 5
 
   const activeThumbRef = useRef<HTMLButtonElement | null>(null)
 
@@ -66,9 +78,15 @@ export default function PhotoGallery({
       {/* Mosaic grid */}
       <section className="bg-primary/5">
         <div className="mx-auto grid max-w-7xl gap-2 p-2 sm:grid-cols-4 sm:grid-rows-2 sm:p-4">
-          {/* Main image */}
+          {/* Hero slot — the video tour when there is one, otherwise the lead photo */}
           <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-gradient-to-br from-primary/20 via-primary/10 to-accent/10 sm:col-span-2 sm:row-span-2">
-            {hasPhotos ? (
+            {hasVideo ? (
+              <VideoTour
+                fill
+                url={videoUrl!}
+                title={`Video tour of ${address}`}
+              />
+            ) : hasPhotos ? (
               <button
                 type="button"
                 onClick={() => setOpenIndex(0)}
@@ -92,33 +110,34 @@ export default function PhotoGallery({
           </div>
 
           {/* Smaller images */}
-          {[1, 2, 3, 4].map((i) => {
-            const photo = photos[i]
+          {[0, 1, 2, 3].map((slot) => {
+            const photoIndex = thumbStart + slot
+            const photo = photos[photoIndex]
             // Show the "View all" overlay on the last visible thumbnail
             // when there are more photos than the mosaic displays.
-            const isLastSlot = i === 4
-            const hiddenCount = total - 5
+            const isLastSlot = slot === 3
+            const hiddenCount = total - mosaicPhotoCount
             const showViewAll = isLastSlot && hiddenCount > 0 && !!photo
 
             return (
               <div
-                key={i}
+                key={slot}
                 className="relative hidden aspect-[16/10] overflow-hidden rounded-lg bg-gradient-to-br from-neutral-200 to-neutral-100 sm:block"
               >
                 {photo?.Url ? (
                   <button
                     type="button"
-                    onClick={() => setOpenIndex(i)}
+                    onClick={() => setOpenIndex(photoIndex)}
                     aria-label={
                       showViewAll
                         ? `View all ${total} photos`
-                        : `View photo ${i + 1} full size`
+                        : `View photo ${photoIndex + 1} full size`
                     }
                     className="group absolute inset-0 h-full w-full cursor-zoom-in"
                   >
                     <Image
                       src={photo.Url}
-                      alt={photo.Caption || `${address} - Photo ${i + 1}`}
+                      alt={photo.Caption || `${address} - Photo ${photoIndex + 1}`}
                       fill
                       sizes="25vw"
                       className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"

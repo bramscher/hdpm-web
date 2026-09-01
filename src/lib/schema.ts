@@ -1,5 +1,6 @@
 import type { AppFolioListing } from './appfolio'
 import { SITE_URL } from '@/lib/site-url'
+import { extractYouTubeId, youTubeEmbedUrl, youTubeThumb } from './listing-utils'
 
 export function localBusinessSchema() {
   return {
@@ -65,6 +66,29 @@ export function listingSchema(listing: AppFolioListing) {
       value: listing.SquareFeet,
       unitCode: 'FTK',
     },
+  }
+}
+
+/**
+ * VideoObject markup for a listing's YouTube marketing tour. Emitting this on
+ * the listing detail page tells Google the page features a video, making it
+ * eligible for video rich results (thumbnail in search + the Videos tab).
+ * Returns null when the listing has no parseable YouTube video, so callers can
+ * skip it. `uploadDate` is required by Google but AppFolio doesn't expose the
+ * real upload date, so we use the render time — matching `listingSchema`'s
+ * `datePosted` fallback.
+ */
+export function listingVideoSchema(listing: AppFolioListing) {
+  const videoId = extractYouTubeId(listing.VideoURL)
+  if (!videoId) return null
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: `Video tour — ${listing.MarketingTitle}`,
+    description: `Video tour of ${listing.Address1}, ${listing.City}, ${listing.State} — a ${listing.Bedrooms} bed / ${listing.Bathrooms} bath rental managed by High Desert Property Management.`,
+    thumbnailUrl: [youTubeThumb(videoId)],
+    uploadDate: new Date().toISOString(),
+    embedUrl: youTubeEmbedUrl(videoId),
   }
 }
 

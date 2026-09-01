@@ -3,11 +3,10 @@ import { SITE_URL } from '@/lib/site-url'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getCachedListingById } from '@/lib/appfolio'
-import { listingSchema, breadcrumbSchema } from '@/lib/schema'
+import { listingSchema, breadcrumbSchema, listingVideoSchema } from '@/lib/schema'
 import { isDogFriendlyPolicy, formatAvailableDate, extractRentZapUrl } from '@/lib/listing-utils'
 import ShareListing from '@/components/listings/ShareListing'
 import PhotoGallery from '@/components/listings/PhotoGallery'
-import VideoTour from '@/components/listings/VideoTour'
 import CallLeesa from '@/components/CallLeesa'
 import ListingInquiryForm from '@/components/listings/ListingInquiryForm'
 import Button from '@/components/ui/Button'
@@ -85,6 +84,10 @@ export default async function ListingDetailPage({
   // failing that, by scraping the AppFolio detail page.
   const rentZapUrl = listing.RentZapURL ?? null
 
+  // When the listing has a YouTube marketing tour, emit VideoObject markup so
+  // the page is eligible for video rich results.
+  const videoSchema = listingVideoSchema(listing)
+
   const jsonLd = [
     listingSchema({ ...listing, MarketingDescription: cleanedDescription }),
     breadcrumbSchema([
@@ -92,6 +95,7 @@ export default async function ListingDetailPage({
       { name: 'Listings', url: '/listings' },
       { name: listing.Address1, url: `/listings/${listing.Id}` },
     ]),
+    ...(videoSchema ? [videoSchema] : []),
   ]
 
   return (
@@ -134,21 +138,16 @@ export default async function ListingDetailPage({
           </nav>
         </div>
 
-        {/* Featured video tour — when a listing has one, lead with it and
-            show the photo mosaic directly below. */}
-        {listing.VideoURL && (
-          <section id="video" className="scroll-mt-4 bg-primary/5">
-            <div className="mx-auto max-w-7xl px-2 pt-2 sm:px-4 sm:pt-4">
-              <VideoTour
-                url={listing.VideoURL}
-                title={`Video tour of ${listing.Address1}`}
-              />
-            </div>
-          </section>
-        )}
-
-        {/* Photo gallery */}
-        <PhotoGallery photos={listing.UnitPhotos} address={listing.Address1} />
+        {/* Media gallery — when a listing has a video tour it takes the
+            mosaic's hero slot, with the photos beside/below it; otherwise the
+            lead photo is the hero. */}
+        <div id="video" className="scroll-mt-4">
+          <PhotoGallery
+            photos={listing.UnitPhotos}
+            address={listing.Address1}
+            videoUrl={listing.VideoURL}
+          />
+        </div>
 
         {/* Content */}
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

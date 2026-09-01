@@ -287,6 +287,11 @@ const PAGES: Array<{ title: string; slug: string; layout: PageLayout; [key: stri
     title: 'Available Rentals',
     slug: 'listings',
     layout: 'listings',
+    meta: {
+      title: 'Rentals in Redmond, Bend, Sisters & All of Central Oregon',
+      description:
+        'Browse available rental homes and apartments in Redmond, Bend, Sisters, and all of Central Oregon. Current listings from High Desert Property Management.',
+    },
     listingsContent: {
       heroHeading: 'Available Rentals',
       heroSubheading: 'Find your next home in Central Oregon',
