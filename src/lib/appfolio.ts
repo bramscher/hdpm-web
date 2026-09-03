@@ -771,10 +771,26 @@ async function fetchDetailPageData(
     const descMatch = html.match(/property="og:description"\s+content="([^"]*)"/)
     const description = descMatch ? decodeHtmlEntities(descMatch[1]) : ''
 
-    // Pet policy
-    const dogMatch = html.match(/(?:Dogs?\s+(?:not\s+)?allowed[^<]*)/i)
-    const dogPolicy = dogMatch ? dogMatch[0].trim() : 'Contact for details'
-    const catsAllowed = /cats?\s+allowed/i.test(html)
+    // Pet policy — AppFolio renders each policy as its own list item:
+    //   <ul class="js-pet-policy-list">
+    //     <li class="js-pet-policy-item">Cats allowed</li>
+    //     <li class="js-pet-policy-item">Small dogs allowed</li>
+    //   </ul>
+    // Parse those items directly. The old approach regex-matched "Dogs allowed"
+    // from the raw HTML, which anchored on the word "Dogs" and silently dropped
+    // qualifiers like "Small" (e.g. "Small dogs allowed" → "dogs allowed").
+    const petItems: string[] = []
+    const petRegex = /js-pet-policy-item[^>]*>([^<]+)</g
+    let petMatch
+    while ((petMatch = petRegex.exec(html)) !== null) {
+      petItems.push(decodeHtmlEntities(petMatch[1]).trim())
+    }
+    const dogItem = petItems.find((i) => /dogs?/i.test(i))
+    const dogPolicy = dogItem || 'Contact for details'
+    const catItem = petItems.find((i) => /cats?/i.test(i))
+    // A cats item is present when cats are addressed at all; only "No cats …"
+    // means they're disallowed.
+    const catsAllowed = catItem ? !/no\s+cats?/i.test(catItem) : false
 
     // Deposit
     const depositMatch = html.match(/Security\s+Deposit:\s*\$?([\d,]+)/i)
