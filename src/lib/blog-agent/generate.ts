@@ -253,23 +253,42 @@ Output format — return ONLY a JSON object with these fields (no markdown code 
     // Categories are optional
   }
 
-  const post = await payload.create({
-    collection: 'posts',
-    data: {
+  const data = {
+    title: blogData.title,
+    slug,
+    status: 'draft' as const,
+    author: blogData.author || 'High Desert Property Management',
+    body: lexicalBody,
+    publishedAt: new Date().toISOString(),
+    categories: categoryIds.length > 0 ? categoryIds : undefined,
+    tags: blogData.tags?.map((tag) => ({ tag })) ?? [],
+    // Recorded so the blog agent won't regenerate this same source topic later
+    // (see run.ts dedup). Undefined for manual/admin-created posts.
+    sourceUrl: topic.sourceUrl,
+    meta: {
       title: blogData.title,
-      slug,
-      status: 'draft',
-      author: blogData.author || 'High Desert Property Management',
-      body: lexicalBody,
-      publishedAt: new Date().toISOString(),
-      categories: categoryIds.length > 0 ? categoryIds : undefined,
-      tags: blogData.tags?.map((tag) => ({ tag })) ?? [],
-      meta: {
-        title: blogData.title,
-        description: blogData.excerpt,
-      },
+      description: blogData.excerpt,
     },
-  })
+  }
+
+  // `source_url` is a newer column (migration 20260904_120000). If the code
+  // deploys before the migration runs, Postgres rejects the insert with a
+  // missing-column error — rather than lose the whole draft, retry without the
+  // field. Dedup simply won't have a source recorded for this post until the
+  // column exists.
+  const isMissingSourceColumn = (err: unknown) => {
+    const e = err as { code?: string; message?: string }
+    return e?.code === '42703' || /source_url/.test(e?.message ?? '')
+  }
+  let post
+  try {
+    post = await payload.create({ collection: 'posts', data })
+  } catch (err) {
+    if (!isMissingSourceColumn(err)) throw err
+    const { sourceUrl: _omit, ...rest } = data
+    void _omit
+    post = await payload.create({ collection: 'posts', data: rest })
+  }
 
   return {
     id: post.id,
