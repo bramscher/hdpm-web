@@ -450,6 +450,10 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Set automatically by the blog agent; blank for hand-written posts.
+   */
+  sourceUrl?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -1395,6 +1399,7 @@ export interface PostsSelect<T extends boolean = true> {
         id?: T;
       };
   body?: T;
+  sourceUrl?: T;
   meta?:
     | T
     | {

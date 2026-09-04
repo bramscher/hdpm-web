@@ -32,6 +32,22 @@ function significantWords(title: string): Set<string> {
   )
 }
 
+/**
+ * Stable identity for a researched source (Reddit permalink / article URL) so a
+ * topic already written about is recognized on later runs. Strips protocol,
+ * `www.`, trailing slashes, query, and hash so trivial URL variants collapse to
+ * the same key. Returns '' for missing/unparseable input.
+ */
+function normalizeSourceUrl(url: string | null | undefined): string {
+  if (!url) return ''
+  try {
+    const u = new URL(url)
+    return `${u.hostname.replace(/^www\./, '')}${u.pathname}`.replace(/\/+$/, '').toLowerCase()
+  } catch {
+    return url.trim().replace(/\/+$/, '').toLowerCase()
+  }
+}
+
 /** True when the topic shares most of its meaningful words with an existing post title. */
 function tooSimilar(topic: string, existing: Set<string>[]): boolean {
   const words = significantWords(topic)
@@ -64,16 +80,42 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
     return { ok: false, skipped: 'no topics found' }
   }
 
-  // 2. Skip topics too close to existing posts (drafts included, so the
-  //    Tuesday run and Friday run never write the same story twice)
+  // 2. Skip topics we've already covered (drafts included, so the Tuesday run
+  //    and Friday run never write the same story twice).
+  //
+  //    Primary key is the source URL: Claude rewrites each topic into an SEO
+  //    headline, so the saved post title no longer resembles the research
+  //    title — comparing the two let the same source regenerate forever. The
+  //    stored `sourceUrl` is the reliable signal; title-word overlap stays as a
+  //    secondary net (catches near-identical topics from different URLs and
+  //    hand-written posts that predate the sourceUrl field).
   const payload = await getPayload({ config })
-  const existing = await payload.find({
-    collection: 'posts',
-    limit: 300,
-    depth: 0,
-    select: { title: true },
-  })
-  const existingTitleWords = existing.docs.map((d) => significantWords(String(d.title ?? '')))
+  type ExistingDoc = { title?: string | null; sourceUrl?: string | null }
+  let existingDocs: ExistingDoc[] = []
+  try {
+    const existing = await payload.find({
+      collection: 'posts',
+      limit: 300,
+      depth: 0,
+      select: { title: true, sourceUrl: true },
+    })
+    existingDocs = existing.docs
+  } catch {
+    // `sourceUrl` column may not exist yet (code deployed before the migration
+    // ran). Fall back to titles only so the run still works — source dedup
+    // resumes once the column is present.
+    const existing = await payload.find({
+      collection: 'posts',
+      limit: 300,
+      depth: 0,
+      select: { title: true },
+    })
+    existingDocs = existing.docs
+  }
+  const existingTitleWords = existingDocs.map((d) => significantWords(String(d.title ?? '')))
+  const usedSources = new Set(
+    existingDocs.map((d) => normalizeSourceUrl(d.sourceUrl)).filter(Boolean),
+  )
 
   // Editorial rule (Craig, 2026-08-03): never publish grievance/conflict or
   // personal-drama content. research.ts already filters at the source; this
@@ -83,7 +125,11 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
     .filter((t) => !EXCLUDED_CONTENT.test(t.title))
     .sort((a, b) => Number(otherState.test(a.title)) - Number(otherState.test(b.title)))
 
-  const fresh = candidates.filter((t) => !tooSimilar(t.title, existingTitleWords))
+  const fresh = candidates.filter(
+    (t) =>
+      !usedSources.has(normalizeSourceUrl(t.sourceUrl)) &&
+      !tooSimilar(t.title, existingTitleWords),
+  )
   if (fresh.length === 0) {
     await sendLeadNotification({
       to: BLOG_AGENT_NOTIFY,
