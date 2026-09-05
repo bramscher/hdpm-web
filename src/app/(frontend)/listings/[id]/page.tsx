@@ -3,6 +3,7 @@ import { SITE_URL } from '@/lib/site-url'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getCachedListingById } from '@/lib/appfolio'
+import { LEGACY_LISTING_REDIRECTS } from '@/lib/listing-redirects'
 import { listingSchema, breadcrumbSchema, listingVideoSchema } from '@/lib/schema'
 import {
   isDogFriendlyPolicy,
@@ -26,6 +27,8 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
+  // Old numeric URLs resolve via the page's 301 redirect; skip the lookup here.
+  if (LEGACY_LISTING_REDIRECTS[id]) return { title: 'Redirecting…' }
   const listing = await getCachedListingById(id)
   if (!listing) return { title: 'Listing Not Found' }
 
@@ -69,6 +72,12 @@ export default async function ListingDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
+  // The listing URL scheme moved from AppFolio's numeric ids to its stable
+  // listable_uid. 301 any old numeric link to its current URL so inbound links
+  // and search results keep working.
+  const legacyTarget = LEGACY_LISTING_REDIRECTS[id]
+  if (legacyTarget) permanentRedirect(`/listings/${legacyTarget}`)
+
   const listing = await getCachedListingById(id)
   // Expired/rented listings never 404 — visitors land on the listings page
   // with a "no longer available" notice instead

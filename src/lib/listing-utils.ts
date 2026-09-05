@@ -48,12 +48,14 @@ export function catsAllowedFromApi(
 }
 
 /**
- * Map AppFolio's v0-API `DogsAllowed` enum to the exact wording AppFolio shows
- * on its public listing page — verified against every current listing:
- *   "Small Only"    -> "Small dogs allowed"
- *   "Large & Small" -> "Dogs allowed"   (also "Yes")
- *   "No"            -> "Dogs not allowed"
- *   null | ""       -> "Contact for details"  (genuinely unknown — never asserted)
+ * Map AppFolio's dog-policy enum to the exact wording AppFolio shows on its
+ * public listing page — verified against every current listing. Handles both
+ * the `/units` enum ("No"|"Small Only"|"Large & Small"|"Yes") and the
+ * `/listings` enum ("Not Allowed"|"Small Only"|"Large & Small"):
+ *   "Small Only"          -> "Small dogs allowed"
+ *   "Large & Small"|"Yes" -> "Dogs allowed"
+ *   "No"|"Not Allowed"    -> "Dogs not allowed"
+ *   null | ""             -> "Contact for details"  (unknown — never asserted)
  */
 export function dogPolicyFromApi(
   unitValue: string | null | undefined,
@@ -63,7 +65,7 @@ export function dogPolicyFromApi(
   if (!v) return 'Contact for details'
   if (v === 'small only') return 'Small dogs allowed'
   if (v === 'large & small' || v === 'large only' || v === 'yes') return 'Dogs allowed'
-  return 'Dogs not allowed'
+  return 'Dogs not allowed' // "no", "not allowed", any other explicit negative
 }
 
 /**
