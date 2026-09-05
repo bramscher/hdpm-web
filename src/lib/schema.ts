@@ -46,6 +46,12 @@ export function listingSchema(listing: AppFolioListing) {
     name: listing.MarketingTitle,
     description: listing.MarketingDescription,
     url: `${SITE_URL}/listings/${listing.Id}`,
+    // All listing photos — makes the page eligible for image-rich results.
+    // Omitted entirely when a listing has no photos (Google prefers no key
+    // over an empty array).
+    ...(listing.UnitPhotos.length
+      ? { image: listing.UnitPhotos.map((p) => p.Url) }
+      : {}),
     datePosted: new Date().toISOString(),
     offers: {
       '@type': 'Offer',
