@@ -4,7 +4,12 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { getCachedListingById } from '@/lib/appfolio'
 import { listingSchema, breadcrumbSchema, listingVideoSchema } from '@/lib/schema'
-import { isDogFriendlyPolicy, formatAvailableDate, extractRentZapUrl } from '@/lib/listing-utils'
+import {
+  isDogFriendlyPolicy,
+  formatAvailableDate,
+  extractRentZapUrl,
+  decodeHtmlEntities,
+} from '@/lib/listing-utils'
 import ShareListing from '@/components/listings/ShareListing'
 import PhotoGallery from '@/components/listings/PhotoGallery'
 import CallLeesa from '@/components/CallLeesa'
@@ -74,12 +79,19 @@ export default async function ListingDetailPage({
 
   const availableDate = formatAvailableDate(listing.AvailableOn)
 
-  // The RentZap application link is pasted into the marketing description and
-  // is the same link the flier's Apply Now points to; pull it out to drive the
-  // Apply Now button here too, and strip it from the displayed copy so the raw
-  // URL doesn't show up in the listing text. Fall back to the AppFolio
-  // application URL when a listing has no RentZap link in its description.
-  const { cleanedDescription } = extractRentZapUrl(listing.MarketingDescription)
+  // Show AppFolio's marketing description verbatim in the body — AppFolio
+  // includes an "APPLY NOW: <RentZap URL>" line, and our site must mirror the
+  // original listing's copy in full. We keep that line and render the URL as a
+  // clickable link; the Apply on RentZap button below is an added feature, not a
+  // replacement for it.
+  const fullDescription = decodeHtmlEntities(listing.MarketingDescription)
+    .replace(/\r\n/g, '\n')
+    .trim()
+  // `cleanedDescription` (RentZap line removed) still feeds the JSON-LD schema so
+  // structured data stays free of a raw URL; the visible body uses fullDescription.
+  const { rentZapUrl: bodyRentZapUrl, cleanedDescription } = extractRentZapUrl(
+    listing.MarketingDescription,
+  )
   // getCachedListingById resolves the RentZap link from the description or,
   // failing that, by scraping the AppFolio detail page.
   const rentZapUrl = listing.RentZapURL ?? null
@@ -228,7 +240,25 @@ export default async function ListingDetailPage({
                   About This Property
                 </h2>
                 <p className="mt-3 font-body leading-relaxed text-neutral-mid whitespace-pre-line">
-                  {cleanedDescription}
+                  {bodyRentZapUrl && fullDescription.includes(bodyRentZapUrl)
+                    ? (() => {
+                        const at = fullDescription.indexOf(bodyRentZapUrl)
+                        return (
+                          <>
+                            {fullDescription.slice(0, at)}
+                            <a
+                              href={bodyRentZapUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary underline hover:no-underline"
+                            >
+                              {bodyRentZapUrl}
+                            </a>
+                            {fullDescription.slice(at + bodyRentZapUrl.length)}
+                          </>
+                        )
+                      })()
+                    : fullDescription}
                 </p>
               </section>
 
