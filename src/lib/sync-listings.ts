@@ -1,6 +1,37 @@
 import { supabaseAdmin } from '@/lib/supabase'
-import { getListings, fetchDetailPage, type AppFolioListing } from '@/lib/appfolio'
+import { getListings, type AppFolioListing } from '@/lib/appfolio'
 import { isListingPetFriendly } from '@/lib/listing-utils'
+
+/**
+ * Refuse to publish a pull that looks broken so a bad fetch can never overwrite
+ * good data. AppFolio changes rarely move listing counts by more than a handful
+ * at a time, so a pull far below the current cache — or one missing photos on
+ * most listings — is treated as degraded and rejected.
+ */
+async function assertHealthyPull(listings: AppFolioListing[]): Promise<void> {
+  const { count } = await supabaseAdmin
+    .from('web_listings')
+    .select('id', { count: 'exact', head: true })
+  const existing = count ?? 0
+
+  // A pull with far fewer listings than we already have is almost certainly a
+  // broken fetch, not 15 units renting overnight. Allow shrinkage to 50%.
+  if (existing >= 4 && listings.length < Math.ceil(existing * 0.5)) {
+    throw new Error(
+      `Refusing sync: got ${listings.length} listings but cache has ${existing} ` +
+        `(more than half would be removed) — treating as a degraded pull`,
+    )
+  }
+
+  // Marketing listings should have photos; if most don't, the feed is degraded.
+  const withoutPhotos = listings.filter((l) => !l.UnitPhotos?.length).length
+  if (listings.length > 0 && withoutPhotos > listings.length * 0.5) {
+    throw new Error(
+      `Refusing sync: ${withoutPhotos}/${listings.length} listings have no photos ` +
+        `— treating as a degraded pull`,
+    )
+  }
+}
 
 export interface SyncListingsResult {
   ok: true
@@ -29,31 +60,15 @@ export interface SyncListingsResult {
 export async function runListingsSync(forceFresh = false): Promise<SyncListingsResult> {
   const startTime = Date.now()
 
-  // 1. Fetch all listings from AppFolio (v0 API + public page CDN images)
+  // 1. Fetch all listings from the AppFolio v0 API `/listings` feed. This one
+  //    call carries every field AND the photos — no page/detail scraping.
   const listings = await getListings(forceFresh)
   if (!listings.length) {
     throw new Error('No listings returned from AppFolio — skipping sync to avoid data loss')
   }
 
-  // 2. For each listing with a detail page ID, fetch all photos (and, from the
-  //    same HTML, the marketing video URL if the property has one).
-  //    Rate limit: 1 second delay between detail page fetches
-  for (const listing of listings) {
-    if (listing.AppFolioDetailId) {
-      try {
-        const { photos, videoUrl } = await fetchDetailPage(listing.AppFolioDetailId, forceFresh)
-        if (photos.length > 0) {
-          listing.UnitPhotos = photos
-        }
-        if (videoUrl) {
-          listing.VideoURL = videoUrl
-        }
-      } catch (err) {
-        console.warn(`[sync-listings] Failed to fetch detail page for ${listing.Id}:`, err)
-      }
-      await new Promise((r) => setTimeout(r, 1000))
-    }
-  }
+  // 2. Guard against a degraded pull overwriting good data.
+  await assertHealthyPull(listings)
 
   const now = new Date().toISOString()
 

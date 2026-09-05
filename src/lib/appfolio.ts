@@ -17,6 +17,7 @@ import {
   catsAllowedFromApi,
   decodeHtmlEntities,
   dogPolicyFromApi,
+  extractRentZapUrl,
   extractYouTubeId,
   youTubeWatchUrl,
 } from './listing-utils'
@@ -1033,86 +1034,148 @@ async function getListingsFromPublicPage(forceFresh = false): Promise<AppFolioLi
 // Public: Get all available listings
 // ============================================
 
+/**
+ * A row from the v0 API `/listings` endpoint — AppFolio's marketing feed. This
+ * is the single source of truth for the website: it carries every field we show
+ * (title, description, pet policy, amenities, rent, deposit, availability, video)
+ * AND the photos (`UnitPhotos`), so no page/detail scraping is needed.
+ */
+interface V0Listing {
+  Id: string
+  UnitId?: string
+  Address1?: string
+  Address2?: string | null
+  City?: string
+  State?: string
+  Zip?: string
+  AdvertisedRent?: number | string
+  Bedrooms?: number | string
+  Bathrooms?: number | string
+  SquareFeet?: number | string
+  AvailableOn?: string | null
+  Deposit?: number | string
+  MarketingTitle?: string
+  MarketingDescription?: string
+  // CatsAllowed is a boolean on this endpoint; DogPolicy is a string enum
+  // ("Not Allowed" | "Small Only" | "Large & Small").
+  CatsAllowed?: boolean | string | null
+  DogPolicy?: string | null
+  UnitAmenities?: string[]
+  UtilitiesIncluded?: string[]
+  UnitPhotos?: { Url?: string; ThumbnailUrl?: string; ContentType?: string }[]
+  YouTubeURL?: string | null
+  ApplicationURL?: string
+  PropertyId?: string
+  PropertyType?: string
+  PostedToWebsite?: boolean
+}
+
+/** Map one `/listings` row to our public AppFolioListing shape. */
+function mapApiListing(l: V0Listing, appliances: string[] = []): AppFolioListing {
+  const beds = Math.round(parseNumber(l.Bedrooms))
+  const baths = parseNumber(l.Bathrooms)
+  const sqft = Math.round(parseNumber(l.SquareFeet))
+  const rent = parseNumber(l.AdvertisedRent)
+  const city = l.City || ''
+
+  // Photos come straight from the API (Url = large image); AppFolio returns the
+  // cover photo first, so order is preserved.
+  const photos = (l.UnitPhotos || [])
+    .map((p) => p.Url)
+    .filter((u): u is string => Boolean(u))
+    .map((Url, i) => ({ Url, Caption: i === 0 ? 'Primary photo' : undefined }))
+
+  // AppFolio's page shows three feature groups: Amenities, Utilities Included,
+  // and Appliances. The `/listings` feed only carries the first two; appliances
+  // come from the joined `/units` record. Combine in that order, deduped.
+  const amenities = Array.from(
+    new Set(
+      [...(l.UnitAmenities ?? []), ...(l.UtilitiesIncluded ?? []), ...appliances]
+        .map((a) => (a ?? '').trim())
+        .filter(Boolean),
+    ),
+  )
+
+  const description = l.MarketingDescription || ''
+  const videoId = extractYouTubeId(l.YouTubeURL)
+  const catsAllowed =
+    typeof l.CatsAllowed === 'boolean' ? l.CatsAllowed : catsAllowedFromApi(l.CatsAllowed)
+
+  return {
+    Id: l.Id,
+    Address1: (l.Address1 || '').trim(),
+    City: city,
+    State: l.State || 'OR',
+    Zip: l.Zip || '',
+    AdvertisedRent: rent,
+    Bedrooms: beds,
+    Bathrooms: baths,
+    SquareFeet: sqft,
+    AvailableOn: l.AvailableOn || '',
+    MarketingTitle: l.MarketingTitle?.trim() || `${beds}BR/${baths}BA in ${city}`,
+    MarketingDescription: description,
+    UnitPhotos: photos,
+    UnitAmenities: amenities,
+    ApplicationURL: l.ApplicationURL || `${APPFOLIO_PUBLIC_BASE}/listings`,
+    CatsAllowed: catsAllowed,
+    DogPolicy: dogPolicyFromApi(l.DogPolicy),
+    Deposit: parseNumber(l.Deposit) || rent,
+    PropertyType: l.PropertyType || undefined,
+    PropertyId: l.PropertyId,
+    // The listing's `Id` is AppFolio's listable_uid, which is also its
+    // detail-page id — keep it so links to AppFolio still resolve.
+    AppFolioDetailId: l.Id,
+    RentZapURL: extractRentZapUrl(description).rentZapUrl ?? undefined,
+    VideoURL: videoId ? youTubeWatchUrl(videoId) : undefined,
+  }
+}
+
 export async function getListings(forceFresh = false): Promise<AppFolioListing[]> {
   const config = getConfig()
   if (!config) {
-    console.warn('[AppFolio] Missing API credentials, falling back to public page scrape')
-    return getListingsFromPublicPage(forceFresh)
+    throw new Error('[AppFolio] API credentials are not configured — cannot fetch listings')
   }
-
   const { clientId, clientSecret, developerId } = config
 
-  try {
-    // Step 1: Fetch public page to get CDN image URLs and detail IDs
-    const publicData = await fetchPublicListingPhotos(forceFresh)
-    console.log(`[AppFolio] Public page: ${publicData.size} listings with images`)
-
-    // Step 2: Fetch all properties from v0 API
-    const allProperties = await fetchAllProperties(clientId, clientSecret, developerId, forceFresh)
-    console.log(`[AppFolio] Total properties: ${allProperties.length}`)
-
-    // Filter out hidden properties
-    const activeProperties = allProperties.filter((p) => !p.HiddenAt)
-
-    // Build a map for quick lookup
-    const propertyMap = new Map<string, V0Property>()
-    for (const p of activeProperties) {
-      propertyMap.set(p.Id, p)
+  // Pull the full marketing feed (paginated), then keep only what's posted to
+  // the website. `/listings` caps at 100 rows/page, so we follow next_page_path.
+  const all: V0Listing[] = []
+  let pageNumber = 1
+  while (true) {
+    const res = await v0Fetch<V0Listing>(
+      '/listings',
+      {
+        'filters[LastUpdatedAtFrom]': '2020-01-01T00:00:00Z',
+        'page[number]': String(pageNumber),
+        'page[size]': '1000',
+      },
+      clientId,
+      clientSecret,
+      developerId,
+      forceFresh,
+    )
+    const rows = res.data || []
+    all.push(...rows)
+    if (!res.next_page_path || rows.length === 0) break
+    pageNumber++
+    if (pageNumber > 50) {
+      console.warn('[AppFolio] /listings hit the 50-page safety cap')
+      break
     }
-
-    // Step 3: Fetch all units from v0 API
-    const allUnits = await fetchAllUnits(clientId, clientSecret, developerId, forceFresh)
-    console.log(`[AppFolio] Total units: ${allUnits.length}`)
-
-    // Step 4: Filter to available units only
-    const availableUnits = allUnits.filter((unit) => {
-      // Unit must belong to an active property
-      if (!unit.PropertyId || !propertyMap.has(unit.PropertyId)) return false
-      return isUnitAvailable(unit)
-    })
-    console.log(`[AppFolio] Available units: ${availableUnits.length}`)
-
-    // Step 5: Build listings, matching with public page data for photos
-    const listings: AppFolioListing[] = []
-
-    for (const unit of availableUnits) {
-      const property = propertyMap.get(unit.PropertyId!)!
-      const unitAddr = unit.Address1 || property.Address1 || ''
-
-      // Try to match this unit's address to a public page listing
-      let matchedPublicInfo: PublicListingInfo | null = null
-      for (const [publicAddr, info] of publicData.entries()) {
-        if (addressesMatch(unitAddr, publicAddr)) {
-          matchedPublicInfo = info
-          break
-        }
-      }
-
-      // Only include listings that appear on the public page (filter out unpublished)
-      if (!matchedPublicInfo) {
-        console.log(`[AppFolio] Skipping unpublished listing: ${unitAddr} (${unit.Id})`)
-        continue
-      }
-
-      // Use CDN image URL as the primary photo
-      const photos: { Url: string; Caption?: string }[] = []
-      if (matchedPublicInfo.primaryImageUrl) {
-        photos.push({
-          Url: matchedPublicInfo.primaryImageUrl,
-          Caption: 'Primary photo',
-        })
-      }
-
-      listings.push(buildListing(property, unit, photos, matchedPublicInfo.detailPageId))
-    }
-
-    console.log(`[AppFolio] Total published listings: ${listings.length}`)
-    return listings
-  } catch (err) {
-    console.error('[AppFolio] Failed to fetch listings via v0 API:', err)
-    console.log('[AppFolio] Falling back to public page scrape...')
-    return getListingsFromPublicPage(forceFresh)
   }
+
+  const posted = all.filter((l) => l.PostedToWebsite)
+  console.log(`[AppFolio] /listings: ${all.length} total, ${posted.length} posted to website`)
+
+  // Appliances aren't on the /listings feed — join them from /units by unit id
+  // (exact match: /listings.UnitId === /units.Id). Pure API, no scraping.
+  const units = await fetchAllUnits(clientId, clientSecret, developerId, forceFresh)
+  const appliancesByUnit = new Map<string, string[]>()
+  for (const u of units) {
+    if (u.Id && u.AppliancesIncluded?.length) appliancesByUnit.set(u.Id, u.AppliancesIncluded)
+  }
+
+  return posted.map((l) => mapApiListing(l, (l.UnitId && appliancesByUnit.get(l.UnitId)) || []))
 }
 
 // ============================================
@@ -1120,13 +1183,6 @@ export async function getListings(forceFresh = false): Promise<AppFolioListing[]
 // ============================================
 
 export async function getListingById(id: string): Promise<AppFolioListing | undefined> {
-  const config = getConfig()
-  if (!config) {
-    const listings = await getListingsFromPublicPage()
-    return listings.find((l) => l.Id === id)
-  }
-
-  // For live lookups, get all listings (which includes public page matching)
   const listings = await getListings()
   return listings.find((l) => l.Id === id)
 }
@@ -1198,6 +1254,9 @@ function rowToListing(row: WebListingRow): AppFolioListing {
     Deposit: Number(row.deposit),
     PropertyType: row.property_type || undefined,
     AppFolioDetailId: row.appfolio_detail_id || undefined,
+    // Derive the RentZap apply link from the stored description so the Apply
+    // button works from the cache without any scraping.
+    RentZapURL: extractRentZapUrl(row.description).rentZapUrl ?? undefined,
     VideoURL: row.video_url || undefined,
   }
 }
@@ -1254,33 +1313,10 @@ export async function getCachedListingById(id: string): Promise<AppFolioListing 
       return getListingById(id)
     }
 
-    const listing = rowToListing(data as WebListingRow)
-
-    // Prefer a RentZap link pasted into the marketing description…
-    const descRentZap = listing.MarketingDescription.match(RENTZAP_APPLY_URL)?.[0]
-    if (descRentZap) listing.RentZapURL = descRentZap
-
-    // For detail pages, fetch ALL photos from the public detail page — and,
-    // while we have the HTML, the RentZap link for listings (e.g. 1400) whose
-    // description doesn't include it.
-    const detailId = (data as WebListingRow).appfolio_detail_id
-    if (detailId) {
-      try {
-        const { photos, rentZapUrl, videoUrl } = await fetchDetailPage(detailId)
-        if (photos.length > 0) {
-          listing.UnitPhotos = photos
-        }
-        if (!listing.RentZapURL && rentZapUrl) {
-          listing.RentZapURL = rentZapUrl
-        }
-        // Prefer the freshly-scraped video; fall back to the stored value.
-        if (videoUrl) listing.VideoURL = videoUrl
-      } catch (detailErr) {
-        console.warn(`[AppFolio] Failed to fetch detail page for ${id}:`, detailErr)
-      }
-    }
-
-    return listing
+    // All fields — photos, video, and the RentZap link (derived in rowToListing
+    // from the description) — come from the cache, which the sync populates from
+    // the v0 API. No detail-page scraping.
+    return rowToListing(data as WebListingRow)
   } catch (err) {
     console.warn(`[AppFolio] Cache error for listing ${id}, falling back to live API:`, err)
     return getListingById(id)
