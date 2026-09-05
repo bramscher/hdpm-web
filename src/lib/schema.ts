@@ -2,6 +2,24 @@ import type { AppFolioListing } from './appfolio'
 import { SITE_URL } from '@/lib/site-url'
 import { extractYouTubeId, youTubeEmbedUrl, youTubeThumb } from './listing-utils'
 
+/**
+ * A STABLE date for a listing's `datePosted` / video `uploadDate`. These pages
+ * are `force-dynamic`, so `new Date()` produced a different timestamp on every
+ * render — Google requires a stable value and treats a date that moves each
+ * crawl as unreliable. Use the availability date when it's a valid past date;
+ * otherwise a fixed past constant (future/blank availability), so the value is
+ * always valid, in the past, and constant across renders.
+ */
+const STABLE_SCHEMA_DATE_FALLBACK = '2025-01-01T00:00:00.000Z'
+function stableListingDate(listing: AppFolioListing): string {
+  const raw = listing.AvailableOn
+  if (raw) {
+    const d = new Date(raw.includes('T') ? raw : `${raw}T00:00:00Z`)
+    if (!Number.isNaN(d.getTime()) && d.getTime() <= Date.now()) return d.toISOString()
+  }
+  return STABLE_SCHEMA_DATE_FALLBACK
+}
+
 export function localBusinessSchema() {
   return {
     '@context': 'https://schema.org',
@@ -52,7 +70,7 @@ export function listingSchema(listing: AppFolioListing) {
     ...(listing.UnitPhotos.length
       ? { image: listing.UnitPhotos.map((p) => p.Url) }
       : {}),
-    datePosted: new Date().toISOString(),
+    datePosted: stableListingDate(listing),
     offers: {
       '@type': 'Offer',
       price: listing.AdvertisedRent,
@@ -93,7 +111,9 @@ export function listingVideoSchema(listing: AppFolioListing) {
     name: `Video tour — ${listing.MarketingTitle}`,
     description: `Video tour of ${listing.Address1}, ${listing.City}, ${listing.State} — a ${listing.Bedrooms} bed / ${listing.Bathrooms} bath rental managed by High Desert Property Management.`,
     thumbnailUrl: [youTubeThumb(videoId)],
-    uploadDate: new Date().toISOString(),
+    uploadDate: stableListingDate(listing),
+    // YouTube-hosted video: embedUrl is the correct signal (contentUrl must be a
+    // raw media file, which YouTube doesn't expose, so it's intentionally omitted).
     embedUrl: youTubeEmbedUrl(videoId),
   }
 }
