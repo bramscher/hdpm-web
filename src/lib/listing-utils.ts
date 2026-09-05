@@ -1,19 +1,69 @@
 import type { AppFolioListing } from './appfolio'
 
 /**
- * AppFolio's `DogPolicy` is a free-text field. Older code compared against the
- * exact string "No dogs", which let any other phrasing ("Dogs not allowed",
- * "No pets", etc.) leak through as pet-friendly. This negates known forms.
+ * AppFolio's `DogPolicy` is a free-text field. Whether dogs are allowed is now
+ * decided with allow-list semantics: a listing is dog-friendly only when the
+ * policy affirmatively says so ("Dogs allowed", "Small dogs allowed"). Anything
+ * negative ("Dogs not allowed") or unknown ("Contact for details", blank) is
+ * NOT treated as friendly — silence about pets must never read as pets welcome.
  */
 const DOG_NEGATIVE = /(no\s+(dogs?|pets?))|((dogs?|pets?)\s+(are\s+)?not\s+(allowed|permitted))|no pets allowed/i
+const DOG_AFFIRMATIVE = /allow|permit|welcome/i
 
 export function isDogFriendlyPolicy(policy: string | null | undefined): boolean {
   if (!policy) return false
-  return !DOG_NEGATIVE.test(policy)
+  if (DOG_NEGATIVE.test(policy)) return false
+  return DOG_AFFIRMATIVE.test(policy)
 }
 
 export function isListingPetFriendly(listing: Pick<AppFolioListing, 'CatsAllowed' | 'DogPolicy'>): boolean {
   return Boolean(listing.CatsAllowed) || isDogFriendlyPolicy(listing.DogPolicy)
+}
+
+/**
+ * Resolve a unit-level pet value, falling back to the property-level value when
+ * the unit's is blank/null — the same precedence AppFolio's public page uses.
+ * Returns a trimmed lowercase string ('' when both are empty).
+ */
+function resolvePetValue(
+  unitValue: string | null | undefined,
+  propertyValue: string | null | undefined,
+): string {
+  const unit = (unitValue ?? '').toString().trim()
+  if (unit) return unit.toLowerCase()
+  return (propertyValue ?? '').toString().trim().toLowerCase()
+}
+
+/**
+ * Map AppFolio's v0-API `CatsAllowed` enum ("Yes" | "No" | null | "") to our
+ * boolean. Only an explicit "Yes" means cats are allowed — this authoritative
+ * signal replaces the fragile detail-page scrape, whose regex misread AppFolio's
+ * actual "Cats not allowed" wording as allowed.
+ */
+export function catsAllowedFromApi(
+  unitValue: string | null | undefined,
+  propertyValue?: string | null | undefined,
+): boolean {
+  return resolvePetValue(unitValue, propertyValue) === 'yes'
+}
+
+/**
+ * Map AppFolio's v0-API `DogsAllowed` enum to the exact wording AppFolio shows
+ * on its public listing page — verified against every current listing:
+ *   "Small Only"    -> "Small dogs allowed"
+ *   "Large & Small" -> "Dogs allowed"   (also "Yes")
+ *   "No"            -> "Dogs not allowed"
+ *   null | ""       -> "Contact for details"  (genuinely unknown — never asserted)
+ */
+export function dogPolicyFromApi(
+  unitValue: string | null | undefined,
+  propertyValue?: string | null | undefined,
+): string {
+  const v = resolvePetValue(unitValue, propertyValue)
+  if (!v) return 'Contact for details'
+  if (v === 'small only') return 'Small dogs allowed'
+  if (v === 'large & small' || v === 'large only' || v === 'yes') return 'Dogs allowed'
+  return 'Dogs not allowed'
 }
 
 /**

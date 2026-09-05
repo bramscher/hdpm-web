@@ -13,7 +13,13 @@
  *   APPFOLIO_DEVELOPER_ID
  */
 
-import { decodeHtmlEntities, extractYouTubeId, youTubeWatchUrl } from './listing-utils'
+import {
+  catsAllowedFromApi,
+  decodeHtmlEntities,
+  dogPolicyFromApi,
+  extractYouTubeId,
+  youTubeWatchUrl,
+} from './listing-utils'
 
 // ============================================
 // Public Interface (consumed by all pages/components)
@@ -453,6 +459,10 @@ interface V0Property {
   PropertyType?: string
   LastUpdatedAt?: string
   HiddenAt?: string | null
+  // Pet policy also lives at the property level; used as a fallback when the
+  // unit's own value is null/blank (matches how AppFolio's public page resolves it).
+  CatsAllowed?: string | null
+  DogsAllowed?: string | null
 }
 
 interface V0Unit {
@@ -465,8 +475,18 @@ interface V0Unit {
   MarketRent?: number | string
   RentReady?: boolean
   AvailableOn?: string
+  MarketingTitle?: string
   MarketingDescription?: string
   AppliancesIncluded?: string[]
+  // Structured feature list AppFolio renders under "Amenities" ({Name, Price}).
+  Amenities?: { Name: string; Price?: string }[]
+  UtilitiesIncluded?: string[]
+  // Pet policy enums: "Yes" | "No" | "Small Only" | "Large & Small" | null | "".
+  CatsAllowed?: string | null
+  DogsAllowed?: string | null
+  Deposit?: number | string
+  // AppFolio's "Marketing Video" — a YouTube URL (empty string when none).
+  YouTubeURL?: string | null
   Address1?: string
   Address2?: string | null
   City?: string
@@ -669,9 +689,39 @@ function buildListing(
   // Listing ID: prefer unit ID for multi-unit, property ID for single-family
   const listingId = unit.Id || property.Id
 
-  // Build marketing title
+  // Title: use AppFolio's own MarketingTitle verbatim so the site matches the
+  // AppFolio listing exactly. Fall back to the property name, then a synthesized
+  // "3BR/2BA in City" only when AppFolio has no marketing title at all.
   const title =
-    property.Name || `${beds}BR/${baths}BA in ${city}` || `Rental in ${city}`
+    unit.MarketingTitle?.trim() ||
+    property.Name ||
+    `${beds}BR/${baths}BA in ${city}` ||
+    `Rental in ${city}`
+
+  // Amenities: AppFolio's public page splits features into Amenities, Utilities
+  // Included, and Appliances. Combine them (deduped, order preserved) into the
+  // single amenities list the site renders.
+  const amenities = Array.from(
+    new Set(
+      [
+        ...(unit.Amenities?.map((a) => a.Name) ?? []),
+        ...(unit.UtilitiesIncluded ?? []),
+        ...(unit.AppliancesIncluded ?? []),
+      ]
+        .map((a) => (a ?? '').trim())
+        .filter(Boolean),
+    ),
+  )
+
+  // Pet policy — authoritative from the v0 API (unit value, property fallback),
+  // replacing the detail-page scrape that misread "Cats not allowed".
+  const catsAllowed = catsAllowedFromApi(unit.CatsAllowed, property.CatsAllowed)
+  const dogPolicy = dogPolicyFromApi(unit.DogsAllowed, property.DogsAllowed)
+
+  // Marketing "video": AppFolio exposes it as YouTubeURL on the unit. Normalize
+  // to a canonical watch URL; ignore anything that isn't a real YouTube link.
+  const videoId = extractYouTubeId(unit.YouTubeURL)
+  const videoUrl = videoId ? youTubeWatchUrl(videoId) : undefined
 
   // Build application URL
   const applicationURL = `https://highdesertpm.appfolio.com/listings`
@@ -690,14 +740,15 @@ function buildListing(
     MarketingTitle: title,
     MarketingDescription: unit.MarketingDescription || '',
     UnitPhotos: photos,
-    UnitAmenities: unit.AppliancesIncluded || [],
+    UnitAmenities: amenities,
     ApplicationURL: applicationURL,
-    CatsAllowed: false, // Not available in v0 API
-    DogPolicy: 'Contact for details',
-    Deposit: rent, // Default deposit to rent amount
+    CatsAllowed: catsAllowed,
+    DogPolicy: dogPolicy,
+    Deposit: parseNumber(unit.Deposit) || rent, // fall back to rent when unset
     PropertyType: property.PropertyType || undefined,
     PropertyId: property.Id,
     AppFolioDetailId: detailId,
+    VideoURL: videoUrl,
   }
 }
 
@@ -723,6 +774,7 @@ async function fetchDetailPageData(
   detailId: string,
   forceFresh = false,
 ): Promise<{
+  marketingTitle: string
   availableOn: string
   description: string
   catsAllowed: boolean
@@ -731,6 +783,7 @@ async function fetchDetailPageData(
   amenities: string[]
 }> {
   const defaults = {
+    marketingTitle: '',
     availableOn: '',
     description: '',
     catsAllowed: false,
@@ -745,6 +798,12 @@ async function fetchDetailPageData(
     })
     if (!response.ok) return defaults
     const html = await response.text()
+
+    // Marketing title — AppFolio's public page heading
+    // (<h2 class="listing-detail__title">…</h2>). This is the same title the v0
+    // API returns as MarketingTitle, so the fallback path matches the API path.
+    const titleMatch = html.match(/listing-detail__title[^>]*>([^<]+)</)
+    const marketingTitle = titleMatch ? decodeHtmlEntities(titleMatch[1]).trim() : ''
 
     // Availability date: "Available 4/3/26" or "Available Now"
     const availMatch = html.match(/Available\s+(Now|\d{1,2}\/\d{1,2}\/\d{2,4})/i)
@@ -788,9 +847,12 @@ async function fetchDetailPageData(
     const dogItem = petItems.find((i) => /dogs?/i.test(i))
     const dogPolicy = dogItem || 'Contact for details'
     const catItem = petItems.find((i) => /cats?/i.test(i))
-    // A cats item is present when cats are addressed at all; only "No cats …"
-    // means they're disallowed.
-    const catsAllowed = catItem ? !/no\s+cats?/i.test(catItem) : false
+    // Cats are allowed only when the item affirmatively says "allowed" and is
+    // not a "not allowed" form. AppFolio writes "Cats not allowed" (not "No
+    // cats"), so the old `!/no\s+cats?/i` test misread it as allowed.
+    const catsAllowed = catItem
+      ? /allowed/i.test(catItem) && !/not\s+allowed/i.test(catItem)
+      : false
 
     // Deposit
     const depositMatch = html.match(/Security\s+Deposit:\s*\$?([\d,]+)/i)
@@ -804,7 +866,7 @@ async function fetchDetailPageData(
       amenities.push(amMatch[1].trim())
     }
 
-    return { availableOn, description, catsAllowed, dogPolicy, deposit, amenities }
+    return { marketingTitle, availableOn, description, catsAllowed, dogPolicy, deposit, amenities }
   } catch {
     return defaults
   }
@@ -881,6 +943,7 @@ async function getListingsFromPublicPage(forceFresh = false): Promise<AppFolioLi
 
       // Fetch detail page for richer data (rate-limited)
       let detailData = {
+        marketingTitle: '',
         availableOn: '',
         description: '',
         catsAllowed: false,
@@ -906,7 +969,7 @@ async function getListingsFromPublicPage(forceFresh = false): Promise<AppFolioLi
         Bathrooms: baths,
         SquareFeet: sqft,
         AvailableOn: detailData.availableOn,
-        MarketingTitle: `${beds}BR/${baths}BA in ${city}`,
+        MarketingTitle: detailData.marketingTitle || `${beds}BR/${baths}BA in ${city}`,
         MarketingDescription: detailData.description,
         UnitPhotos: photos,
         UnitAmenities: detailData.amenities,
