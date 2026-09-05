@@ -882,13 +882,29 @@ async function fetchDetailPageData(
     const depositMatch = html.match(/Security\s+Deposit:\s*\$?([\d,]+)/i)
     const deposit = depositMatch ? parseInt(depositMatch[1].replace(/,/g, ''), 10) : 0
 
-    // Amenities
-    const amenities: string[] = []
-    const amenityRegex = /class="amenity[^"]*"[^>]*>([^<]+)</g
-    let amMatch
-    while ((amMatch = amenityRegex.exec(html)) !== null) {
-      amenities.push(amMatch[1].trim())
+    // Amenities — AppFolio's public page splits features into three sections,
+    // each an <h3>Label</h3> followed by <ul class="list"><li class="list__item">.
+    // Combine them (Amenities + Utilities Included + Appliances), matching the
+    // v0-API path's ordering, so both paths render the same list. The old
+    // `class="amenity"` regex matched nothing on the current markup.
+    const sectionItems = (heading: string): string[] => {
+      const section = html.match(
+        new RegExp(`>${heading}</h3>\\s*<ul[^>]*>([\\s\\S]*?)</ul>`, 'i'),
+      )
+      if (!section) return []
+      return Array.from(section[1].matchAll(/list__item[^>]*>([^<]+)</g)).map((m) =>
+        decodeHtmlEntities(m[1]).trim(),
+      )
     }
+    const amenities = Array.from(
+      new Set(
+        [
+          ...sectionItems('Amenities'),
+          ...sectionItems('Utilities Included'),
+          ...sectionItems('Appliances'),
+        ].filter(Boolean),
+      ),
+    )
 
     return { marketingTitle, availableOn, description, catsAllowed, dogPolicy, deposit, amenities }
   } catch {
