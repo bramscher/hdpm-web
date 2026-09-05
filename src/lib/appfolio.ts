@@ -185,6 +185,29 @@ export async function fetchPublicListingPhotos(
 
     const html = await response.text()
 
+    // Preferred: parse the structured listings JSON the page embeds. Each object
+    // carries address, default_photo_url, listing_id, and detail_page_url
+    // TOGETHER, so we sidestep the fragile positional pairing below — detail
+    // links ALSO appear in the HTML cards near the top of the page, far
+    // (>6000 chars) from the address JSON blob, which collapsed the map to a
+    // single entry and made the whole v0-API path publish ~1 listing.
+    const jsonMatch = html.match(/(\[(?:\{[^{}]*"address"[^{}]*\},?\s*)+\])/)
+    if (jsonMatch) {
+      try {
+        const parsed: PublicPageListing[] = JSON.parse(jsonMatch[1])
+        for (const pl of parsed) {
+          const detailPageId = pl.detail_page_url?.match(/detail\/([a-f0-9-]+)/)?.[1] || ''
+          if (!pl.address || !detailPageId) continue
+          result.set(pl.address, {
+            primaryImageUrl: pl.default_photo_url || null,
+            detailPageId,
+          })
+        }
+      } catch {
+        // Malformed JSON — fall through to the regex-based extraction below.
+      }
+    }
+
     // Extract listing cards from the HTML.
     // The page contains JSON-like data with addresses, image URLs, and detail page links.
     // Pattern: each listing has an address, a detail link, and an image URL.
@@ -226,8 +249,9 @@ export async function fetchPublicListingPhotos(
       }
     }
 
-    // Pair each detail link with the nearest address/image from the surrounding page data.
-    if (addresses.length > 0 && detailMatches.length > 0) {
+    // Fallback pairing (only if the JSON parse above found nothing): pair each
+    // detail link with the nearest address/image from the surrounding page data.
+    if (result.size === 0 && addresses.length > 0 && detailMatches.length > 0) {
       for (const detail of detailMatches) {
         const address = closestMatch(addresses, detail.index, 6000)
         if (!address) continue
