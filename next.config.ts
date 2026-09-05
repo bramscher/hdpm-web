@@ -1,5 +1,6 @@
 import { withPayload } from '@payloadcms/next/withPayload'
 import type { NextConfig } from 'next'
+import { LEGACY_LISTING_REDIRECTS } from './src/lib/listing-redirects'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://sywffgwizbxisalwmxib.supabase.co'
 
@@ -19,7 +20,17 @@ const nextConfig: NextConfig = {
   // 301 map for every URL in the live WordPress-era sitemap (see
   // docs/hdpm-web-fix-brief.md P0-6). Verified by scripts/verify-cutover.sh.
   async redirects() {
+    // Listing URLs moved from AppFolio's numeric ids to its stable listable_uid
+    // when listings went API-only. 301 every old numeric URL to its new one.
+    const legacyListingRedirects = Object.entries(LEGACY_LISTING_REDIRECTS).map(
+      ([numericId, listableUid]) => ({
+        source: `/listings/${numericId}`,
+        destination: `/listings/${listableUid}`,
+        permanent: true,
+      }),
+    )
     return [
+      ...legacyListingRedirects,
       { source: '/about-us', destination: '/about', permanent: true },
       { source: '/contact-us', destination: '/contact', permanent: true },
       { source: '/rentals', destination: '/listings', permanent: true },
