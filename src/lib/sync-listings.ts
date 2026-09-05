@@ -1,6 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { getListings, type AppFolioListing } from '@/lib/appfolio'
 import { isListingPetFriendly } from '@/lib/listing-utils'
+import { submitToIndexNow } from '@/lib/indexnow'
+import { SITE_URL } from '@/lib/site-url'
 
 /**
  * Refuse to publish a pull that looks broken so a bad fetch can never overwrite
@@ -168,6 +170,16 @@ export async function runListingsSync(forceFresh = false): Promise<SyncListingsR
       console.error('[sync-listings] Delete removed listings error:', deleteError)
       throw deleteError
     }
+  }
+
+  // Notify IndexNow (Bing/Yandex/etc.) so added/changed listings get recrawled
+  // quickly. Best-effort — never fail the sync over it.
+  try {
+    const urls = [`${SITE_URL}/listings`, ...rows.map((r) => `${SITE_URL}/listings/${r.id}`)]
+    const inx = await submitToIndexNow(urls)
+    console.log(`[sync-listings] IndexNow: submitted ${inx.submitted} urls (HTTP ${inx.status})`)
+  } catch (err) {
+    console.warn('[sync-listings] IndexNow submit failed:', err)
   }
 
   const elapsed = Date.now() - startTime
