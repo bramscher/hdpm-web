@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import Image from 'next/image'
+import ScrollHero from '@/components/ui/ScrollHero'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema, faqSchema } from '@/lib/schema'
 import { SITE_URL } from '@/lib/site-url'
@@ -92,16 +94,26 @@ export default function AiAgentsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema(faqs)) }} />
 
       {/* Hero */}
-      <Section tone="dark">
-        <div className="max-w-3xl">
+      <ScrollHero className="relative flex min-h-[70vh] items-center bg-primary text-white">
+        <Image
+          src="/agents/ai-voice-workspace.png"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-[65%_center] lg:object-center"
+        />
+        <div className="absolute inset-0 bg-black/55 lg:bg-transparent lg:bg-gradient-to-r lg:from-black/65 lg:via-black/30 lg:to-transparent" />
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div className="max-w-2xl">
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-bold uppercase tracking-wide text-accent-light">
               Powered by AI · Backed by our team
             </span>
-            <h1 className="mt-5 font-heading text-display font-extrabold tracking-tight text-white">
+            <h1 className="mt-5 font-heading text-display-sm font-extrabold text-white sm:text-display">
               The AI agents answering your calls
             </h1>
-            <p className="mt-5 text-lg leading-relaxed text-white/80">
+            <p className="mt-5 text-lg leading-relaxed text-white/90">
               Meet Leesa, Max, and Sally — the AI phone agents at High Desert Property Management. They
               pick up when our team is already on another call and when the office is closed, so owners
               and residents across Central Oregon always reach a helpful voice. A real person always
@@ -117,7 +129,8 @@ export default function AiAgentsPage() {
             </div>
           </Reveal>
         </div>
-      </Section>
+        </div>
+      </ScrollHero>
 
       {/* Why */}
       <Section tone="white" id="why">
@@ -177,7 +190,7 @@ export default function AiAgentsPage() {
         <div className="mt-10 space-y-12">
           {AGENT_LIST.map((agent, i) => (
             <Reveal key={agent.id} delay={Math.min(i, 3) * 0.05}>
-              <div className="grid items-center gap-8 lg:grid-cols-2">
+              <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2">
                 <div className={i % 2 === 1 ? 'lg:order-2' : ''}>
                   <AgentVideo agent={agent} />
                 </div>
@@ -200,7 +213,7 @@ export default function AiAgentsPage() {
                       : 'Answers daytime overflow when the team is on another call, and is the primary responder after hours.'}
                   </p>
                   <div className="mt-6">
-                    <CallAgent agent={agent} />
+                    <CallAgent agent={agent} className="max-w-full" />
                   </div>
                 </div>
               </div>

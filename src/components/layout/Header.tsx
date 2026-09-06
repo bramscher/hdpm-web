@@ -59,6 +59,7 @@ export default function Header() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
+    onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
@@ -74,7 +75,7 @@ export default function Header() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 w-full glass-dark text-white transition-all duration-300',
+        'sticky top-0 z-50 w-full bg-primary/95 text-white transition-all duration-300',
         scrolled && 'border-b border-white/10 shadow-md',
       )}
     >
@@ -213,10 +214,11 @@ export default function Header() {
         }
         transition={reduceMotion ? { duration: 0.2 } : springGentle}
         className={cn(
-          'fixed top-0 right-0 z-40 flex h-full w-[280px] max-w-[80vw] translate-x-full flex-col bg-primary shadow-xl lg:hidden',
-          !mobileOpen && 'pointer-events-none',
+          'fixed top-0 right-0 z-40 flex h-dvh w-[280px] max-w-[80vw] flex-col bg-primary shadow-xl lg:hidden',
+          !mobileOpen && 'invisible pointer-events-none',
         )}
         aria-hidden={!mobileOpen}
+        inert={!mobileOpen}
       >
         <div className="flex-1 overflow-y-auto px-6 pt-20 pb-8">
           <div className="flex flex-col gap-1">

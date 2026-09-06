@@ -17,7 +17,7 @@ export default function Card({
   return (
     <Tag
       className={cn(
-        'rounded-xl border border-neutral-200 bg-surface shadow-sm',
+        'astra-card rounded-xl border border-neutral-200 bg-surface shadow-sm',
         interactive &&
           'transition-all duration-300 ease-out hover:-translate-y-1 hover:border-primary/20 hover:shadow-lg motion-reduce:transform-none',
         className,

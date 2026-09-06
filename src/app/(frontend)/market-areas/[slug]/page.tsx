@@ -1,3 +1,4 @@
+import ScrollHero from '@/components/ui/ScrollHero'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -139,7 +140,7 @@ export default async function MarketAreaPage({
       />
 
       {/* Hero */}
-      <section className="relative flex min-h-[50vh] items-end overflow-hidden">
+      <ScrollHero className="relative flex min-h-[50vh] items-end overflow-hidden">
         {image && (
           <Image
             src={image}
@@ -193,7 +194,7 @@ export default async function MarketAreaPage({
             </p>
           )}
         </div>
-      </section>
+      </ScrollHero>
 
       {/* Quick Stats */}
       <section className="border-b border-neutral-100 bg-white">

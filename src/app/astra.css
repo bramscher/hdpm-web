@@ -1,0 +1,94 @@
+/* Public-site art direction. Payload and landing-page campaigns keep their own UI. */
+.astra-site { overflow-x: clip; }
+.astra-page {
+  --color-neutral-mid: #626664;
+  --color-neutral-light: #f3f5f3;
+  overflow-wrap: break-word;
+}
+.astra-page :is(h1, h2, h3, p, a, button) { letter-spacing: 0; }
+.astra-page :is(section[id], h2[id]) { scroll-margin-top: 100px; }
+.astra-page .astra-hero {
+  min-height: min(790px, calc(100svh - 120px));
+  border-bottom: 1px solid rgb(255 255 255 / .15);
+}
+.astra-hero-content { padding-top: 72px; padding-bottom: 48px; }
+.astra-hero-copy > * { animation: astra-arrive .8s cubic-bezier(.22,1,.36,1) both; }
+.astra-hero-copy > :nth-child(2) { animation-delay: .08s; }
+.astra-hero-copy > :nth-child(3) { animation-delay: .16s; }
+.astra-hero-copy > :nth-child(4) { animation-delay: .24s; }
+.astra-hero-copy > :nth-child(5) { animation-delay: .32s; }
+.astra-hero-copy > :nth-child(6) { animation-delay: .4s; }
+.astra-hero-copy > h1 { max-width: 760px; line-height: 1.09; }
+.astra-hero-copy > p { max-width: 620px; color: rgb(255 255 255 / .9); }
+.astra-hero-copy > div:nth-last-child(2) {
+  border-top: 1px solid rgb(255 255 255 / .3);
+  padding-top: 24px;
+  color: rgb(255 255 255 / .85);
+}
+.astra-page .astra-section { border-bottom: 1px solid #dde2df; }
+.astra-section-heading { border-left: 2px solid #238c45; padding-left: 28px; }
+.astra-page .astra-section h2 { font-weight: 600; }
+.astra-page .astra-services { background: #edf1ee; }
+.astra-service-card { box-shadow: 0 2px 0 #e0e5e1; min-height: 320px; }
+.astra-service-number { position: absolute; top: 32px; right: 24px; font-size: 13px; font-variant-numeric: tabular-nums; color: #727d76; }
+.astra-service-card h3 { max-width: 220px; font-weight: 600; }
+.astra-page .astra-card {
+  border-radius: 8px;
+  border-color: #dce2dd;
+  box-shadow: 0 2px 3px rgb(20 34 24 / .03), 0 12px 32px -24px rgb(20 34 24 / .3);
+}
+.astra-page .astra-card:focus-within { border-color: #238c45; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .astra-page .astra-card:hover { box-shadow: 0 20px 44px -24px rgb(20 34 24 / .35); }
+  .astra-service-card:nth-child(even) { transition-delay: 30ms; }
+}
+.astra-page a.bg-accent { color: #092a13; }
+.astra-page a.bg-accent:hover { color: white; }
+.astra-page :is(input, select, textarea) { border-radius: 6px; }
+.astra-page > section:not(.astra-hero):first-child > div.relative { animation: astra-arrive .75s cubic-bezier(.22,1,.36,1) both; }
+.astra-page > section:not(.astra-hero) { border-bottom: 1px solid #dde2df; }
+.astra-market-grid > div > a { border-radius: 8px; }
+.astra-market-grid > div > a > div { min-height: 290px; }
+.astra-market-grid h3 { font-size: 28px; }
+.astra-market-grid p { color: rgb(255 255 255 / .85); }
+.astra-page .text-overline.text-accent { color: #227840; }
+.astra-page section.bg-primary .text-overline.text-accent { color: #4ade6b; }
+.astra-scroll-hero { overflow: hidden; --hero-heading-drift: 48px; }
+@media (prefers-reduced-motion: no-preference) {
+  .astra-scroll-hero > img,
+  .astra-scroll-hero > .astra-hero-media {
+    transform: translateY(calc(var(--hero-progress, 0) * 14%)) scale(1.04);
+  }
+  .astra-scroll-hero h1 {
+    translate: calc(var(--hero-progress, 0) * var(--hero-heading-drift)) calc(var(--hero-progress, 0) * 16px);
+  }
+}
+@media (max-width: 767px) {
+  .astra-scroll-hero { --hero-heading-drift: 12px; }
+}
+@keyframes astra-arrive { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@media (min-width: 1024px) {
+  .astra-market-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .astra-market-grid > :first-child { grid-column: span 2; grid-row: span 2; }
+  .astra-market-grid > :nth-child(6), .astra-market-grid > :nth-child(7) { grid-column: span 2; }
+  .astra-services .grid { gap: 20px; }
+  .astra-services .grid > :nth-child(even) { padding-top: 28px; }
+  .astra-services .grid > :nth-child(odd) { padding-bottom: 28px; }
+}
+@media (max-width: 640px) {
+  .astra-page .astra-hero { min-height: 0; }
+  .astra-hero-content { padding-top: 32px; padding-bottom: 16px; }
+  .astra-hero-copy > :first-child { margin-bottom: 16px; font-size: 12px; }
+  .astra-hero-copy > h1 { font-size: 30px; }
+  .astra-hero-copy > p { margin-top: 16px; font-size: 16px; line-height: 1.6; }
+  .astra-hero-copy > div:nth-child(4) { margin-top: 24px; gap: 12px; }
+  .astra-hero-copy > div:nth-child(4) a { padding-top: 12px; padding-bottom: 12px; }
+  .astra-hero-copy > div:nth-last-child(2) { margin-top: 24px; padding-top: 16px; gap: 8px; font-size: 12px; }
+  .astra-hero-copy > div:last-child { margin-top: 8px; gap: 8px; }
+  .astra-section-heading { padding-left: 20px; }
+  .astra-service-card { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .astra-hero-copy > * { animation: none; }
+  .astra-page > section:not(.astra-hero):first-child > div.relative { animation: none; }
+}

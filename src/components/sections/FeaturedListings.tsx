@@ -49,12 +49,12 @@ export default function FeaturedListings({
       </Reveal>
 
       {/* Listing cards grid */}
-      <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {featured.map((listing, i) => (
           <Reveal
             key={listing.Id}
             delay={Math.min(i, 3) * 0.07}
-            className="h-full [&>article]:h-full"
+            className="h-full min-w-0 [&>article]:h-full"
           >
             <ListingCard listing={listing} index={i} />
           </Reveal>

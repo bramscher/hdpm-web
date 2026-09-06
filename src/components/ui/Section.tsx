@@ -25,7 +25,7 @@ export default function Section({
   children: ReactNode
 }) {
   return (
-    <section id={id} className={cn('py-16 sm:py-24', toneClasses[tone], className)}>
+    <section id={id} className={cn('astra-section py-16 sm:py-24', toneClasses[tone], className)}>
       <Container className={containerClassName}>{children}</Container>
     </section>
   )

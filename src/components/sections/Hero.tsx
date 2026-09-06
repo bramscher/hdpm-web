@@ -1,11 +1,12 @@
 'use client'
 
 import Image from 'next/image'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useState, useEffect, useCallback } from 'react'
+import ScrollHero from '@/components/ui/ScrollHero'
 import { SERVING_SINCE, YEARS_IN_BUSINESS } from '@/lib/constants'
-import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
+import Badge from '@/components/ui/Badge'
 
 const heroImages = [
   {
@@ -72,6 +73,8 @@ interface HeroContent {
 }
 
 export default function Hero({ content }: { content?: HeroContent | null }) {
+  const reduced = useReducedMotion()
+  const [paused, setPaused] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   // Previous image stays mounted underneath while the new one fades in,
   // so combined opacity never dips mid-crossfade.
@@ -88,19 +91,20 @@ export default function Hero({ content }: { content?: HeroContent | null }) {
   useEffect(() => {
     // Auto-rotation is vestibular motion — don't autoplay for users who
     // prefer reduced motion (manual dot navigation still works).
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (reduced || paused) return
     const timer = setInterval(
       () => goTo((currentIndex + 1) % heroImages.length),
       INTERVAL_MS,
     )
     return () => clearInterval(timer)
-  }, [currentIndex, goTo])
+  }, [currentIndex, goTo, reduced, paused])
 
   const current = heroImages[currentIndex]
   const prev = prevIndex === null ? null : heroImages[prevIndex]
 
   return (
-    <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-primary">
+    <ScrollHero className="astra-hero relative flex items-center overflow-hidden bg-primary">
+      <div className="astra-hero-media absolute inset-0">
       {/* Rotating background: outgoing image below, incoming fades in above */}
       {prev && (
         <Image
@@ -135,13 +139,14 @@ export default function Hero({ content }: { content?: HeroContent | null }) {
           />
         </motion.div>
       </AnimatePresence>
+      </div>
 
       {/* Overlay - just enough for text readability, lets the image shine */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
 
       {/* Content */}
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
-        <div className="max-w-3xl">
+      <div className="astra-hero-content relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl astra-hero-copy">
           <Badge className="mb-6 tracking-wide">
             <span className="inline-block h-2 w-2 rounded-full bg-accent-light" />
             {content?.heroBadge ?? SERVING_SINCE}
@@ -209,7 +214,8 @@ export default function Hero({ content }: { content?: HeroContent | null }) {
           </div>
 
           {/* Image dots indicator */}
-          <div className="mt-6 flex">
+          <div className="mt-6 flex items-center gap-4">
+            <span className="text-xs tabular-nums text-white/70" aria-hidden="true">0{currentIndex + 1} / 0{heroImages.length}</span>
             {heroImages.map((img, i) => (
               <button
                 key={i}
@@ -227,9 +233,12 @@ export default function Hero({ content }: { content?: HeroContent | null }) {
                 />
               </button>
             ))}
+            <button type="button" onClick={() => setPaused(!paused)} aria-label={paused ? 'Play slideshow' : 'Pause slideshow'} title={paused ? 'Play slideshow' : 'Pause slideshow'} className="flex h-11 w-11 items-center justify-center border border-white/30 rounded-full text-white hover:bg-white/15">
+              <span aria-hidden="true">{paused ? '\u25b6' : '\u2161'}</span>
+            </button>
           </div>
         </div>
       </div>
-    </section>
+    </ScrollHero>
   )
 }

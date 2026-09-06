@@ -23,8 +23,8 @@ export default function Reveal({
   return (
     <motion.div
       className={className}
-      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16 }}
-      whileInView={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+      initial={false}
+      whileInView={reduceMotion ? { opacity: 1 } : { opacity: [0.55, 1], y: [24, 0] }}
       viewport={{ once: true, margin: '0px 0px -10% 0px' }}
       transition={{ ...(reduceMotion ? fadeTransition : springDefault), delay }}
     >

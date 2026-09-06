@@ -51,9 +51,9 @@ const services = [
 
 export default function ServicesOverview() {
   return (
-    <Section tone="muted">
+    <Section tone="muted" className="astra-services">
       {/* Section header */}
-      <Reveal className="mx-auto max-w-2xl text-center">
+      <Reveal className="astra-section-heading max-w-3xl">
         <p className="font-heading text-overline uppercase text-accent">
           What We Do
         </p>
@@ -72,9 +72,10 @@ export default function ServicesOverview() {
           <Reveal key={service.title} delay={Math.min(i, 3) * 0.07}>
             <Link
               href={service.href}
-              className="group relative block h-full rounded-xl border border-neutral-200 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/20 active:scale-[0.99] motion-reduce:transform-none"
+              className="astra-service-card group relative flex flex-col h-full rounded-lg border border-neutral-200 bg-white p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/20 active:scale-[0.99] motion-reduce:transform-none"
             >
               {/* Icon container */}
+              <span className="astra-service-number" aria-hidden="true">0{i + 1}</span>
               <div className="mb-5 inline-flex items-center justify-center rounded-lg bg-accent/10 p-3 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
                 {service.icon}
               </div>
@@ -88,7 +89,7 @@ export default function ServicesOverview() {
               </p>
 
               {/* Hover arrow indicator */}
-              <div className="mt-5 flex items-center gap-1 text-sm font-semibold text-accent opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1">
+              <div className="mt-auto pt-8 flex items-center gap-1 text-sm font-semibold text-accent-dark transition-transform duration-300 group-hover:translate-x-1">
                 Learn more
                 <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

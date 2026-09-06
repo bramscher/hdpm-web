@@ -51,18 +51,20 @@ export default function Footer() {
     <footer className="bg-primary text-white/90">
       {/* Main Footer */}
       <div className="mx-auto max-w-7xl px-4 pt-16 pb-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5 lg:gap-8">
           {/* Company Info */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <div className="mb-4">
+          <div className="min-w-0 sm:col-span-2">
+            <div className="mb-6">
               <Image
-                src="/logo-white-text.png"
+                src="/footer-logo-color-white.png"
                 alt="High Desert Property Management"
-                width={180}
-                height={44}
+                width={2498}
+                height={599}
+                sizes="(min-width: 1280px) 467px, (min-width: 1024px) 40vw, (min-width: 640px) 480px, 100vw"
+                className="h-auto w-full max-w-[480px]"
               />
             </div>
-            <p className="mb-5 max-w-xs text-sm leading-relaxed text-white/70">
+            <p className="mb-5 max-w-sm text-sm leading-relaxed text-white/70">
               Professional property management across Central Oregon. Maximizing
               your investment while keeping tenants happy since {FOUNDED_YEAR}.
             </p>

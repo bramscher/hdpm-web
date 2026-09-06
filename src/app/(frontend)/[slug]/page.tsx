@@ -1,3 +1,4 @@
+import ScrollHero from '@/components/ui/ScrollHero'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import type { Metadata } from 'next'
@@ -217,7 +218,7 @@ function HeroBlock({ block }: { block: HeroSection }) {
       : null
 
   return (
-    <section className="relative bg-primary px-4 pb-16 pt-20 sm:px-6 lg:px-8">
+    <ScrollHero className="relative bg-primary px-4 pb-16 pt-20 sm:px-6 lg:px-8">
       {bgImage?.url && (
         <>
           <Image
@@ -247,7 +248,7 @@ function HeroBlock({ block }: { block: HeroSection }) {
           </div>
         )}
       </div>
-    </section>
+    </ScrollHero>
   )
 }
 

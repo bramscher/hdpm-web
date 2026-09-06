@@ -1,3 +1,4 @@
+import ScrollHero from '@/components/ui/ScrollHero'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPayload } from 'payload'
@@ -227,7 +228,7 @@ export default async function OwnersPage() {
       />
 
       {/* ==================== HERO ==================== */}
-      <section className="relative flex min-h-[70vh] items-center overflow-hidden bg-primary">
+      <ScrollHero className="relative flex min-h-[70vh] items-center overflow-hidden bg-primary">
         <Image
           src={
             c?.heroImage && typeof c.heroImage === 'object' && (c.heroImage as MediaType).url
@@ -287,7 +288,7 @@ export default async function OwnersPage() {
             </p>
           </div>
         </div>
-      </section>
+      </ScrollHero>
 
       {/* ==================== WHY HDPM ==================== */}
       <section className="bg-neutral-light py-16 sm:py-24">

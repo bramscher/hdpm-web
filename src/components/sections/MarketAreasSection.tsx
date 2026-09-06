@@ -34,9 +34,9 @@ export default async function MarketAreasSection() {
   if (areas.length === 0) return null
 
   return (
-    <Section tone="muted">
+    <Section tone="muted" className="astra-markets">
       {/* Section header */}
-      <Reveal className="mx-auto max-w-2xl text-center">
+      <Reveal className="astra-section-heading max-w-3xl">
         <p className="font-heading text-overline uppercase text-accent">
           Our Service Areas
         </p>
@@ -50,7 +50,7 @@ export default async function MarketAreasSection() {
       </Reveal>
 
       {/* City cards grid */}
-      <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="astra-market-grid mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {areas.map((area, i) => {
           const image = getAreaImage(area)
 
@@ -77,7 +77,7 @@ export default async function MarketAreasSection() {
 
                   {/* Content */}
                   <div className="relative z-10 p-6">
-                    <h3 className="font-heading text-2xl font-extrabold text-white">
+                    <h3 className="font-heading text-2xl font-semibold text-white">
                       {area.city}
                     </h3>
                     <p className="mt-1 text-sm font-medium text-white/70">

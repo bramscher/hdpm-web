@@ -4,6 +4,8 @@ import '../globals.css'
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import PageMotion from '@/components/layout/PageMotion'
+import '../astra.css'
 import AttributionCapture from '@/components/AttributionCapture'
 import { localBusinessSchema } from '@/lib/schema'
 
@@ -30,7 +32,7 @@ export default function FrontendLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${plusJakarta.variable} ${inter.variable} flex min-h-screen flex-col font-body text-neutral-dark antialiased`}
+        className={`${plusJakarta.variable} ${inter.variable} astra-site flex min-h-screen flex-col font-body text-neutral-dark antialiased`}
       >
         <script
           type="application/ld+json"
@@ -45,7 +47,7 @@ export default function FrontendLayout({
         <AttributionCapture />
         <Header />
         <main id="main-content" className="flex-1">
-          {children}
+          <PageMotion>{children}</PageMotion>
         </main>
         <Footer />
         {process.env.NEXT_PUBLIC_GTM_ID && (

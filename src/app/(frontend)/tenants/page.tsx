@@ -1,3 +1,4 @@
+import ScrollHero from '@/components/ui/ScrollHero'
 import Image from 'next/image'
 import { createMetadata } from '@/lib/seo'
 import { breadcrumbSchema, faqSchema } from '@/lib/schema'
@@ -144,7 +145,7 @@ export default async function TenantsPage() {
       />
 
       {/* ==================== HERO ==================== */}
-      <section className="relative flex min-h-[70vh] items-center overflow-hidden bg-primary">
+      <ScrollHero className="relative flex min-h-[70vh] items-center overflow-hidden bg-primary">
         <Image
           src={heroImageUrl}
           alt="Deschutes River flowing through Central Oregon landscape"
@@ -200,7 +201,7 @@ export default async function TenantsPage() {
             </div>
           </div>
         </div>
-      </section>
+      </ScrollHero>
 
       {/* ==================== CURRENT TENANTS ==================== */}
       <section className="bg-neutral-light py-16 sm:py-24">
