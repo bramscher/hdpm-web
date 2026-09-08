@@ -156,6 +156,15 @@ export async function getSubredditHot(subreddit: string): Promise<RedditPost[]> 
   return redditGet(`/r/${subreddit}/hot.json`, new URLSearchParams({ limit: '15' }))
 }
 
+/** Top posts within a recent window — surfaces what a community is actively
+ *  discussing now, complementing "hot". Defaults to the past week for freshness. */
+export async function getSubredditTop(
+  subreddit: string,
+  t: 'week' | 'month' = 'week',
+): Promise<RedditPost[]> {
+  return redditGet(`/r/${subreddit}/top.json`, new URLSearchParams({ limit: '15', t }))
+}
+
 /* ------------------------------------------------------------------ */
 /*  Tavily web search                                                  */
 /* ------------------------------------------------------------------ */
@@ -295,9 +304,15 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
   const subs = subsForFocus(focus)
   const allowed = new Set(subs.map((s) => s.toLowerCase()))
 
-  // 1. Hot posts from the whitelisted subreddits
-  const hotResults = await Promise.all(subs.map((sub) => getSubredditHot(sub)))
-  for (const posts of hotResults) {
+  // 1. Current discussions from the whitelisted subreddits — "hot" (trending
+  //    now) plus "top this week" so we catch what owners are actively talking
+  //    about, not just long-lived evergreen threads. deduplicateTopics() below
+  //    collapses any post that appears in both passes.
+  const [hotResults, topResults] = await Promise.all([
+    Promise.all(subs.map((sub) => getSubredditHot(sub))),
+    Promise.all(subs.map((sub) => getSubredditTop(sub, 'week'))),
+  ])
+  for (const posts of [...hotResults, ...topResults]) {
     for (const post of posts) {
       if (!allowed.has(post.data.subreddit.toLowerCase())) continue
       if (post.data.score < 5) continue
@@ -355,10 +370,15 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
   // 3. Tavily web search — industry publications and Oregon news. These are
   //    professionally written, so they get a ranking boost over forum posts.
   const month = new Date().toLocaleString('en-US', { month: 'long' }).toLowerCase()
+  const year = new Date().getFullYear()
   const tavilyQueries = [
     'property management industry trends landlords',
-    `central oregon bend redmond rental market ${new Date().getFullYear()}`,
-    'oregon landlord rental law update',
+    `central oregon bend redmond rental market ${year}`,
+    // Rental-law / legislative updates: timely, high-authority, and rarely a
+    // duplicate of an evergreen how-to already on the blog.
+    `oregon rental law changes ${year} landlords`,
+    'oregon residential landlord tenant act update',
+    `bend oregon housing market ${month} ${year}`,
     `${month} rental property maintenance checklist`,
   ]
 

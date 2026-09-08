@@ -1,30 +1,37 @@
 /**
- * Featured-image selection for generated blog posts: searches Wikimedia
- * Commons with the model-suggested query, picks the best license-safe
- * landscape photo, imports it into the Media collection, and attaches it
- * to the post.
+ * Featured-image selection for generated blog posts. Searches Unsplash first
+ * (purpose-built stock: homes, keys, Oregon landscapes) and falls back to
+ * Wikimedia Commons, picking the best license-safe landscape photo, importing
+ * it into the Media collection, and attaching it to the post.
  */
 
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { searchWikimedia, type SearchResult } from '@/lib/image-search'
+import { searchUnsplash, searchWikimedia, type SearchResult } from '@/lib/image-search'
 
-const ALLOWED_IMPORT_HOSTS = new Set(['upload.wikimedia.org', 'commons.wikimedia.org'])
+const ALLOWED_IMPORT_HOSTS = new Set([
+  'upload.wikimedia.org',
+  'commons.wikimedia.org',
+  'images.unsplash.com',
+])
 
-const SAFE_LICENSE = /(^|\b)(cc[- ]|cc0|public domain|pd|attribution)/i
+// Unsplash images are free-to-use under the Unsplash License; Wikimedia results
+// must carry a CC / public-domain / attribution license.
+const SAFE_LICENSE = /(^|\b)(cc[- ]|cc0|public domain|pd|attribution|unsplash)/i
+
+function isUsable(r: SearchResult): boolean {
+  if (!SAFE_LICENSE.test(r.license)) return false
+  if (r.width < 1000 || r.width <= r.height) return false
+  // Unsplash URLs (images.unsplash.com/photo-...) carry no file extension —
+  // the host always serves JPEG, so trust the source instead of the path.
+  if (r.source === 'unsplash') return true
+  // Wikimedia appends ?utm_* params — check the extension on the path only.
+  return /\.(jpe?g|png)(\?|$)/i.test(r.url)
+}
 
 function pickBest(results: SearchResult[]): SearchResult | null {
-  const candidates = results.filter(
-    (r) =>
-      SAFE_LICENSE.test(r.license) &&
-      r.width >= 1000 &&
-      r.width > r.height &&
-      // Wikimedia appends ?utm_* params — check the extension on the path only
-      /\.(jpe?g|png)(\?|$)/i.test(r.url),
-  )
-  // Wikimedia search relevance order is already good — take the first
-  // sufficiently-large landscape photo with a clear license.
-  return candidates[0] ?? null
+  // Search relevance order is already good — take the first usable landscape.
+  return results.find(isUsable) ?? null
 }
 
 export interface AttachedImage {
@@ -45,12 +52,18 @@ export async function findAndAttachFeaturedImage(
   alt: string,
 ): Promise<AttachedImage | null> {
   try {
-    let results = await searchWikimedia(query, 1)
-    let best = pickBest(results)
-    if (!best) {
-      // Broaden: retry with a Central Oregon fallback query
-      results = await searchWikimedia('Bend Oregon', 1)
-      best = pickBest(results)
+    // Try the topic-specific query on Unsplash then Wikimedia, then broaden to a
+    // generic Central Oregon query on each. First usable hit wins.
+    const attempts: Array<() => Promise<SearchResult[]>> = [
+      () => searchUnsplash(query, 1),
+      () => searchWikimedia(query, 1),
+      () => searchUnsplash('Central Oregon home', 1),
+      () => searchWikimedia('Bend Oregon', 1),
+    ]
+    let best: SearchResult | null = null
+    for (const attempt of attempts) {
+      best = pickBest(await attempt())
+      if (best) break
     }
     if (!best) return null
 
@@ -58,8 +71,23 @@ export async function findAndAttachFeaturedImage(
     if (parsedUrl.protocol !== 'https:' || !ALLOWED_IMPORT_HOSTS.has(parsedUrl.hostname)) {
       return null
     }
-    // Strip Wikimedia's utm tracking params before downloading/storing
-    parsedUrl.search = ''
+    if (best.source === 'unsplash') {
+      // Request a sensible web-sized JPEG rather than the full-res original.
+      parsedUrl.searchParams.set('w', '1920')
+      parsedUrl.searchParams.set('q', '80')
+      parsedUrl.searchParams.set('fm', 'jpg')
+      // Unsplash API guidelines: trigger the download endpoint when a photo is
+      // used. Fire-and-forget — never block or fail the import on it.
+      const unsplashKey = process.env.UNSPLASH_ACCESS_KEY
+      if (best.downloadUrl && unsplashKey) {
+        void fetch(best.downloadUrl, {
+          headers: { Authorization: `Client-ID ${unsplashKey}` },
+        }).catch(() => {})
+      }
+    } else {
+      // Wikimedia: strip utm tracking params before downloading/storing.
+      parsedUrl.search = ''
+    }
     best.url = parsedUrl.toString()
 
     const res = await fetch(best.url, {
