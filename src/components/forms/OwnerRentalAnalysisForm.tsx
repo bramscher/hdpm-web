@@ -188,6 +188,19 @@ export default function OwnerRentalAnalysisForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Audience qualifier — reassures owners this is the right place and
+          redirects renters so they don't submit here as junk owner leads. */}
+      <p className="rounded-lg border border-accent/20 bg-accent/5 px-4 py-3 text-sm leading-relaxed text-neutral-dark">
+        <span className="font-semibold">For property owners &amp; investors.</span>{' '}
+        Looking to rent a home instead?{' '}
+        <a
+          href="/listings"
+          className="font-semibold text-accent-dark underline underline-offset-2"
+        >
+          Browse available rentals →
+        </a>
+      </p>
+
       {/* Step 1: Address Lookup */}
       {step === 1 && (
         <div className="space-y-4">
@@ -504,7 +517,7 @@ export default function OwnerRentalAnalysisForm() {
             disabled={submitting}
             className="w-full disabled:opacity-60 disabled:pointer-events-none"
           >
-            {submitting ? 'Submitting…' : 'Get My Free Rental Analysis'}
+            {submitting ? 'Submitting…' : 'See What My Property Could Earn'}
           </Button>
           <p className="text-center text-xs text-neutral-mid">
             We&apos;ll review your property and email a full rent analysis within one business day.

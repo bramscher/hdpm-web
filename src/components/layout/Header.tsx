@@ -163,7 +163,7 @@ export default function Header() {
             </Button>
           </div>
           <Button href="/owners#get-started" variant="primary" size="md" className="ml-3 xl:ml-2">
-            Free Rental Analysis
+            Owners: Free Rent Estimate
           </Button>
         </nav>
 
@@ -289,7 +289,7 @@ export default function Header() {
               className="w-full"
               onClick={() => setMobileOpen(false)}
             >
-              Free Rental Analysis
+              Owners: Free Rent Estimate
             </Button>
           </div>
           <div className="mt-8 space-y-3 text-sm text-white/60">

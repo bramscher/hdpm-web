@@ -28,8 +28,8 @@ export default function LeadForm({
   town,
   sourceDetail,
   analyticsTag,
-  heading = 'Get Your Free Rental Analysis',
-  subheading = 'Find out what your property could earn. No obligation — we’ll email you a full rent analysis within one business day.',
+  heading = 'What Could Your Rental Earn?',
+  subheading = 'Find out what your property could earn with professional management. No obligation — we’ll email you a full rent analysis within one business day.',
   dark = false,
 }: LeadFormProps) {
   const [name, setName] = useState('')
@@ -112,6 +112,25 @@ export default function LeadForm({
           {subheading}
         </p>
       </div>
+
+      {/* Audience qualifier — reassures owners, redirects renters so they
+          don't submit here and land in the owner CRM as junk leads. */}
+      <p
+        className={`rounded-lg border px-4 py-3 text-sm leading-relaxed ${
+          dark
+            ? 'border-white/20 bg-white/10 text-white/85'
+            : 'border-accent/20 bg-accent/5 text-neutral-dark'
+        }`}
+      >
+        <span className="font-semibold">For property owners &amp; investors.</span>{' '}
+        Looking to rent a home instead?{' '}
+        <a
+          href="/listings"
+          className={`font-semibold underline underline-offset-2 ${dark ? 'text-white' : 'text-accent-dark'}`}
+        >
+          Browse available rentals →
+        </a>
+      </p>
 
       {/* Honeypot — hidden from real users, bots fill it. Neutral naming so
           browser address-autofill never populates it. */}
@@ -199,7 +218,7 @@ export default function LeadForm({
         disabled={submitting}
         className="w-full disabled:opacity-60 disabled:pointer-events-none"
       >
-        {submitting ? 'Submitting…' : 'Get My Free Rental Analysis'}
+        {submitting ? 'Submitting…' : 'See What My Property Could Earn'}
       </Button>
       <p className={`text-center text-xs ${dark ? 'text-white/60' : 'text-neutral-mid'}`}>
         Prefer to talk? Call{' '}

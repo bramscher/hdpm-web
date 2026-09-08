@@ -68,13 +68,13 @@ export const LandingPages: CollectionConfig = {
     {
       name: 'formHeading',
       type: 'text',
-      defaultValue: 'Get Your Free Rental Analysis',
+      defaultValue: 'What Could Your Rental Earn?',
     },
     {
       name: 'formSubheading',
       type: 'textarea',
       defaultValue:
-        'Find out what your property could earn. No obligation — we’ll email you a full rent analysis within one business day.',
+        'Find out what your property could earn with professional management. No obligation — we’ll email you a full rent analysis within one business day.',
     },
     {
       name: 'testimonial',
