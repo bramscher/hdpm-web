@@ -176,7 +176,7 @@ export default function Footer() {
             </dl>
             <div className="mt-6">
               <Button href="/owners#get-started" variant="primary" size="md">
-                Free Rental Analysis
+                Owners: Free Rent Estimate
               </Button>
             </div>
           </div>
