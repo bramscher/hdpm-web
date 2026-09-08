@@ -253,6 +253,7 @@ export default function AutomationsView() {
   const [blogAgentResult, setBlogAgentResult] = useState<ActionResult>({ status: 'idle' })
   const [backfillResult, setBackfillResult] = useState<ActionResult>({ status: 'idle' })
   const [backfillOnlyMissing, setBackfillOnlyMissing] = useState(false)
+  const [curatedResult, setCuratedResult] = useState<ActionResult>({ status: 'idle' })
   const [seoApplyResult, setSeoApplyResult] = useState<ActionResult>({ status: 'idle' })
 
   async function syncReviews() {
@@ -349,6 +350,25 @@ export default function AutomationsView() {
       }
     } catch (err) {
       setBlogAgentResult({ status: 'error', message: String(err) })
+    }
+  }
+
+  async function applyCuratedImages() {
+    setCuratedResult({ status: 'loading' })
+    try {
+      const res = await fetch('/api/automations/apply-curated-images', { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok || data.ok === false) {
+        setCuratedResult({ status: 'error', message: data.error || 'Request failed', data })
+      } else {
+        setCuratedResult({
+          status: 'success',
+          message: `Applied ${data.updated} images${data.failed ? ` (${data.failed} failed)` : ''}`,
+          data: data.failed ? data : undefined,
+        })
+      }
+    } catch (err) {
+      setCuratedResult({ status: 'error', message: String(err) })
     }
   }
 
@@ -579,6 +599,20 @@ export default function AutomationsView() {
             Only posts missing an image (leave existing images alone)
           </label>
         </ActionCard>
+
+        {/* Apply Curated Blog Images (one-off recovery) */}
+        <ActionCard
+          title="Apply Curated Blog Images"
+          description="Apply the 22 hand-picked, topic-matched Central Oregon featured images to their posts. Downloads each from the Unsplash CDN and sets it as the post's featured image. One-off recovery for the posts that lost images."
+          buttonLabel="Apply Curated Images"
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+          }
+          onRun={applyCuratedImages}
+          result={curatedResult}
+        />
 
         {/* Apply SEO Suggestions */}
         <ActionCard
