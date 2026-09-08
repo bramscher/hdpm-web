@@ -12,6 +12,60 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { findAndAttachFeaturedImage } from './image'
+import { CURATED_BLOG_IMAGES } from './curated-blog-images'
+
+export interface ApplyCuratedResult {
+  ok: boolean
+  updated: number
+  failed: number
+  details: Array<{ postId: number; ok: boolean; mediaId?: number; error?: string }>
+}
+
+/**
+ * Apply the hand-curated featured images (see curated-blog-images.ts). Downloads
+ * each image directly from the Unsplash CDN (no search API → no rate limit),
+ * imports it to Media, and repoints the post's featuredImage. Best-effort per
+ * post so one failure never aborts the batch.
+ */
+export async function applyCuratedBlogImages(): Promise<ApplyCuratedResult> {
+  const payload = await getPayload({ config })
+  const details: ApplyCuratedResult['details'] = []
+  let updated = 0
+  let failed = 0
+
+  for (const item of CURATED_BLOG_IMAGES) {
+    try {
+      const res = await fetch(item.imageUrl, {
+        headers: { 'User-Agent': 'HDPM-Web/1.0 (info@highdesertpm.com)' },
+      })
+      if (!res.ok) throw new Error(`download HTTP ${res.status}`)
+      const buffer = Buffer.from(await res.arrayBuffer())
+      const contentType = res.headers.get('content-type') || 'image/jpeg'
+      const ext = contentType.includes('png') ? '.png' : '.jpg'
+      const cleanName =
+        item.alt.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) + ext
+
+      const media = await (payload.create as Function)({
+        collection: 'media',
+        data: {
+          alt: item.alt,
+          attribution: item.attribution,
+          license: 'Unsplash License',
+          sourceUrl: item.imageUrl,
+        },
+        file: { data: buffer, name: cleanName, mimetype: contentType, size: buffer.length },
+      })
+      await payload.update({ collection: 'posts', id: item.postId, data: { featuredImage: media.id } })
+      updated++
+      details.push({ postId: item.postId, ok: true, mediaId: media.id })
+    } catch (err) {
+      failed++
+      details.push({ postId: item.postId, ok: false, error: err instanceof Error ? err.message : String(err) })
+    }
+  }
+
+  return { ok: true, updated, failed, details }
+}
 
 // Words that add nothing to an image search — stripped so the query is the
 // concrete subject (e.g. "property management company redmond").
