@@ -251,6 +251,8 @@ export default function AutomationsView() {
   const [creatingPosts, setCreatingPosts] = useState<Record<number, boolean>>({})
   const [createdPosts, setCreatedPosts] = useState<Record<number, { id: number; slug: string; adminUrl: string }>>({})
   const [blogAgentResult, setBlogAgentResult] = useState<ActionResult>({ status: 'idle' })
+  const [backfillResult, setBackfillResult] = useState<ActionResult>({ status: 'idle' })
+  const [backfillOnlyMissing, setBackfillOnlyMissing] = useState(false)
   const [seoApplyResult, setSeoApplyResult] = useState<ActionResult>({ status: 'idle' })
 
   async function syncReviews() {
@@ -347,6 +349,29 @@ export default function AutomationsView() {
       }
     } catch (err) {
       setBlogAgentResult({ status: 'error', message: String(err) })
+    }
+  }
+
+  async function runBackfillImages() {
+    setBackfillResult({ status: 'loading' })
+    try {
+      const res = await fetch('/api/automations/backfill-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ onlyMissing: backfillOnlyMissing }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.ok === false) {
+        setBackfillResult({ status: 'error', message: data.error || 'Request failed', data })
+      } else {
+        setBackfillResult({
+          status: 'success',
+          message: `Updated ${data.updated} of ${data.processed} posts${data.failed ? ` (${data.failed} without a match)` : ''}`,
+          data: { details: data.details },
+        })
+      }
+    } catch (err) {
+      setBackfillResult({ status: 'error', message: String(err) })
     }
   }
 
@@ -520,6 +545,40 @@ export default function AutomationsView() {
           onRun={runBlogAgent}
           result={blogAgentResult}
         />
+
+        {/* Refresh Blog Images */}
+        <ActionCard
+          title="Refresh Blog Images (Unsplash)"
+          description="Assign a relevant Unsplash featured image to blog posts, searching by each post's topic (Wikimedia fallback). The previous image stays in the media library, so any post can be reverted by hand. Takes a couple of minutes."
+          buttonLabel={backfillOnlyMissing ? 'Fill Missing Images' : 'Refresh All Images'}
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+          }
+          onRun={runBackfillImages}
+          result={backfillResult}
+        >
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginTop: '12px',
+              fontSize: '13px',
+              color: 'var(--theme-elevation-500, #666)',
+              cursor: 'pointer',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={backfillOnlyMissing}
+              onChange={(e) => setBackfillOnlyMissing(e.target.checked)}
+              style={{ accentColor: 'var(--theme-success-500, #28a745)' }}
+            />
+            Only posts missing an image (leave existing images alone)
+          </label>
+        </ActionCard>
 
         {/* Apply SEO Suggestions */}
         <ActionCard
