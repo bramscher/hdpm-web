@@ -80,5 +80,19 @@ export const Posts: CollectionConfig = {
       name: 'body',
       type: 'richText',
     },
+    {
+      // Origin of the researched topic (Reddit permalink or article URL). The
+      // blog agent writes this so a later run can tell it already covered this
+      // source and pick a different topic — the post's title alone can't serve
+      // as the key because Claude rewrites it into an SEO headline that no
+      // longer resembles the research title. Blank for manually written posts.
+      name: 'sourceUrl',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Set automatically by the blog agent; blank for hand-written posts.',
+      },
+    },
   ],
 }
