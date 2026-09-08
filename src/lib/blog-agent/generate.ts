@@ -178,7 +178,7 @@ Requirements:
 8. EDITORIAL RULE: never write grievance or conflict content — no tenant-complaint stories, landlord-misdeed angles, dispute drama, or "know your rights against your landlord" framing. Tenant-facing content must be constructive and service-oriented (how to care for your rental, seasonal tips, local living guides). If the topic is inherently a complaint or conflict, reframe it entirely as positive, practical guidance — or write about the closest constructive adjacent topic instead.
 
 Also produce companion assets for the post:
-- image_query: a 2-4 word Wikimedia Commons search phrase for a fitting featured photo. Prefer real Central Oregon places or landscapes (e.g. "Bend Oregon houses", "Deschutes River Bend", "Smith Rock Oregon") over abstract concepts — Wikimedia has real-place photography, not stock imagery.
+- image_query: a 2-4 word photo search phrase for a fitting featured image. The primary source is Unsplash (professional stock), so describe a concrete, photographable subject that matches the article — e.g. "rental home keys", "modern kitchen interior", "moving boxes home", "autumn house exterior", or a real Central Oregon place like "Bend Oregon house" or "Deschutes River". Avoid abstract concepts.
 - image_alt: a one-sentence alt text describing what such a photo would show.
 - social_facebook: a 2-3 sentence Facebook post promoting the article, ending with a reason to click through. No hashtags.
 - social_instagram: an Instagram caption (2-3 short lines) with 3-5 relevant hashtags on the final line.

@@ -141,14 +141,51 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
     return { ok: false, skipped: 'all topics already covered' }
   }
 
-  // 3. Generate the draft from the top fresh topic
-  const topic = fresh[0]
-  const post = await generateBlogPost({
-    title: topic.title,
-    angle: topic.angle,
-    audience: topic.audience,
-    sourceUrl: topic.sourceUrl,
-  })
+  // 3. Generate the draft. Claude rewrites each research topic into an SEO
+  //    headline the pre-generation dedup can't predict, so a topic that maps to
+  //    an already-published post only reveals itself once written (this is how
+  //    the Aug-2026 "Showing Occupied Rentals" post got regenerated). So: after
+  //    generating, compare the FINAL title against existing post titles; if it's
+  //    a duplicate, delete that draft and try the next candidate. Bounded to a
+  //    few attempts so we never fan out expensive generations.
+  const MAX_ATTEMPTS = 3
+  let post: GeneratedBlogPost | null = null
+  let topic: TopicSuggestion | null = null
+  const rejectedDuplicates: string[] = []
+  for (const candidate of fresh.slice(0, MAX_ATTEMPTS)) {
+    const generated = await generateBlogPost({
+      title: candidate.title,
+      angle: candidate.angle,
+      audience: candidate.audience,
+      sourceUrl: candidate.sourceUrl,
+    })
+    if (tooSimilar(generated.title, existingTitleWords)) {
+      rejectedDuplicates.push(generated.title)
+      // Remove the just-created draft so near-duplicates never pile up.
+      await payload.delete({ collection: 'posts', id: generated.id }).catch(() => {})
+      continue
+    }
+    post = generated
+    topic = candidate
+    break
+  }
+
+  if (!post || !topic) {
+    await sendLeadNotification({
+      to: BLOG_AGENT_NOTIFY,
+      subject: 'Blog agent: no fresh topics this run',
+      fields: [
+        [
+          'Detail',
+          rejectedDuplicates.length > 0
+            ? `Every candidate this run rewrote into a headline that duplicates an existing post, so no draft was created. Rejected: ${rejectedDuplicates.join('; ')}.`
+            : 'No fresh topics survived research and dedup. No draft created.',
+        ],
+        ['Next step', 'The evergreen topics are largely covered — consider adding new topic sources (seasonal/local angles, rental-law updates, customer questions).'],
+      ],
+    })
+    return { ok: false, skipped: 'no fresh (non-duplicate) topics' }
+  }
 
   // 4. Featured image (best-effort)
   const image = await findAndAttachFeaturedImage(post.id, post.imageQuery, post.imageAlt)
