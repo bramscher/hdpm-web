@@ -35,11 +35,11 @@ const nav: NavItem[] = [
   },
   { label: 'Areas', href: '/market-areas' },
   { label: 'AI Agents', href: '/ai-agents' },
+  { label: 'Blog', href: '/blog' },
   {
     label: 'About',
     children: [
       { href: '/about', label: 'About Us' },
-      { href: '/blog', label: 'Blog' },
       { href: '/contact', label: 'Contact' },
     ],
   },
