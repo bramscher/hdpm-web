@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { AppFolioListing } from '@/lib/appfolio'
+import { selectFeatured } from '@/lib/featured-listings'
 import ListingCard from '@/components/listings/ListingCard'
 import Button from '@/components/ui/Button'
 import Reveal from '@/components/ui/Reveal'
@@ -10,7 +11,7 @@ export default function FeaturedListings({
 }: {
   listings: AppFolioListing[]
 }) {
-  const featured = listings.slice(0, 3)
+  const featured = selectFeatured(listings)
 
   if (featured.length === 0) {
     return null
