@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canManageContent } from '../lib/access'
 
 /**
  * A paid ad campaign (Facebook, Instagram, Google, …) pointing at a landing
@@ -16,6 +17,9 @@ export const Campaigns: CollectionConfig = {
       'One entry per ad campaign. Copy the ad URL from the Campaigns dashboard into Ads Manager — visits and leads are measured by utm_campaign.',
   },
   access: {
+    create: canManageContent,
+    update: canManageContent,
+    delete: canManageContent,
     read: ({ req: { user } }) => Boolean(user),
   },
   fields: [

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { requireAuth } from '@/lib/api-auth'
+import { trackUnsplashDownload } from '@/lib/unsplash-tracking'
 
 const ALLOWED_IMPORT_HOSTS = new Set([
   'images.unsplash.com',
@@ -46,6 +47,9 @@ export async function POST(req: NextRequest) {
     // Download the image
     const res = await fetch(url, {
       headers: { 'User-Agent': 'HDPM-Web/1.0 (info@highdesertpm.com)' },
+      // A redirect must not bypass the source-host allowlist.
+      redirect: 'error',
+      signal: AbortSignal.timeout(15000),
     })
 
     if (!res.ok) {
@@ -88,11 +92,8 @@ export async function POST(req: NextRequest) {
     })
 
     // If Unsplash, trigger download tracking per API guidelines
-    if (sourceUrl?.includes('unsplash.com') && process.env.UNSPLASH_ACCESS_KEY) {
-      const downloadLocation = body.downloadLocation
-      if (downloadLocation) {
-        fetch(`${downloadLocation}?client_id=${process.env.UNSPLASH_ACCESS_KEY}`).catch(() => {})
-      }
+    if (process.env.UNSPLASH_ACCESS_KEY) {
+      await trackUnsplashDownload(body.downloadLocation, process.env.UNSPLASH_ACCESS_KEY)
     }
 
     return NextResponse.json({

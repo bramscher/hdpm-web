@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canManageContent } from '../lib/access'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -6,6 +7,9 @@ export const Media: CollectionConfig = {
     group: 'Content',
   },
   access: {
+    create: canManageContent,
+    update: canManageContent,
+    delete: canManageContent,
     read: () => true,
   },
   upload: {
