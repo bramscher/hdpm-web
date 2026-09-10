@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canManageContent } from '../lib/access'
 
 /**
  * Conversion-focused landing pages served at /lp/[slug] — stripped of the
@@ -15,6 +16,9 @@ export const LandingPages: CollectionConfig = {
       'Ad landing pages served at /lp/<slug>. No site navigation, always noindex. Attach campaigns to measure them.',
   },
   access: {
+    create: canManageContent,
+    update: canManageContent,
+    delete: canManageContent,
     read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
   },
   fields: [

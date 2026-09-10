@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canManageContent } from '../lib/access'
 
 /**
  * Suggestions produced by the SEO agent (api/cron/seo-agent). Human-in-the-
@@ -24,6 +25,9 @@ export const SeoSuggestions: CollectionConfig = {
     },
   },
   access: {
+    create: canManageContent,
+    update: canManageContent,
+    delete: canManageContent,
     read: ({ req: { user } }) => Boolean(user),
   },
   fields: [

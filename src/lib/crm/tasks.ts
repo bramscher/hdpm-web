@@ -1,10 +1,12 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
+import type { LeadActivity, LeadTask } from '../../payload-types'
 
 interface CreateFollowUpTaskOpts {
-  taskType?: string
+  taskType?: LeadTask['taskType']
   title?: string
   dueMinutes?: number
-  priority?: string
+  priority?: LeadTask['priority']
+  req?: PayloadRequest
 }
 
 export async function createFollowUpTask(
@@ -20,8 +22,7 @@ export async function createFollowUpTask(
 
   const dueAt = new Date(Date.now() + dueMinutes * 60 * 1000).toISOString()
 
-  // Cast needed: lead-tasks not yet registered in payload.config.ts
-  await (payload as any).create({
+  await payload.create({
     collection: 'lead-tasks',
     data: {
       lead: leadId,
@@ -33,24 +34,25 @@ export async function createFollowUpTask(
       priority,
     },
     depth: 0,
+    req: opts?.req,
   })
 }
 
 interface CreateActivityLogOpts {
-  direction?: string
+  direction?: LeadActivity['direction']
   metadata?: Record<string, unknown>
   performedById?: number
+  req?: PayloadRequest
 }
 
 export async function createActivityLog(
   payload: Payload,
   leadId: number,
-  type: string,
+  type: LeadActivity['type'],
   body: string,
   opts?: CreateActivityLogOpts,
 ): Promise<void> {
-  // Cast needed: lead-activities not yet registered in payload.config.ts
-  await (payload as any).create({
+  await payload.create({
     collection: 'lead-activities',
     data: {
       lead: leadId,
@@ -61,5 +63,6 @@ export async function createActivityLog(
       performedBy: opts?.performedById ?? undefined,
     },
     depth: 0,
+    req: opts?.req,
   })
 }

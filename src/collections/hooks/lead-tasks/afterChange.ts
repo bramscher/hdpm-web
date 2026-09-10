@@ -6,29 +6,11 @@ export const leadTasksAfterChange: CollectionAfterChangeHook = async ({
   previousDoc,
   req,
 }) => {
-  const leadId = typeof doc.lead === 'object' ? doc.lead.id : doc.lead
-
-  // Auto-set completedAt when status changes to 'complete'
-  if (
-    operation === 'update' &&
-    doc.status === 'complete' &&
-    previousDoc?.status !== 'complete' &&
-    !doc.completedAt
-  ) {
-    // Cast needed: lead-tasks not yet registered in payload.config.ts
-    await (req.payload as any).update({
-      collection: 'lead-tasks',
-      id: doc.id,
-      data: {
-        completedAt: new Date().toISOString(),
-      },
-      depth: 0,
-    })
-  }
+  const leadId = typeof doc.lead === 'object' ? doc.lead?.id : doc.lead
 
   // Log activity when a task is created
   if (operation === 'create') {
-    await (req.payload as any).create({
+    await req.payload.create({
       collection: 'lead-activities',
       data: {
         lead: leadId,
@@ -44,6 +26,7 @@ export const leadTasksAfterChange: CollectionAfterChangeHook = async ({
         performedBy: req.user?.id ?? undefined,
       },
       depth: 0,
+      req,
     })
   }
 
@@ -53,7 +36,7 @@ export const leadTasksAfterChange: CollectionAfterChangeHook = async ({
     doc.status === 'complete' &&
     previousDoc?.status !== 'complete'
   ) {
-    await (req.payload as any).create({
+    await req.payload.create({
       collection: 'lead-activities',
       data: {
         lead: leadId,
@@ -67,6 +50,7 @@ export const leadTasksAfterChange: CollectionAfterChangeHook = async ({
         performedBy: req.user?.id ?? undefined,
       },
       depth: 0,
+      req,
     })
   }
 

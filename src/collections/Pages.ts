@@ -1,4 +1,5 @@
 import type { CollectionConfig, Field } from 'payload'
+import { canManageContent } from '../lib/access'
 import { revalidateHooks } from '@/lib/revalidate'
 
 /* ------------------------------------------------------------------ */
@@ -220,6 +221,9 @@ export const Pages: CollectionConfig = {
     group: 'Content',
   },
   access: {
+    create: canManageContent,
+    update: canManageContent,
+    delete: canManageContent,
     read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
   },
   // Bust the statically-generated page (/, /[slug], and dedicated routes like

@@ -64,7 +64,7 @@ export default function ImageBrowser() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url: result.downloadUrl || result.url,
+          url: result.url,
           alt: altText || result.title,
           caption: result.attribution,
           attribution: result.attribution,
