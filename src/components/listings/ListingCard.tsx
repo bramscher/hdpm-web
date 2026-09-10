@@ -36,6 +36,10 @@ export default function ListingCard({
   const hasPhoto = listing.UnitPhotos.length > 0 && listing.UnitPhotos[0].Url.length > 0
   const gradientClass = placeholderGradients[index % placeholderGradients.length]
   const petFriendly = isPetFriendly(listing)
+  // Prefer the per-listing RentZap application link (pulled from the marketing
+  // description); fall back to AppFolio's generic ApplicationURL. Matches the
+  // detail page — the card was still pointing only at ApplicationURL.
+  const applyUrl = listing.RentZapURL ?? listing.ApplicationURL
 
   return (
     <Card
@@ -146,7 +150,7 @@ export default function ListingCard({
         <div className="mt-4 flex flex-col gap-2 pt-1">
           <div className="flex gap-2">
             <Button
-              href={listing.ApplicationURL}
+              href={applyUrl}
               target="_blank"
               rel="noopener noreferrer"
               variant="primary"
