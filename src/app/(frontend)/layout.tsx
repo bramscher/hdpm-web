@@ -7,6 +7,7 @@ import Footer from '@/components/layout/Footer'
 import PageMotion from '@/components/layout/PageMotion'
 import '../astra.css'
 import AttributionCapture from '@/components/AttributionCapture'
+import MetaPixel from '@/components/MetaPixel'
 import { localBusinessSchema } from '@/lib/schema'
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -56,6 +57,7 @@ export default function FrontendLayout({
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         )}
+        <MetaPixel />
       </body>
     </html>
   )

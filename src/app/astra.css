@@ -30,7 +30,6 @@
 .astra-page .astra-section h2 { font-weight: 600; }
 .astra-page .astra-services { background: #edf1ee; }
 .astra-service-card { box-shadow: 0 2px 0 #e0e5e1; min-height: 320px; }
-.astra-service-number { position: absolute; top: 32px; right: 24px; font-size: 13px; font-variant-numeric: tabular-nums; color: #727d76; }
 .astra-service-card h3 { max-width: 220px; font-weight: 600; }
 .astra-page .astra-card {
   border-radius: 8px;
@@ -71,9 +70,7 @@
   .astra-market-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .astra-market-grid > :first-child { grid-column: span 2; grid-row: span 2; }
   .astra-market-grid > :nth-child(6), .astra-market-grid > :nth-child(7) { grid-column: span 2; }
-  .astra-services .grid { gap: 20px; }
-  .astra-services .grid > :nth-child(even) { padding-top: 28px; }
-  .astra-services .grid > :nth-child(odd) { padding-bottom: 28px; }
+  .astra-services .grid { gap: 24px; }
 }
 @media (max-width: 640px) {
   .astra-page .astra-hero { min-height: 0; }

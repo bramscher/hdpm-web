@@ -19,9 +19,19 @@ const ALLOWED_IMPORT_HOSTS = new Set([
 // must carry a CC / public-domain / attribution license.
 const SAFE_LICENSE = /(^|\b)(cc[- ]|cc0|public domain|pd|attribution|unsplash)/i
 
+// Reject imagery that reads as decay/abandonment/blight. For a property-
+// management brand, a boarded-up or derelict property is off-message even when
+// it's a perfect keyword match — this is why the auto-picker must never attach
+// it unreviewed. Matched against the photo's title/description/attribution.
+// (The interactive Image Studio bypasses this so a human can still choose any
+// result; this gate applies only to the unattended auto-pick path.)
+const REJECT_SUBJECT =
+  /(abandon|derelict|dilapidat|ramshackle|\bruin(s|ed|ous)?\b|decay|decrepit|rundown|run[- ]down|rotting|rott?en|boarded|foreclos|condemn|haunt|ghost\s*town|crumbl|collaps|\bshack\b|shanty|slum|blight|vandal|graffiti|burnt|burned|fire[- ]damage|broke?n?\s*window|demolit|\brubble\b|disrepair|neglect|weath?ered\s*barn|old\s*barn)/i
+
 function isUsable(r: SearchResult): boolean {
   if (!SAFE_LICENSE.test(r.license)) return false
   if (r.width < 1000 || r.width <= r.height) return false
+  if (REJECT_SUBJECT.test(r.title) || REJECT_SUBJECT.test(r.attribution)) return false
   // Unsplash URLs (images.unsplash.com/photo-...) carry no file extension —
   // the host always serves JPEG, so trust the source instead of the path.
   if (r.source === 'unsplash') return true
@@ -57,8 +67,12 @@ export async function findAndAttachFeaturedImage(
     const attempts: Array<() => Promise<SearchResult[]>> = [
       () => searchUnsplash(query, 1),
       () => searchWikimedia(query, 1),
-      () => searchUnsplash('Central Oregon home', 1),
-      () => searchWikimedia('Bend Oregon', 1),
+      // Aspirational, on-brand fallbacks — well-kept homes and Central Oregon
+      // scenery rather than a bare "home"/"Oregon" match that can surface
+      // rural decay. REJECT_SUBJECT still guards each result.
+      () => searchUnsplash('modern home exterior Central Oregon', 1),
+      () => searchUnsplash('Bend Oregon scenic landscape', 1),
+      () => searchWikimedia('Bend Oregon skyline', 1),
     ]
     let best: SearchResult | null = null
     for (const attempt of attempts) {

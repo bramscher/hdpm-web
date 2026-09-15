@@ -15,6 +15,7 @@ import PhotoGallery from '@/components/listings/PhotoGallery'
 import CallLeesa from '@/components/CallLeesa'
 import ListingInquiryForm from '@/components/listings/ListingInquiryForm'
 import Button from '@/components/ui/Button'
+import TrackView from '@/components/analytics/TrackView'
 
 // Use dynamic rendering — listing data from AppFolio v0 API is too large to SSG all at build time
 export const dynamic = 'force-dynamic'
@@ -114,6 +115,13 @@ export default async function ListingDetailPage({
 
   return (
     <>
+      <TrackView
+        contentName={listing.Address1}
+        contentCategory="rental_listing"
+        contentIds={[listing.Id]}
+        value={listing.AdvertisedRent}
+        currency="USD"
+      />
       {/* JSON-LD */}
       {jsonLd.map((schema, i) => (
         <script

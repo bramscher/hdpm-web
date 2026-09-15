@@ -9,6 +9,7 @@ import { breadcrumbSchema } from '@/lib/schema'
 import { stripBrandSuffix } from '@/lib/seo'
 import BlogPostCard from '@/components/blog/BlogPostCard'
 import LeadForm from '@/components/forms/LeadForm'
+import TrackView from '@/components/analytics/TrackView'
 import type { Post, Category, Media } from '@/payload-types'
 import { SITE_URL } from '@/lib/site-url'
 
@@ -218,6 +219,7 @@ export default async function BlogPostPage({
 
   return (
     <>
+      <TrackView contentName={post.title} contentCategory="blog" />
       {/* JSON-LD */}
       <script
         type="application/ld+json"
