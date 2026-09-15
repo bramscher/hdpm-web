@@ -3,6 +3,7 @@ import '../globals.css'
 
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google'
 import AttributionCapture from '@/components/AttributionCapture'
+import MetaPixel from '@/components/MetaPixel'
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -40,6 +41,7 @@ export default function LandingLayout({
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         )}
+        <MetaPixel />
       </body>
     </html>
   )

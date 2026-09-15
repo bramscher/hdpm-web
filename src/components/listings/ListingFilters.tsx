@@ -2,6 +2,7 @@
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { useCallback } from 'react'
+import { trackSearch } from '@/lib/analytics'
 
 const CITIES = [
   'All',
@@ -52,6 +53,12 @@ export function ListingFilters() {
       }
       const query = params.toString()
       router.push(query ? `${pathname}?${query}` : pathname, { scroll: false })
+      // Report the resulting filter set as a Meta Pixel Search event.
+      const summary = ['city', 'beds', 'price', 'pets']
+        .map((k) => (params.get(k) ? `${k}:${params.get(k)}` : null))
+        .filter(Boolean)
+        .join(' ')
+      if (summary) trackSearch(summary)
     },
     [searchParams, router, pathname],
   )
