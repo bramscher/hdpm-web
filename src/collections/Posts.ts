@@ -61,6 +61,18 @@ export const Posts: CollectionConfig = {
       relationTo: 'media',
     },
     {
+      // Virtual field (no DB column) that renders the in-draft Featured Image
+      // Studio directly beneath the upload field: search Unsplash/Wikimedia or
+      // reuse an owned Media image, then set it on this post in one click.
+      name: 'featuredImageStudio',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/admin/components/FeaturedImageStudio#default',
+        },
+      },
+    },
+    {
       name: 'categories',
       type: 'relationship',
       relationTo: 'categories',

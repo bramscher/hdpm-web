@@ -84,7 +84,7 @@ export function imageQueryForPost(title: string, tags: string[]): string {
     .split(/\s+/)
     .filter((w) => w.length > 2 && !FILLER.has(w))
   const q = words.slice(0, 6).join(' ').trim()
-  return q || tags.find(Boolean) || 'Central Oregon home'
+  return q || tags.find(Boolean) || 'modern home exterior Central Oregon'
 }
 
 export interface BackfillResult {
