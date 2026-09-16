@@ -467,7 +467,10 @@ export default async function ListingDetailPage({
                   Request Info
                 </Button>
 
-                <CallLeesa className="mt-3 w-full justify-center" />
+                <CallLeesa
+                  className="mt-3 w-full justify-center"
+                  propertyAddress={`${listing.Address1}, ${listing.City}, ${listing.State} ${listing.Zip}`}
+                />
 
                 <p className="mt-3 text-center font-body text-xs text-neutral-mid">
                   {rentZapUrl

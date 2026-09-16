@@ -11,9 +11,11 @@ import { type Agent, telHref, smsHref } from '@/lib/agents'
 export default function CallAgent({
   agent,
   className = '',
+  smsBody = agent.smsGreeting,
 }: {
   agent: Agent
   className?: string
+  smsBody?: string
 }) {
   return (
     <div
@@ -59,7 +61,7 @@ export default function CallAgent({
           Call
         </a>
         <a
-          href={smsHref(agent.phone, agent.smsGreeting)}
+          href={smsHref(agent.phone, smsBody)}
           aria-label={`Text ${agent.name} at ${agent.phone}`}
           className="inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent/5 px-3 py-1.5 text-xs font-bold text-accent transition-colors hover:border-accent hover:bg-accent hover:text-white"
         >

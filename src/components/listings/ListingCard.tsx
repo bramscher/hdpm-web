@@ -171,7 +171,10 @@ export default function ListingCard({
               View Details
             </Button>
           </div>
-          <CallLeesa className="w-full justify-center" />
+          <CallLeesa
+            className="w-full justify-center"
+            propertyAddress={`${listing.Address1}, ${listing.City}, ${listing.State} ${listing.Zip}`}
+          />
         </div>
       </div>
     </Card>
