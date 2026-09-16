@@ -173,7 +173,7 @@ export default function ListingCard({
           </div>
           <CallLeesa
             className="w-full justify-center"
-            propertyAddress={`${listing.Address1}, ${listing.City}, ${listing.State} ${listing.Zip}`}
+            appfolioListingId={listing.Id}
           />
         </div>
       </div>
