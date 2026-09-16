@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canManageContent } from '../lib/access'
 
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
@@ -8,6 +9,9 @@ export const Testimonials: CollectionConfig = {
     group: 'Content',
   },
   access: {
+    create: canManageContent,
+    update: canManageContent,
+    delete: canManageContent,
     read: ({ req: { user } }) => (user ? true : { approved: { equals: true } }),
   },
   fields: [

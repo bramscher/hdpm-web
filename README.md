@@ -442,6 +442,7 @@ Owner fills form on /owners
 /api/owner-intake/address-lookup  (Google Geocoding + RentCast)
         ↓ subject property auto-filled, owner confirms
 POST /api/crm/rental-analysis
+        ├──→ existing email/phone: save an unverified inbound lead activity and notify staff for review
         ├──→ creates owner Lead (leadType=owner) with subjectProperty + rentAnalysisStatus="requested"
         └──→ forwards to hdpm-chatbot: POST /api/intake/rental-analysis-request (Bearer HDPM_SERVICE_TOKEN)
                   ↓
@@ -457,6 +458,22 @@ Lead's rentAnalysisStatus and rentAnalysisShortUrl update in the CRM
 ```
 
 Address-lookup data shape is intentionally identical to `hdpm-chatbot/lib/address-lookup.ts` so the `SubjectProperty` passed across services maps 1:1 to the analysis engine input.
+
+When the submitted email or phone matches an existing lead, intake preserves
+all existing contact, pipeline, property, attribution, and analysis fields.
+The complete submitted details are saved in a `lead-activities` note with
+`metadata.kind = rental_analysis_request` and `reviewStatus = pending`.
+The monitored inbox receives a review warning. Staff should verify the request
+using established contact details, review the submitted property, and arrange
+the analysis within the promised one business day. These repeat requests are
+not automatically sent to the chatbot, whose callback could otherwise replace
+the existing analysis. New contacts continue through the flow shown above.
+
+The public success response is always `{ "ok": true }`, including honeypot
+submissions. CRM IDs, deduplication results, and internal handoff errors are
+not returned to the browser. Invalid request shapes and field values return
+400 before database access. Handler regression tests use fake persistence,
+handoff, and notification dependencies; no real messages or requests are sent.
 
 ---
 
@@ -551,6 +568,14 @@ Protected by Payload's built-in auth system (Users collection). Roles:
 - **API** — programmatic access
 
 CRM and automation API routes use `requireAuth({ roles: [...] })` from `src/lib/api-auth.ts` for role-gated access.
+
+Only admins may create/delete user accounts, unlock accounts, or change roles.
+Other signed-in users can edit their own account. Content writes require an
+admin, editor, or API role; viewers cannot write CMS content or delete campaign
+measurements. Public lead submissions use the contact/listing server actions or
+`/api/crm/*` intake routes. Anonymous writes to Payload's raw `/api/leads`
+collection endpoint are denied. Trusted server-side Local API calls still bypass
+collection access control, including Microsoft SSO provisioning.
 
 ### Microsoft 365 (Entra ID) SSO — live
 Admins sign in with their `@highdesertpm.com` Microsoft 365 account via **`payload-oauth2`** (native OIDC), configured in `src/lib/microsoft-sso.ts` and registered in `payload.config.ts`:
@@ -724,6 +749,21 @@ The app runs at `http://localhost:3000` with:
 
 ### Creating the First Admin User
 On first run, navigate to `/admin` and Payload will prompt you to create an initial admin user.
+The first local account receives the admin role; new Microsoft SSO accounts
+receive the viewer role.
+
+### Validation
+
+```bash
+npm run typecheck
+npm test
+```
+
+The regression tests run without database credentials or external service calls.
+They cover collection permissions, SSO role defaults, CRM hook transaction
+propagation, and Unsplash tracking destinations. See
+[the September 2026 code review](docs/code-review-2026-09-08.md) for remaining
+findings and validation limits.
 
 ### Database Migrations
 Payload migrations live in `src/migrations/`. Run via:
@@ -770,6 +810,8 @@ Pushes to `main` trigger automatic production deployments. PRs create preview de
 | `build`             | `next build`             | Production build                   |
 | `start`             | `next start`             | Start production server            |
 | `lint`              | `next lint`              | Run ESLint                         |
+| `typecheck`         | `tsc --noEmit --incremental false` | Check application and test types |
+| `test`              | `node --import tsx --test tests/*.test.ts` | Run database-free regression tests |
 | `payload`           | `payload` (via cross-env) | Payload CLI (migrations, etc.)   |
 | `generate:types`    | `payload generate:types` | Regenerate TypeScript types from Payload schema |
 | `seed:blog`         | `tsx scripts/seed-blog.ts` | Seed initial blog posts          |

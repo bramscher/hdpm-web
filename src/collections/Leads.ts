@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canManageContent } from '../lib/access'
 import { leadsBeforeChange } from './hooks/leads/beforeChange'
 import { leadsAfterChange } from './hooks/leads/afterChange'
 
@@ -20,7 +21,9 @@ export const Leads: CollectionConfig = {
   },
   access: {
     read: ({ req: { user } }) => Boolean(user),
-    create: () => true, // open for forms
+    // Public forms use server-side intake, which selects permitted fields.
+    // Do not expose the full CRM schema through anonymous REST/GraphQL writes.
+    create: canManageContent,
     update: ({ req: { user } }) => {
       if (!user) return false
       const role = (user as unknown as { role?: string }).role
