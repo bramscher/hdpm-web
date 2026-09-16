@@ -469,7 +469,7 @@ export default async function ListingDetailPage({
 
                 <CallLeesa
                   className="mt-3 w-full justify-center"
-                  appfolioListingId={listing.Id}
+                  propertyAddress={`${listing.Address1}, ${listing.City}, ${listing.State} ${listing.Zip}`}
                 />
 
                 <p className="mt-3 text-center font-body text-xs text-neutral-mid">

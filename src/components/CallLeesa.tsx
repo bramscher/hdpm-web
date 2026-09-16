@@ -10,18 +10,18 @@ import { AGENTS } from '@/lib/agents'
  */
 export default function CallLeesa({
   className = '',
-  appfolioListingId,
+  propertyAddress,
 }: {
   className?: string
-  appfolioListingId?: string
+  propertyAddress?: string
 }) {
-  const listingId = appfolioListingId?.trim()
+  const address = propertyAddress?.trim()
 
   return (
     <CallAgent
       agent={AGENTS.leesa}
       className={className}
-      smsBody={listingId ? `Hi Leesa, I have a question about the rental with AppFolio listing ID ${listingId}.` : undefined}
+      smsBody={address ? `Hi Leesa, I have a question about the rental at ${address}.` : undefined}
     />
   )
 }
