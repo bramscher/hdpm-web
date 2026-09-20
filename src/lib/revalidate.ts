@@ -24,6 +24,8 @@ function pathsFor(collection: string, doc: Doc): string[] {
       if (!slug) return []
       // The `home` page doc is served at `/`, not `/home`.
       return slug === 'home' ? ['/'] : [`/${slug}`]
+    case 'jobs':
+      return ['/careers', '/sitemap.xml']
     case 'posts':
       return slug ? [`/blog/${slug}`, '/blog'] : ['/blog']
     case 'market-areas':

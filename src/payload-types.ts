@@ -73,6 +73,7 @@ export interface Config {
     'market-areas': MarketArea;
     testimonials: Testimonial;
     'team-members': TeamMember;
+    jobs: Job;
     categories: Category;
     leads: Lead;
     'lead-activities': LeadActivity;
@@ -99,6 +100,7 @@ export interface Config {
     'market-areas': MarketAreasSelect<false> | MarketAreasSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
+    jobs: JobsSelect<false> | JobsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     'lead-activities': LeadActivitiesSelect<false> | LeadActivitiesSelect<true>;
@@ -596,6 +598,69 @@ export interface TeamMember {
    * Lower numbers appear first
    */
   order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage openings on Work at High Desert. Only open jobs appear publicly.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "jobs".
+ */
+export interface Job {
+  id: number;
+  title: string;
+  /**
+   * Unique link anchor, e.g. maintenance-technician.
+   */
+  slug: string;
+  status: 'draft' | 'open' | 'closed';
+  /**
+   * Lower numbers appear first.
+   */
+  order?: number | null;
+  summary: string;
+  /**
+   * Responsibilities, qualifications, and other role details.
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  location?: string | null;
+  /**
+   * Optional: full-time, part-time, or working hours.
+   */
+  schedule?: string | null;
+  /**
+   * Optional: approved pay range.
+   */
+  compensation?: string | null;
+  contactEmail?: string | null;
+  /**
+   * Add the actual listing URL on Indeed, Craigslist, or any other job board.
+   */
+  postingLinks?:
+    | {
+        /**
+         * For example: Indeed or Craigslist.
+         */
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1109,6 +1174,10 @@ export interface PayloadLockedDocument {
         value: number | TeamMember;
       } | null)
     | ({
+        relationTo: 'jobs';
+        value: number | Job;
+      } | null)
+    | ({
         relationTo: 'categories';
         value: number | Category;
       } | null)
@@ -1551,6 +1620,31 @@ export interface TeamMembersSelect<T extends boolean = true> {
   phone?: T;
   photo?: T;
   order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "jobs_select".
+ */
+export interface JobsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  order?: T;
+  summary?: T;
+  description?: T;
+  location?: T;
+  schedule?: T;
+  compensation?: T;
+  contactEmail?: T;
+  postingLinks?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

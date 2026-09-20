@@ -30,6 +30,7 @@ const linkGroups = [
     links: [
       { href: '/ai-agents', label: 'AI Agents' },
       { href: '/about', label: 'About Us' },
+      { href: '/careers', label: 'Work at High Desert' },
       { href: '/blog', label: 'Blog' },
       { href: '/contact', label: 'Contact' },
     ],

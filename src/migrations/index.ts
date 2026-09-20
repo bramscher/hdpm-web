@@ -1,3 +1,4 @@
+import * as migration_20260920_120000_add_jobs from './20260920_120000_add_jobs';
 import * as migration_20260327_201402_add_team_member_fields from './20260327_201402_add_team_member_fields';
 import * as migration_20260330_173657_add_media_attribution_fields from './20260330_173657_add_media_attribution_fields';
 import * as migration_20260331_213356_crm_tables from './20260331_213356_crm_tables';
@@ -35,5 +36,10 @@ export const migrations = [
     up: migration_20260904_120000_add_posts_source_url.up,
     down: migration_20260904_120000_add_posts_source_url.down,
     name: '20260904_120000_add_posts_source_url',
+  },
+  {
+    up: migration_20260920_120000_add_jobs.up,
+    down: migration_20260920_120000_add_jobs.down,
+    name: '20260920_120000_add_jobs',
   },
 ];

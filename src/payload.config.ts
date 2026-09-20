@@ -9,6 +9,7 @@ import sharp from 'sharp'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { Jobs } from './collections/Jobs'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Posts } from './collections/Posts'
@@ -84,6 +85,7 @@ export default buildConfig({
     MarketAreas,
     Testimonials,
     TeamMembers,
+    Jobs,
     Categories,
     // CRM
     Leads,

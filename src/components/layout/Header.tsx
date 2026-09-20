@@ -40,6 +40,7 @@ const nav: NavItem[] = [
     label: 'About',
     children: [
       { href: '/about', label: 'About Us' },
+      { href: '/careers', label: 'Work at High Desert' },
       { href: '/contact', label: 'Contact' },
     ],
   },
