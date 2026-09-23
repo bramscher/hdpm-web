@@ -33,12 +33,16 @@ const FILLER = new Set([
 ])
 
 function queryFromTitle(title: string): string {
+  if (/upgrade|renovat|kitchen|remodel/i.test(title)) return 'modern kitchen interior'
+  if (/maintenance|repair/i.test(title)) return 'home maintenance repair'
+  if (/moving|move.in/i.test(title)) return 'moving boxes home'
+  if (/lease|screening|landlord|self.manage|property manag/i.test(title)) return 'rental home keys'
   const words = title
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, ' ')
     .split(/\s+/)
     .filter((w) => w.length > 2 && !FILLER.has(w))
-  return words.slice(0, 6).join(' ').trim()
+  return words.slice(0, 3).join(' ').trim()
 }
 
 interface LibraryImage {
@@ -71,6 +75,7 @@ export default function FeaturedImageStudio() {
   const [libResults, setLibResults] = useState<LibraryImage[]>([])
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [searched, setSearched] = useState(false)
   const [error, setError] = useState('')
   const [status, setStatus] = useState('')
 
@@ -92,6 +97,7 @@ export default function FeaturedImageStudio() {
     async (q: string, src: string, p: number) => {
       if (!q.trim()) return
       setLoading(true)
+      setSearched(true)
       setError('')
       try {
         const res = await fetch(
@@ -99,11 +105,13 @@ export default function FeaturedImageStudio() {
         )
         const data = await res.json()
         setHasUnsplash(data.hasUnsplash !== false)
+        if (data.hasUnsplash === false) setSource('wikimedia')
+        if (!res.ok) throw new Error(data.error || 'Image search failed.')
         setWebResults((prev) =>
           p === 1 ? data.results || [] : [...prev, ...(data.results || [])],
         )
-      } catch {
-        setError('Search failed. Please try again.')
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Search failed. Please try again.')
       } finally {
         setLoading(false)
       }
@@ -117,9 +125,10 @@ export default function FeaturedImageStudio() {
     try {
       const res = await fetch(`/api/media-search?q=${encodeURIComponent(q)}`)
       const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Library search failed.')
       setLibResults(data.results || [])
-    } catch {
-      setError('Library search failed. Please try again.')
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Library search failed. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -150,7 +159,7 @@ export default function FeaturedImageStudio() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url: result.downloadUrl || result.url,
+          url: result.url,
           alt: altText,
           caption: result.attribution,
           attribution: result.attribution,
@@ -280,9 +289,17 @@ export default function FeaturedImageStudio() {
         </div>
 
         {/* Search form */}
-        <form onSubmit={runSearch} style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+        <div role="search" aria-label="Featured image search" style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
           <input
             type="text"
+            aria-label="Image search terms"
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                event.stopPropagation()
+                runSearch()
+              }
+            }}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={
@@ -320,7 +337,8 @@ export default function FeaturedImageStudio() {
             </select>
           )}
           <button
-            type="submit"
+            type="button"
+            onClick={() => runSearch()}
             disabled={loading}
             style={{
               padding: '9px 18px',
@@ -336,7 +354,7 @@ export default function FeaturedImageStudio() {
           >
             {loading ? 'Searching…' : 'Search'}
           </button>
-        </form>
+        </div>
 
         {error && (
           <div
@@ -431,13 +449,13 @@ export default function FeaturedImageStudio() {
           </div>
         )}
 
-        {!loading &&
+        {!loading && !error &&
           ((tab === 'web' && webResults.length === 0) ||
             (tab === 'library' && libResults.length === 0)) && (
             <div style={{ padding: '24px', textAlign: 'center', color: '#999', fontSize: '13px' }}>
               {tab === 'library'
                 ? 'No matching images in your library yet.'
-                : 'Search to see results.'}
+                : searched ? 'No images matched. Try a short subject such as “modern kitchen” or choose another source.' : 'Search to see results.'}
             </div>
           )}
       </div>

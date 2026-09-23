@@ -1,3 +1,5 @@
+import { hasRecentEvidence, researchDateRange, sourceDateFromReddit, type SourceEvidence } from './freshness'
+
 /**
  * Blog topic research: mines professional property-management communities
  * on Reddit plus Tavily web search for topics relevant to Central Oregon
@@ -11,7 +13,7 @@
  *   drama can't outrank useful industry topics
  */
 
-export interface TopicSuggestion {
+export interface TopicSuggestion extends SourceEvidence {
   title: string
   angle: string
   audience: 'owners' | 'tenants' | 'both'
@@ -129,6 +131,7 @@ async function redditGet(path: string, params: URLSearchParams): Promise<RedditP
         'User-Agent': REDDIT_UA,
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
+      signal: AbortSignal.timeout(12000),
     })
     if (!res.ok) return []
     const data: RedditListing = await res.json()
@@ -170,6 +173,8 @@ export async function getSubredditTop(
 /* ------------------------------------------------------------------ */
 
 interface TavilyResult {
+  published_date?: string
+  raw_content?: string
   title: string
   url: string
   content: string
@@ -186,9 +191,14 @@ async function searchTavily(query: string): Promise<TavilyResult[]> {
         Authorization: `Bearer ${key}`,
         'Content-Type': 'application/json',
       },
+      signal: AbortSignal.timeout(15000),
       body: JSON.stringify({
         query,
-        search_depth: 'basic',
+        search_depth: 'advanced',
+        ...researchDateRange(),
+        include_published_date: true,
+        filter_by_published_date: true,
+        include_raw_content: 'text',
         max_results: 6,
         include_answer: false,
       }),
@@ -225,13 +235,13 @@ function generateAngle(title: string, subreddit: string): string {
     return 'Answer this common question with Central Oregon-specific expertise'
   }
   if (lower.includes('tip') || lower.includes('advice') || lower.includes('checklist')) {
-    return "Share HDPM's professional take with local market context"
+    return "Discuss the source’s practical advice without inventing HDPM experience or local market facts"
   }
   if (lower.includes('cost') || lower.includes('price') || lower.includes('worth') || lower.includes('market')) {
-    return 'Provide Central Oregon-specific data and market comparison'
+    return 'Explain this dated source and its implications for Central Oregon; use only data present in the source'
   }
   if (LOCAL_SUBS.some((s) => s.toLowerCase() === subreddit.toLowerCase())) {
-    return 'Localize with Central Oregon market data and community knowledge'
+    return 'Explain the specific recent local discussion using the supplied source evidence'
   }
   return 'Adapt this industry discussion into actionable guidance for Central Oregon owners'
 }
@@ -258,6 +268,7 @@ function rank(title: string, body: string, upvotes: number, comments: number): n
 }
 
 interface Candidate {
+  createdUTC: number
   title: string
   body: string
   subreddit: string
@@ -268,7 +279,14 @@ interface Candidate {
   angleOverride?: string
 }
 
-function acceptCandidate(c: Candidate, focus: ResearchFocus): (TopicSuggestion & { _score: number }) | null {
+export function acceptCandidate(c: Candidate, focus: ResearchFocus): (TopicSuggestion & { _score: number }) | null {
+  const evidence: SourceEvidence = {
+    sourceUrl: `https://reddit.com${c.permalink}`,
+    sourcePublishedAt: sourceDateFromReddit(c.createdUTC),
+    sourceDateBasis: 'published',
+    sourceExcerpt: c.body.slice(0, 6000),
+  }
+  if (!hasRecentEvidence(evidence)) return null
   const text = `${c.title} ${c.body.slice(0, 400)}`
   if (EXCLUDED_CONTENT.test(text)) return null
   if (c.title.length > 110) return null // story posts, not topics
@@ -279,6 +297,7 @@ function acceptCandidate(c: Candidate, focus: ResearchFocus): (TopicSuggestion &
   if (focus === 'tenants' && audience === 'owners') return null
 
   return {
+    ...evidence,
     title: c.title,
     angle: c.angleOverride ?? generateAngle(c.title, c.subreddit),
     audience,
@@ -318,6 +337,7 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
       if (post.data.score < 5) continue
       const item = acceptCandidate(
         {
+          createdUTC: post.data.created_utc,
           title: post.data.title,
           body: post.data.selftext,
           subreddit: post.data.subreddit,
@@ -337,7 +357,7 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
     focus === 'tenants'
       ? ['moving checklist', 'winter home maintenance', 'renting first home']
       : [
-          'rental market 2026',
+          `rental market ${new Date().getFullYear()}`,
           'property management worth it',
           'tenant screening best practices',
           'rental property maintenance seasonal',
@@ -352,6 +372,7 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
         if (post.data.score < 3) continue
         const item = acceptCandidate(
           {
+            createdUTC: post.data.created_utc,
             title: post.data.title,
             body: post.data.selftext,
             subreddit: post.data.subreddit,
@@ -385,6 +406,8 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
   for (const query of tavilyQueries) {
     const results = await searchTavily(query)
     for (const r of results) {
+      const evidence: SourceEvidence = { sourceUrl: r.url, sourcePublishedAt: r.published_date, sourceDateBasis: 'published-or-updated', sourceExcerpt: (r.raw_content || r.content).slice(0, 6000) }
+      if (!hasRecentEvidence(evidence)) continue
       const text = `${r.title} ${r.content.slice(0, 400)}`
       if (EXCLUDED_CONTENT.test(text)) continue
       if (r.title.length > 110) continue
@@ -402,12 +425,13 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
       }
 
       scored.push({
+        ...evidence,
         title: r.title,
         angle: 'Cover this industry topic with a Central Oregon lens',
         audience,
         source: host,
         sourceUrl: r.url,
-        relevance: 'Industry publication (Tavily)',
+        relevance: 'Dated within 30 days (Tavily publication/update estimate)',
         _score: proScore(text) * 25 + 20, // publication bonus in lieu of upvotes
       })
     }

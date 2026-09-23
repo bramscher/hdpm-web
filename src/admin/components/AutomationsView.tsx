@@ -134,7 +134,7 @@ function TopicCard({
   creating,
   created,
 }: {
-  topic: { title: string; angle: string; audience: string; source: string; sourceUrl?: string; upvotes?: number; comments?: number }
+  topic: { title: string; angle: string; audience: string; source: string; sourceUrl?: string; sourcePublishedAt?: string; sourceDateBasis?: 'published' | 'published-or-updated'; sourceExcerpt?: string; upvotes?: number; comments?: number }
   onCreatePost: () => void
   creating?: boolean
   created?: { id: number; slug: string; adminUrl: string } | null
@@ -194,6 +194,10 @@ function TopicCard({
           </span>
         </div>
       </div>
+      {topic.sourcePublishedAt && <p style={{ fontSize: 12, margin: '8px 0', color: 'var(--theme-elevation-500)' }}>
+        Source {topic.sourceDateBasis === 'published-or-updated' ? 'published/updated (estimated)' : 'published'}: {new Date(topic.sourcePublishedAt).toLocaleDateString()} · Within 30 days
+      </p>}
+      {topic.sourceExcerpt && <details style={{ fontSize: 12, margin: '8px 0' }}><summary>Read the source excerpt</summary><p style={{ whiteSpace: 'pre-wrap' }}>{topic.sourceExcerpt.slice(0, 1600)}</p></details>}
       <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
         {(topic.upvotes != null || topic.comments != null) && (
           <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: 'var(--theme-elevation-400, #999)', flex: 1 }}>
@@ -247,7 +251,7 @@ export default function AutomationsView() {
   const [listingsResult, setListingsResult] = useState<ActionResult>({ status: 'idle' })
   const [researchResult, setResearchResult] = useState<ActionResult>({ status: 'idle' })
   const [researchFocus, setResearchFocus] = useState<'both' | 'owners' | 'tenants'>('both')
-  const [researchTopics, setResearchTopics] = useState<Array<{ title: string; angle: string; audience: string; source: string; sourceUrl?: string; upvotes?: number; comments?: number }>>([])
+  const [researchTopics, setResearchTopics] = useState<Array<{ title: string; angle: string; audience: string; source: string; sourceUrl?: string; sourcePublishedAt?: string; sourceDateBasis?: 'published' | 'published-or-updated'; sourceExcerpt?: string; upvotes?: number; comments?: number }>>([])
   const [creatingPosts, setCreatingPosts] = useState<Record<number, boolean>>({})
   const [createdPosts, setCreatedPosts] = useState<Record<number, { id: number; slug: string; adminUrl: string }>>({})
   const [blogAgentResult, setBlogAgentResult] = useState<ActionResult>({ status: 'idle' })
@@ -315,6 +319,9 @@ export default function AutomationsView() {
           angle: topic.angle,
           audience: topic.audience,
           sourceUrl: topic.sourceUrl,
+          sourcePublishedAt: topic.sourcePublishedAt,
+          sourceDateBasis: topic.sourceDateBasis,
+          sourceExcerpt: topic.sourceExcerpt,
         }),
       })
       const data = await res.json()

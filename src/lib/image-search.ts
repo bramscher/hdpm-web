@@ -36,11 +36,12 @@ export async function searchWikimedia(query: string, page: number): Promise<Sear
 
   const res = await fetch(
     `https://commons.wikimedia.org/w/api.php?${params}`,
-    { headers: { 'User-Agent': 'HDPM-Web/1.0 (info@highdesertpm.com)' } },
+    { headers: { 'User-Agent': 'HDPM-Web/1.0 (info@highdesertpm.com)' }, signal: AbortSignal.timeout(12000) },
   )
 
-  if (!res.ok) return []
+  if (!res.ok) throw new Error(`Wikimedia search is unavailable (HTTP ${res.status}). Try Unsplash or retry shortly.`)
   const data = await res.json()
+  if (data.error) throw new Error('Wikimedia could not complete the search. Try a shorter query.')
   if (!data.query?.pages) return []
 
   return (Object.values(data.query.pages) as unknown[])
@@ -87,7 +88,7 @@ export async function searchWikimedia(query: string, page: number): Promise<Sear
 // Unsplash search — requires UNSPLASH_ACCESS_KEY
 export async function searchUnsplash(query: string, page: number): Promise<SearchResult[]> {
   const key = process.env.UNSPLASH_ACCESS_KEY
-  if (!key) return []
+  if (!key) throw new Error('Unsplash is not configured. Choose Wikimedia or the media library.')
 
   const params = new URLSearchParams({
     query,
@@ -98,9 +99,10 @@ export async function searchUnsplash(query: string, page: number): Promise<Searc
 
   const res = await fetch(`https://api.unsplash.com/search/photos?${params}`, {
     headers: { Authorization: `Client-ID ${key}` },
+    signal: AbortSignal.timeout(12000),
   })
 
-  if (!res.ok) return []
+  if (!res.ok) throw new Error(`Unsplash search is unavailable (HTTP ${res.status}). Try Wikimedia or retry shortly.`)
   const data = await res.json()
 
   return (data.results || []).map(

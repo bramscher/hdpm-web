@@ -60,10 +60,13 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await res.arrayBuffer())
-    const contentType = res.headers.get('content-type') || 'image/jpeg'
+    const contentType = (res.headers.get('content-type') || '').split(';')[0].trim()
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(contentType)) {
+      return NextResponse.json({ error: 'The selected URL did not return a supported image file. Please choose another image.' }, { status: 400 })
+    }
 
     // Derive a clean filename
-    const ext = contentType.includes('png') ? '.png' : '.jpg'
+    const ext = contentType === 'image/png' ? '.png' : contentType === 'image/webp' ? '.webp' : contentType === 'image/gif' ? '.gif' : '.jpg'
     const cleanName =
       filename ||
       alt

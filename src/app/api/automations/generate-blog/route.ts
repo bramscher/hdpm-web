@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/api-auth'
+import { SourceGroundingError, hasRecentEvidence, type SourceEvidence } from '@/lib/blog-agent/freshness'
 import { generateBlogPost } from '@/lib/blog-agent/generate'
 import { findAndAttachFeaturedImage } from '@/lib/blog-agent/image'
 
 export const maxDuration = 300
 
-interface GenerateRequest {
+interface GenerateRequest extends SourceEvidence {
   title: string
   angle?: string
   audience?: 'owners' | 'tenants' | 'both'
@@ -36,12 +37,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'title is required' }, { status: 400 })
   }
 
+  if (!hasRecentEvidence(body)) return NextResponse.json({ error: 'Run topic research again: a source from the past 30 days and its text are required.' }, { status: 400 })
+
   try {
     const post = await generateBlogPost({
       title: body.title,
       angle: body.angle,
       audience: body.audience,
       sourceUrl: body.sourceUrl,
+      sourcePublishedAt: body.sourcePublishedAt,
+      sourceDateBasis: body.sourceDateBasis,
+      sourceExcerpt: body.sourceExcerpt,
     })
 
     const image = await findAndAttachFeaturedImage(post.id, post.imageQuery, post.imageAlt)
@@ -61,6 +67,7 @@ export async function POST(request: Request) {
       image,
     })
   } catch (err) {
+    if (err instanceof SourceGroundingError) return NextResponse.json({ error: err.message }, { status: 422 })
     return NextResponse.json(
       { error: 'Generation failed', details: String(err) },
       { status: 500 },

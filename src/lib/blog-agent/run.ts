@@ -11,6 +11,7 @@ import config from '@payload-config'
 import { researchTopics, EXCLUDED_CONTENT, type TopicSuggestion } from './research'
 import { generateBlogPost, type GeneratedBlogPost } from './generate'
 import { findAndAttachFeaturedImage, type AttachedImage } from './image'
+import { hasRecentEvidence, SourceGroundingError } from './freshness'
 import { sendLeadNotification } from '@/lib/notify'
 
 // Blog-agent emails are Craig's alone — never the monitored info@ inbox.
@@ -75,7 +76,7 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
     await sendLeadNotification({
       to: BLOG_AGENT_NOTIFY,
       subject: 'Blog agent: no topics found this run',
-      fields: [['Detail', 'Reddit and Tavily research returned no usable topics. Will retry on the next scheduled run.']],
+      fields: [['Detail', 'No usable sources with dates in the past 30 days and sufficient source text were found. Will retry on the next scheduled run.']],
     })
     return { ok: false, skipped: 'no topics found' }
   }
@@ -122,7 +123,7 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
   // is defense in depth with the same shared pattern.
   const otherState = /\[(?!OR\b)[A-Z]{2}\b/
   const candidates = research.topics
-    .filter((t) => !EXCLUDED_CONTENT.test(t.title))
+    .filter((t) => hasRecentEvidence(t) && !EXCLUDED_CONTENT.test(t.title))
     .sort((a, b) => Number(otherState.test(a.title)) - Number(otherState.test(b.title)))
 
   const fresh = candidates.filter(
@@ -152,13 +153,23 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
   let post: GeneratedBlogPost | null = null
   let topic: TopicSuggestion | null = null
   const rejectedDuplicates: string[] = []
+  const rejectedGrounding: string[] = []
   for (const candidate of fresh.slice(0, MAX_ATTEMPTS)) {
-    const generated = await generateBlogPost({
+    let generated: GeneratedBlogPost
+    try { generated = await generateBlogPost({
       title: candidate.title,
       angle: candidate.angle,
       audience: candidate.audience,
       sourceUrl: candidate.sourceUrl,
-    })
+      sourcePublishedAt: candidate.sourcePublishedAt,
+      sourceDateBasis: candidate.sourceDateBasis,
+      sourceExcerpt: candidate.sourceExcerpt,
+    }) } catch (error) {
+      if (!(error instanceof SourceGroundingError)) throw error
+      rejectedGrounding.push(`${candidate.title}: ${error.message}`)
+      console.warn('[blog-agent] Skipping ungrounded candidate:', error.message)
+      continue
+    }
     if (tooSimilar(generated.title, existingTitleWords)) {
       rejectedDuplicates.push(generated.title)
       // Remove the just-created draft so near-duplicates never pile up.
@@ -177,14 +188,14 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
       fields: [
         [
           'Detail',
-          rejectedDuplicates.length > 0
-            ? `Every candidate this run rewrote into a headline that duplicates an existing post, so no draft was created. Rejected: ${rejectedDuplicates.join('; ')}.`
-            : 'No fresh topics survived research and dedup. No draft created.',
+          'No candidate passed both source-grounding review and duplicate checks. No draft retained.',
         ],
-        ['Next step', 'The evergreen topics are largely covered — consider adding new topic sources (seasonal/local angles, rental-law updates, customer questions).'],
+        ['Source review rejections', rejectedGrounding.join('; ') || 'None'],
+        ['Duplicate headlines', rejectedDuplicates.join('; ') || 'None'],
+        ['Next step', 'Review the dated research sources or wait for the next scheduled run.'],
       ],
     })
-    return { ok: false, skipped: 'no fresh (non-duplicate) topics' }
+    return { ok: false, skipped: 'no candidates passed source review and duplicate checks' }
   }
 
   // 4. Featured image (best-effort)
@@ -200,6 +211,8 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
       ['Excerpt', post.excerpt],
       ['Topic source', `${topic.source}${topic.sourceUrl ? ` — ${topic.sourceUrl}` : ''}`],
       ['Audience', topic.audience],
+      ['Source date', topic.sourcePublishedAt],
+      ['Source date basis', topic.sourceDateBasis],
       [
         'Featured image',
         image

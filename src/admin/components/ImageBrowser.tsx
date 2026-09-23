@@ -27,14 +27,16 @@ export default function ImageBrowser() {
           `/api/image-search?q=${encodeURIComponent(q)}&source=${src}&page=${p}`,
         )
         const data = await res.json()
+        setHasUnsplash(data.hasUnsplash === true)
+        if (!res.ok) throw new Error(data.error || 'Image search failed.')
         if (p === 1) {
           setResults(data.results || [])
         } else {
           setResults((prev) => [...prev, ...(data.results || [])])
         }
         setHasUnsplash(data.hasUnsplash)
-      } catch {
-        setError('Search failed. Please try again.')
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Search failed. Please try again.')
       } finally {
         setLoading(false)
       }

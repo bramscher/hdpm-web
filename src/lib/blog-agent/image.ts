@@ -76,7 +76,10 @@ export async function findAndAttachFeaturedImage(
     ]
     let best: SearchResult | null = null
     for (const attempt of attempts) {
-      best = pickBest(await attempt())
+      try { best = pickBest(await attempt()) } catch (error) {
+        console.warn('[blog-agent] Image provider unavailable:', error instanceof Error ? error.message : 'Search failed')
+        continue
+      }
       if (best) break
     }
     if (!best) return null
@@ -123,7 +126,7 @@ export async function findAndAttachFeaturedImage(
     const media = await (payload.create as Function)({
       collection: 'media',
       data: {
-        alt,
+        alt: best.title || alt,
         attribution: best.attribution,
         license: best.license,
         sourceUrl: best.url,
