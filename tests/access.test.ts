@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { Access, FieldAccess, CollectionBeforeChangeHook } from 'payload'
 import { Users } from '../src/collections/Users'
+import { Jobs } from '../src/collections/Jobs'
 import { Posts } from '../src/collections/Posts'
 import { Pages } from '../src/collections/Pages'
 import { Media } from '../src/collections/Media'
@@ -56,7 +57,7 @@ test('SSO provisioning remains viewer; existing SSO roles are preserved; first l
 })
 
 test('content collections deny anonymous and viewer writes but preserve editor and API publishing', async () => {
-  for (const collection of [Posts, Pages, Media, Categories, MarketAreas, Testimonials, TeamMembers, LandingPages, Campaigns, SeoSuggestions]) {
+  for (const collection of [Jobs, Posts, Pages, Media, Categories, MarketAreas, Testimonials, TeamMembers, LandingPages, Campaigns, SeoSuggestions]) {
     for (const operation of ['create', 'update', 'delete'] as const) {
       for (const role of [undefined, 'viewer']) {
         assert.equal(await collection.access![operation]!(args(role)), false, `${collection.slug}: ${operation}`)
@@ -80,6 +81,7 @@ test('anonymous callers cannot write arbitrary CRM fields; viewers cannot delete
 
 test('published content and media remain publicly readable', async () => {
   assert.equal(await Media.access!.read!(args()), true)
+  assert.deepEqual(await Jobs.access!.read!(args()), { status: { equals: 'open' } })
   for (const collection of [Posts, Pages, MarketAreas, LandingPages]) {
     assert.deepEqual(await collection.access!.read!(args()), { status: { equals: 'published' } })
   }

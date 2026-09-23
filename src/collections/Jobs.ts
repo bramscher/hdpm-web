@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canManageContent } from '../lib/access'
 import { revalidateHooks } from '@/lib/revalidate'
 import { isJobPostingURL } from '@/lib/job-links'
 
@@ -13,9 +14,9 @@ export const Jobs: CollectionConfig = {
   defaultSort: 'order',
   access: {
     read: ({ req: { user } }) => user ? true : { status: { equals: 'open' } },
-    create: ({ req }) => Boolean(req.user),
-    update: ({ req }) => Boolean(req.user),
-    delete: ({ req }) => Boolean(req.user),
+    create: canManageContent,
+    update: canManageContent,
+    delete: canManageContent,
   },
   hooks: revalidateHooks('jobs'),
   fields: [
