@@ -19,6 +19,11 @@ export const Jobs: CollectionConfig = {
   },
   hooks: revalidateHooks('jobs'),
   fields: [
+    {
+      name: 'jobDescriptionCreator',
+      type: 'ui',
+      admin: { components: { Field: '/admin/components/JobDescriptionCreator#default' } },
+    },
     { name: 'title', type: 'text', required: true },
     {
       name: 'slug', type: 'text', required: true, unique: true,

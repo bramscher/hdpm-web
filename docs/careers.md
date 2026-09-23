@@ -24,3 +24,13 @@ Uploads abandoned before submission and files belonging to deleted records remai
 ## Checks
 
 `npx tsx --test tests/career-validation.test.ts tests/career-notification.test.ts tests/job-links.test.ts` covers form validation, supported formats and limits, tamper-resistant upload receipts, expiry, origin checks, administrator access, and notification success/failure. Run `npx tsc --noEmit` and `npm run build` before release.
+
+## Job Description Creator
+
+Open any Job (or create a new one), then choose **Open creator**. Existing job fields can seed the notes. Paste the source description, request follow-up questions, answer what is known, and generate the draft. Blank answers are allowed; the assistant flags unresolved details separately for review. You can edit every generated field before choosing **Save as new draft job**.
+
+Saving creates a separate Draft job and links to its editor. It does not change the original listing, publish anything, or copy external posting links. Review the new draft's contact email and details before setting it to Open. Review notes are shown in the preview only; they are not published or saved as job copy. Notes and answers remain in browser component state during the workflow and are lost on navigation/reload.
+
+The assistant is available to authenticated admins and editors via `/api/job-description`. It uses `CLAUDE_API_KEY` (or `ANTHROPIC_API_KEY`), with optional `JOB_DESCRIPTION_MODEL` (default matches the blog generator: `claude-opus-4-8`). Notes, answers, and published About-page copy are sent to the configured AI provider. Company context includes the confirmed founding year from `src/lib/constants.ts` and published About copy. Prompts require omission of unconfirmed employment terms and forbid invented compensation, benefits, requirements, or application links. Generated copy still needs human review.
+
+This is a virtual UI field using the existing Jobs schema; no database migration is needed.
