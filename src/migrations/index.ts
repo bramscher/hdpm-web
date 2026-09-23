@@ -1,3 +1,4 @@
+import * as migration_20260922_120000_add_job_applications from './20260922_120000_add_job_applications';
 import * as migration_20260920_120000_add_jobs from './20260920_120000_add_jobs';
 import * as migration_20260327_201402_add_team_member_fields from './20260327_201402_add_team_member_fields';
 import * as migration_20260330_173657_add_media_attribution_fields from './20260330_173657_add_media_attribution_fields';
@@ -7,6 +8,7 @@ import * as migration_20260827_120000_add_users_sub_for_sso from './20260827_120
 import * as migration_20260904_120000_add_posts_source_url from './20260904_120000_add_posts_source_url';
 
 export const migrations = [
+
   {
     up: migration_20260327_201402_add_team_member_fields.up,
     down: migration_20260327_201402_add_team_member_fields.down,
@@ -42,4 +44,5 @@ export const migrations = [
     down: migration_20260920_120000_add_jobs.down,
     name: '20260920_120000_add_jobs',
   },
+  { up: migration_20260922_120000_add_job_applications.up, down: migration_20260922_120000_add_job_applications.down, name: '20260922_120000_add_job_applications' },
 ];

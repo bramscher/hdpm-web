@@ -74,6 +74,7 @@ export interface Config {
     testimonials: Testimonial;
     'team-members': TeamMember;
     jobs: Job;
+    'job-applications': JobApplication;
     categories: Category;
     leads: Lead;
     'lead-activities': LeadActivity;
@@ -101,6 +102,7 @@ export interface Config {
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
     jobs: JobsSelect<false> | JobsSelect<true>;
+    'job-applications': JobApplicationsSelect<false> | JobApplicationsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     'lead-activities': LeadActivitiesSelect<false> | LeadActivitiesSelect<true>;
@@ -665,6 +667,45 @@ export interface Job {
   createdAt: string;
 }
 /**
+ * Private applications. To retry an email, set Notification Status to Pending and save. Attachment download links are included in the saved application and notification.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "job-applications".
+ */
+export interface JobApplication {
+  id: number;
+  submissionId: string;
+  job: number | Job;
+  jobTitle: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  availability: string;
+  experience: string;
+  technology: string;
+  consent: boolean;
+  attachments?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Open this URL while signed into an admin account to download the résumé.
+   */
+  resumeDownload?: string | null;
+  /**
+   * Open this URL while signed into an admin account to download the video.
+   */
+  videoDownload?: string | null;
+  notificationStatus: 'pending' | 'sent' | 'failed';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "leads".
  */
@@ -1178,6 +1219,10 @@ export interface PayloadLockedDocument {
         value: number | Job;
       } | null)
     | ({
+        relationTo: 'job-applications';
+        value: number | JobApplication;
+      } | null)
+    | ({
         relationTo: 'categories';
         value: number | Category;
       } | null)
@@ -1645,6 +1690,28 @@ export interface JobsSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "job-applications_select".
+ */
+export interface JobApplicationsSelect<T extends boolean = true> {
+  submissionId?: T;
+  job?: T;
+  jobTitle?: T;
+  fullName?: T;
+  email?: T;
+  phone?: T;
+  availability?: T;
+  experience?: T;
+  technology?: T;
+  consent?: T;
+  attachments?: T;
+  resumeDownload?: T;
+  videoDownload?: T;
+  notificationStatus?: T;
   updatedAt?: T;
   createdAt?: T;
 }

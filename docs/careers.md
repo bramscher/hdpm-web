@@ -1,17 +1,26 @@
 # Work at High Desert
 
-The public jobs page is `/careers`, linked from the About menu (desktop and mobile) and the Company footer. Manage listings in **Payload → Content → Jobs** (`/admin/collections/jobs`).
+`/careers` is linked from About and the Company footer. Open jobs appear as compact rows with expandable details. Every Apply button selects that job in the shared application form. External posting links remain editable for reference but no longer redirect applicants away from the application.
 
-Apply the committed database migration before deploying code that queries Jobs:
+Manage listings in **Payload → Content → Jobs**. Only Open jobs appear publicly. Preserve existing role summaries and add approved responsibilities, location, schedule, and compensation in the CMS. No pay or benefit promises are invented by the page. Slugs retain shareable `/careers#maintenance-technician` anchors.
 
-```sh
-npm run payload -- migrate
-```
+## Deployment
 
-The migration creates the collection and five open listings: Office Assistant, Assistant Maintenance Coordinator, Maintenance Technician, Landscape Technician, and Cleaning Technician. These have short starter summaries and the existing public contact email. Review the copy in Payload and add approved role details, location, schedule, and pay as needed.
+1. Set `DATABASE_URL`, `PAYLOAD_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `RESEND_API_KEY`. Use the canonical production `NEXT_PUBLIC_SITE_URL`. `CAREERS_FROM_EMAIL` optionally overrides the verified `LEAD_FROM_EMAIL` sender. Notifications always go to **work@highdesertpm.com**.
+2. Run `npm run payload -- migrate` to create private application records and database-backed rate limits (after the existing Jobs migration).
+3. Run `npx tsx scripts/setup-career-storage.ts` against the intended environment. It creates/updates the **private** `job-applications` bucket, allowed MIME types, and 100 MB maximum. Never make this bucket public or add anonymous storage policies. The browser only receives a signed URL for one random upload path; server credentials are never sent to it.
+4. Deploy, then submit a test application with a résumé and a video. Verify the saved record, inbox delivery, administrator-only downloads, and rejection of anonymous collection reads. Check mobile video selection with an actual phone. Database, storage, and email integration require configured services and are not verified by unit tests.
 
-For each job, add one or more **Posting Links**, using a label such as Indeed or Craigslist and the actual posting URL. No placeholder board links are displayed. An optional contact email provides an “Ask About This Role” link.
+## Applications and privacy
 
-New jobs default to Draft. Set Status to Open to display them; Draft and Closed are hidden from both the public page and anonymous API reads. Lower Order values display first. Slugs provide shareable anchors such as `/careers#maintenance-technician`. Saved changes appear on the next page request. Closing all jobs shows an empty state; database errors are not represented as “no openings.”
+**Payload → Hiring → Job Applications** is restricted to administrators (`role: admin`). It stores contact details, the selected job and title at submission, experience, technology answer, availability, consent, attachment references, and email status. Public collection creation/read is disabled; the bounded intake endpoint validates input and rechecks that the job is open. The form uses a honeypot, same-origin checks, and shared database hourly request limits. The deployment proxy must supply trustworthy client-IP headers; on Vercel the Vercel-specific header is preferred. These controls are not a CAPTCHA or malware scanner; review uploads with normal safe file handling.
 
-The migration rollback deletes the jobs and their posting links. Back up any edited listings before rolling it back.
+Résumés (PDF/DOC/DOCX, 10 MB) and video introductions (MP4/MOV/WebM, 100 MB) are optional. Videos upload directly to Supabase to avoid the hosting function request-body limit. Receipts bind uploaded files to the application and expire after two hours; final submission verifies object size and MIME type in storage. Files use unguessable paths. Notification emails include the form and authenticated download links, rather than large public attachments. Download links issue a 60-second private storage URL only after administrator authentication. Application data is not added to the sales CRM or conversion analytics.
+
+The form confirms **saved**, not delivered. If Resend fails, the application remains saved with `failed` notification status. Filter for Failed/Pending in admin, set Notification Status to Pending, and save to retry. Resend receives an application-specific idempotency key. A stable submission ID prevents ordinary network retries from creating duplicate applications. Do not rotate `PAYLOAD_SECRET` during active applications, as it signs upload receipts.
+
+Uploads abandoned before submission and files belonging to deleted records remain private in storage. Administrators should apply their hiring retention policy to both records and storage; deleting a record does not delete the underlying files. Unreferenced upload folders older than a day can be removed after checking saved application references. Rate-limit entries expire and are purged as new requests arrive. Migration rollback deletes application records: back up hiring data before any rollback.
+
+## Checks
+
+`npx tsx --test tests/career-validation.test.ts tests/career-notification.test.ts tests/job-links.test.ts` covers form validation, supported formats and limits, tamper-resistant upload receipts, expiry, origin checks, administrator access, and notification success/failure. Run `npx tsc --noEmit` and `npm run build` before release.
