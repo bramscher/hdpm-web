@@ -34,3 +34,10 @@ Saving creates a separate Draft job and links to its editor. It does not change 
 The assistant is available to authenticated admins and editors via `/api/job-description`. It uses `CLAUDE_API_KEY` (or `ANTHROPIC_API_KEY`), with optional `JOB_DESCRIPTION_MODEL` (default matches the blog generator: `claude-opus-4-8`). Notes, answers, and published About-page copy are sent to the configured AI provider. Company context includes the confirmed founding year from `src/lib/constants.ts` and published About copy. Prompts require omission of unconfirmed employment terms and forbid invented compensation, benefits, requirements, or application links. Generated copy still needs human review.
 
 This is a virtual UI field using the existing Jobs schema; no database migration is needed.
+
+
+## Role images
+
+The six role illustrations live in `public/images/careers/` as optimized WebP files. They depict fictional professionals actively working in Central Oregon-inspired settings; they are not photos of HDPM employees or actual managed properties. Office roles show Mac workstations. Original generation prompts are in `docs/assets/career-image-prompts.json` (built-in image generation).
+
+`src/lib/career-role-images.ts` matches the role slug or normalized title, including draft-creator UUID slug suffixes. Unrecognized roles retain the numbered list treatment. Images use responsive Next Image thumbnails with lazy loading; no database migration or CMS image upload is needed.

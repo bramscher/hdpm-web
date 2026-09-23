@@ -1,5 +1,7 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
+import { careerRoleImage } from '@/lib/career-role-images'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Job } from '@/payload-types'
 import ApplicationForm from './ApplicationForm'
@@ -8,13 +10,11 @@ export default function CareersExperience({ jobs }: { jobs: Job[] }) {
   const [selectedJob, setSelectedJob] = useState('')
   function apply(id: number) {
     setSelectedJob(String(id))
-    document
-      .getElementById('application')
-      ?.scrollIntoView({
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          ? 'instant'
-          : 'smooth',
-      })
+    document.getElementById('application')?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'instant'
+        : 'smooth',
+    })
     document.getElementById('application-job')?.focus({ preventScroll: true })
   }
   return (
@@ -43,68 +43,85 @@ export default function CareersExperience({ jobs }: { jobs: Job[] }) {
             yourself.
           </p>
           <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white divide-y divide-neutral-200">
-            {jobs.map((job, index) => (
-              <article
-                key={job.id}
-                id={job.slug}
-                className="scroll-mt-28 p-5 sm:p-7"
-              >
-                <div className="flex items-start gap-4 sm:gap-7">
-                  <span
-                    aria-hidden="true"
-                    className="hidden pt-1 font-mono text-sm text-neutral-400 sm:block"
-                  >
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                      <h3 className="font-heading text-xl font-semibold text-primary sm:text-2xl">
-                        {job.title}
-                      </h3>
-                      <button
-                        onClick={() => apply(job.id)}
-                        aria-label={`Apply for ${job.title}`}
-                        className="rounded-full border border-primary/20 px-5 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
-                      >
-                        Apply <span aria-hidden="true">↗</span>
-                      </button>
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-mid">
-                      {[
-                        job.location || 'Central Oregon',
-                        job.schedule,
-                        job.compensation,
-                      ]
-                        .filter(Boolean)
-                        .map((text, i) => (
-                          <span key={i}>{text}</span>
-                        ))}
-                    </div>
-                    <details className="group mt-4">
-                      <summary className="w-fit cursor-pointer text-sm font-semibold text-[#246b38]">
-                        About this role{' '}
-                        <span
-                          aria-hidden="true"
-                          className="ml-1 inline-block transition group-open:rotate-45"
-                        >
-                          +
-                        </span>
-                      </summary>
-                      <div className="mt-4 max-w-3xl border-l-2 border-accent/30 pl-5">
-                        <p className="whitespace-pre-line leading-relaxed text-neutral-mid">
-                          {job.summary}
-                        </p>
-                        {job.description && (
-                          <div className="prose mt-4 max-w-none">
-                            <RichText data={job.description} />
-                          </div>
-                        )}
+            {jobs.map((job, index) => {
+              const roleImage = careerRoleImage(job)
+              return (
+                <article
+                  key={job.id}
+                  id={job.slug}
+                  className="scroll-mt-28 p-5 sm:p-7"
+                >
+                  <div className="grid grid-cols-[96px_minmax(0,1fr)] items-start gap-4 sm:flex sm:gap-7">
+                    {roleImage ? (
+                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-neutral-100 sm:h-32 sm:w-48">
+                        <Image
+                          src={roleImage.src}
+                          alt={roleImage.alt}
+                          fill
+                          sizes="(min-width: 640px) 192px, 96px"
+                          className="object-cover"
+                        />
                       </div>
-                    </details>
+                    ) : (
+                      <span
+                        aria-hidden="true"
+                        className="hidden pt-1 font-mono text-sm text-neutral-400 sm:block"
+                      >
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                    )}
+                    <div className="contents sm:block sm:min-w-0 sm:flex-1">
+                      <div
+                        className={`${roleImage ? '' : 'col-span-2'} flex flex-wrap items-center justify-between gap-4`}
+                      >
+                        <h3 className="font-heading text-xl font-semibold text-primary sm:text-2xl">
+                          {job.title}
+                        </h3>
+                        <button
+                          onClick={() => apply(job.id)}
+                          aria-label={`Apply for ${job.title}`}
+                          className="rounded-full border border-primary/20 px-5 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+                        >
+                          Apply <span aria-hidden="true">↗</span>
+                        </button>
+                      </div>
+                      <div className="col-span-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-mid sm:mt-2">
+                        {[
+                          job.location || 'Central Oregon',
+                          job.schedule,
+                          job.compensation,
+                        ]
+                          .filter(Boolean)
+                          .map((text, i) => (
+                            <span key={i}>{text}</span>
+                          ))}
+                      </div>
+                      <details className="group col-span-2 sm:mt-4">
+                        <summary className="w-fit cursor-pointer text-sm font-semibold text-[#246b38]">
+                          About this role{' '}
+                          <span
+                            aria-hidden="true"
+                            className="ml-1 inline-block transition group-open:rotate-45"
+                          >
+                            +
+                          </span>
+                        </summary>
+                        <div className="mt-4 max-w-3xl border-l-2 border-accent/30 pl-5">
+                          <p className="whitespace-pre-line leading-relaxed text-neutral-mid">
+                            {job.summary}
+                          </p>
+                          {job.description && (
+                            <div className="prose mt-4 max-w-none">
+                              <RichText data={job.description} />
+                            </div>
+                          )}
+                        </div>
+                      </details>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              )
+            })}
             {!jobs.length && (
               <div className="p-8">
                 <h3 className="font-heading text-2xl text-primary">
