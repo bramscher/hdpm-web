@@ -38,6 +38,18 @@ This is a virtual UI field using the existing Jobs schema; no database migration
 
 ## Role images
 
-The six role illustrations live in `public/images/careers/` as optimized WebP files. They depict fictional professionals actively working in Central Oregon-inspired settings; they are not photos of HDPM employees or actual managed properties. Office roles show Mac workstations. Original generation prompts are in `docs/assets/career-image-prompts.json` (built-in image generation).
+The seven role illustrations live in `public/images/careers/` as optimized WebP files. They depict fictional professionals actively working in Central Oregon-inspired settings; they are not photos of HDPM employees or actual managed properties. Office roles show Mac workstations. Original generation prompts are in `docs/assets/career-image-prompts.json` (built-in image generation).
 
 `src/lib/career-role-images.ts` matches the role slug or normalized title, including draft-creator UUID slug suffixes. Unrecognized roles retain the numbered list treatment. Images use responsive Next Image thumbnails with lazy loading; no database migration or CMS image upload is needed.
+
+## Publish or unpublish a job
+
+In **Content → Jobs**, open a listing, change **Availability** in the sidebar,
+and click **Save**. **Open / Published** shows the job on the careers page and
+application dropdown. **Closed / Unpublished** hides it and stops new
+applications; **Draft / Unpublished** also stays hidden. To reopen a saved
+listing, change it back to **Open / Published** and save. Existing applications
+and listing details are retained. The Jobs list includes the Availability column.
+
+This uses the existing status field and needs no migration. It only controls
+the HDPM site; external job-board postings must be managed separately.

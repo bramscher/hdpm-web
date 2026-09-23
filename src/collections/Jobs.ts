@@ -9,7 +9,7 @@ export const Jobs: CollectionConfig = {
     useAsTitle: 'title',
     group: 'Content',
     defaultColumns: ['title', 'status', 'location', 'order'],
-    description: 'Manage openings on Work at High Desert. Only open jobs appear publicly.',
+    description: 'Publish or unpublish each opening using Availability. Only Open / Published jobs appear on the careers page and application form.',
   },
   defaultSort: 'order',
   access: {
@@ -32,9 +32,16 @@ export const Jobs: CollectionConfig = {
       validate: (value: unknown) => typeof value === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value) || 'Use lowercase letters, numbers, and single hyphens.',
     },
     {
-      name: 'status', type: 'select', required: true, defaultValue: 'draft',
-      options: [{ label: 'Draft', value: 'draft' }, { label: 'Open', value: 'open' }, { label: 'Closed', value: 'closed' }],
-      admin: { position: 'sidebar' },
+      name: 'status', label: 'Availability', type: 'select', required: true, defaultValue: 'draft',
+      options: [
+        { label: 'Draft / Unpublished', value: 'draft' },
+        { label: 'Open / Published', value: 'open' },
+        { label: 'Closed / Unpublished', value: 'closed' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description: 'Choose Open to publish and accept applications, or Closed to hide the role. Click Save to apply. You can reopen it anytime; existing applications are kept.',
+      },
     },
     { name: 'order', type: 'number', defaultValue: 0, admin: { position: 'sidebar', description: 'Lower numbers appear first.' } },
     { name: 'summary', type: 'textarea', required: true },
