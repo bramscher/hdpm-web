@@ -11,7 +11,9 @@
     "payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload",
     "generate:types": "payload generate:types",
     "seed:blog": "npx tsx scripts/seed-blog.ts",
-    "seed:blog-ai": "npx tsx scripts/seed-blog-ai.ts"
+    "seed:blog-ai": "npx tsx scripts/seed-blog-ai.ts",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit --incremental false"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.82.0",
@@ -46,6 +48,7 @@
     "eslint-config-next": "^16.2.1",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "tsx": "4.21.0"
   }
 }

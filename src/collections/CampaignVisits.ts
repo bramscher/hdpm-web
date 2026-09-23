@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canManageContent } from '../lib/access'
 
 /**
  * One row per landing-page visit that arrived with a known utm_campaign.
@@ -15,7 +16,7 @@ export const CampaignVisits: CollectionConfig = {
     read: ({ req: { user } }) => Boolean(user),
     create: () => false, // API writes use the local API with overrideAccess
     update: () => false,
-    delete: ({ req: { user } }) => Boolean(user),
+    delete: canManageContent,
   },
   fields: [
     {

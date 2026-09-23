@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { adminOrSelf, isAdmin } from '../lib/access'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -14,6 +15,10 @@ export const Users: CollectionConfig = {
   },
   access: {
     read: ({ req: { user } }) => Boolean(user),
+    create: isAdmin,
+    update: adminOrSelf,
+    delete: isAdmin,
+    unlock: isAdmin,
   },
   hooks: {
     beforeChange: [
@@ -22,9 +27,14 @@ export const Users: CollectionConfig = {
       // sets `sub` on create, so this never touches manually-created users or
       // existing accounts (SSO logins for existing users are an update, not a
       // create, and never re-run this branch).
-      ({ operation, data }) => {
+      async ({ operation, data, req }) => {
         if (operation === 'create' && data?.sub) {
           data.role = 'viewer'
+        } else if (operation === 'create' && !req.user) {
+          // Payload's first-user registration bypasses access control. Make
+          // that initial local account an admin so it can manage later users.
+          const { totalDocs } = await req.payload.count({ collection: 'users', req })
+          if (totalDocs === 0) data.role = 'admin'
         }
         return data
       },
@@ -36,6 +46,10 @@ export const Users: CollectionConfig = {
       type: 'select',
       required: true,
       defaultValue: 'editor',
+      access: {
+        create: isAdmin,
+        update: isAdmin,
+      },
       options: [
         { label: 'Admin', value: 'admin' },
         { label: 'Editor', value: 'editor' },

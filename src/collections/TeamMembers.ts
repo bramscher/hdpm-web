@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canManageContent } from '../lib/access'
 
 export const TeamMembers: CollectionConfig = {
   slug: 'team-members',
@@ -7,6 +8,9 @@ export const TeamMembers: CollectionConfig = {
     group: 'Content',
   },
   access: {
+    create: canManageContent,
+    update: canManageContent,
+    delete: canManageContent,
     read: () => true,
   },
   fields: [

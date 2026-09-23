@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canManageContent } from '../lib/access'
 
 /**
  * Cached lat/lng per listing address, filled on demand by the listings map
@@ -15,7 +16,7 @@ export const ListingGeocodes: CollectionConfig = {
     read: () => false,
     create: () => false,
     update: () => false,
-    delete: ({ req: { user } }) => Boolean(user),
+    delete: canManageContent,
   },
   fields: [
     { name: 'address', type: 'text', required: true, unique: true, index: true },

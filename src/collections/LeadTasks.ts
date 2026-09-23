@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { leadTasksAfterChange } from './hooks/lead-tasks/afterChange'
+import { leadTasksBeforeChange } from './hooks/lead-tasks/beforeChange'
 
 export const LeadTasks: CollectionConfig = {
   slug: 'lead-tasks',
@@ -31,6 +32,7 @@ export const LeadTasks: CollectionConfig = {
     },
   },
   hooks: {
+    beforeChange: [leadTasksBeforeChange],
     afterChange: [leadTasksAfterChange],
   },
   fields: [

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { canManageContent } from '../lib/access'
 import { revalidateHooks } from '@/lib/revalidate'
 
 export const Posts: CollectionConfig = {
@@ -9,6 +10,9 @@ export const Posts: CollectionConfig = {
     group: 'Content',
   },
   access: {
+    create: canManageContent,
+    update: canManageContent,
+    delete: canManageContent,
     read: ({ req: { user } }) => (user ? true : { status: { equals: 'published' } }),
   },
   // Bust /blog/[slug] and the blog index on change (the detail route is
