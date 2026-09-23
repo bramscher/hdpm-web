@@ -27,6 +27,7 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { default as default_be0a5877553f6b77d30a3712b38781a7 } from '../../../admin/components/FeaturedImageStudio'
+import { default as default_e9b05d98e15cf7165cdd5a47bb7d3b08 } from '../../../admin/components/JobDescriptionCreator'
 import { default as default_7f7781003cb4d9426245d5bd539e4eb8 } from '../../../admin/components/SeoNeedsReviewBanner'
 import { default as default_2212c90818c434474974243664d5f97a } from '../../../admin/components/AdminNav'
 import { default as default_dd0c8adde91fd4e2ddcddb6d3f31e14d } from '../../../admin/components/MicrosoftLoginButton'
@@ -69,6 +70,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "/admin/components/FeaturedImageStudio#default": default_be0a5877553f6b77d30a3712b38781a7,
+  "/admin/components/JobDescriptionCreator#default": default_e9b05d98e15cf7165cdd5a47bb7d3b08,
   "./admin/components/SeoNeedsReviewBanner#default": default_7f7781003cb4d9426245d5bd539e4eb8,
   "./admin/components/AdminNav#default": default_2212c90818c434474974243664d5f97a,
   "./admin/components/MicrosoftLoginButton#default": default_dd0c8adde91fd4e2ddcddb6d3f31e14d,
