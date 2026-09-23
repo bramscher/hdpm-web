@@ -53,3 +53,9 @@ and listing details are retained. The Jobs list includes the Availability column
 
 This uses the existing status field and needs no migration. It only controls
 the HDPM site; external job-board postings must be managed separately.
+
+The **Availability** column in the Jobs list also has an on/off switch. Changes
+save immediately: On publishes a draft or closed job; Off closes an open job.
+Only users with content-editing permissions can use the switch. Failed saves
+leave the displayed status unchanged and show an error. The list refreshes its
+current filters after a successful change.

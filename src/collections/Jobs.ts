@@ -9,7 +9,7 @@ export const Jobs: CollectionConfig = {
     useAsTitle: 'title',
     group: 'Content',
     defaultColumns: ['title', 'status', 'location', 'order'],
-    description: 'Publish or unpublish each opening using Availability. Only Open / Published jobs appear on the careers page and application form.',
+    description: 'Use the Availability toggle in this list to publish or unpublish a job instantly. Only Open / Published jobs appear on the careers page and application form.',
   },
   defaultSort: 'order',
   access: {
@@ -40,6 +40,7 @@ export const Jobs: CollectionConfig = {
       ],
       admin: {
         position: 'sidebar',
+        components: { Cell: '/admin/components/JobAvailabilityCell#default' },
         description: 'Choose Open to publish and accept applications, or Closed to hide the role. Click Save to apply. You can reopen it anytime; existing applications are kept.',
       },
     },
