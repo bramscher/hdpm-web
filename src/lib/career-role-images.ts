@@ -1,4 +1,6 @@
 const roleImages = {
+  'accounting-bookkeeper-ap-ar':
+    'Bookkeeper reviewing an invoice at a wood desk beside a Mac in a bright Central Oregon office.',
   'property-manager':
     'Property manager checking a tablet outside a Central Oregon home with junipers and Cascade mountains beyond.',
   'office-assistant':
