@@ -1,5 +1,6 @@
 import { OAuth2Plugin } from 'payload-oauth2'
 import { SITE_URL } from './site-url'
+import { attachmentLoginPath, safeAttachmentReturn } from './career-attachment-links'
 
 /**
  * Microsoft 365 (Entra ID) SSO for the Payload admin — the native, schema-safe
@@ -81,9 +82,10 @@ export const microsoftSsoPlugin = () =>
         lastName: profile.family_name,
       }
     },
-    successRedirect: () => '/admin',
+    successRedirect: (req) => safeAttachmentReturn(req.searchParams.get('state')) || '/admin',
     failureRedirect: (_req, error) => {
       console.error('[sso] Microsoft sign-in failed:', error)
-      return '/admin/login?error=sso'
+      const returnTo = safeAttachmentReturn(_req.searchParams.get('state'))
+      return returnTo ? `${attachmentLoginPath(returnTo)}&error=sso` : '/admin/login?error=sso'
     },
   })

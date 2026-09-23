@@ -1,4 +1,5 @@
 import React from 'react'
+import { safeAttachmentReturn } from '@/lib/career-attachment-links'
 
 /**
  * "Sign in with Microsoft 365" button rendered above the Payload admin login
@@ -8,11 +9,19 @@ import React from 'react'
  *
  * Server component: no client JS needed, it's just a styled anchor.
  */
-export default function MicrosoftLoginButton() {
+export default function MicrosoftLoginButton({
+  searchParams,
+}: {
+  searchParams?: Record<string, unknown>
+}) {
+  const returnTo = safeAttachmentReturn(searchParams?.redirect)
+  const authorizeURL = returnTo
+    ? `/api/users/oauth/authorize?state=${encodeURIComponent(returnTo)}`
+    : '/api/users/oauth/authorize'
   return (
     <div style={{ marginBottom: 'calc(var(--base) * 1.5)' }}>
       <a
-        href="/api/users/oauth/authorize"
+        href={authorizeURL}
         className="btn btn--style-primary btn--size-medium"
         style={{
           display: 'flex',

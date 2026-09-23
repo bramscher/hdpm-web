@@ -14,6 +14,12 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next()
   const host = request.headers.get('host')?.toLowerCase() ?? ''
 
+  if (request.nextUrl.pathname.startsWith('/careers/application-files/')) {
+    response.headers.set('Cache-Control', 'private, no-store')
+    response.headers.set('Referrer-Policy', 'no-referrer')
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  }
+
   if (!INDEXABLE_HOSTS.has(host)) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')
   }
