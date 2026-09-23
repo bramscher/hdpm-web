@@ -255,9 +255,6 @@ export default function AutomationsView() {
   const [creatingPosts, setCreatingPosts] = useState<Record<number, boolean>>({})
   const [createdPosts, setCreatedPosts] = useState<Record<number, { id: number; slug: string; adminUrl: string }>>({})
   const [blogAgentResult, setBlogAgentResult] = useState<ActionResult>({ status: 'idle' })
-  const [backfillResult, setBackfillResult] = useState<ActionResult>({ status: 'idle' })
-  const [backfillOnlyMissing, setBackfillOnlyMissing] = useState(false)
-  const [curatedResult, setCuratedResult] = useState<ActionResult>({ status: 'idle' })
   const [seoApplyResult, setSeoApplyResult] = useState<ActionResult>({ status: 'idle' })
 
   async function syncReviews() {
@@ -357,48 +354,6 @@ export default function AutomationsView() {
       }
     } catch (err) {
       setBlogAgentResult({ status: 'error', message: String(err) })
-    }
-  }
-
-  async function applyCuratedImages() {
-    setCuratedResult({ status: 'loading' })
-    try {
-      const res = await fetch('/api/automations/apply-curated-images', { method: 'POST' })
-      const data = await res.json()
-      if (!res.ok || data.ok === false) {
-        setCuratedResult({ status: 'error', message: data.error || 'Request failed', data })
-      } else {
-        setCuratedResult({
-          status: 'success',
-          message: `Applied ${data.updated} images${data.failed ? ` (${data.failed} failed)` : ''}`,
-          data: data.failed ? data : undefined,
-        })
-      }
-    } catch (err) {
-      setCuratedResult({ status: 'error', message: String(err) })
-    }
-  }
-
-  async function runBackfillImages() {
-    setBackfillResult({ status: 'loading' })
-    try {
-      const res = await fetch('/api/automations/backfill-images', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ onlyMissing: backfillOnlyMissing }),
-      })
-      const data = await res.json()
-      if (!res.ok || data.ok === false) {
-        setBackfillResult({ status: 'error', message: data.error || 'Request failed', data })
-      } else {
-        setBackfillResult({
-          status: 'success',
-          message: `Updated ${data.updated} of ${data.processed} posts${data.failed ? ` (${data.failed} without a match)` : ''}`,
-          data: { details: data.details },
-        })
-      }
-    } catch (err) {
-      setBackfillResult({ status: 'error', message: String(err) })
     }
   }
 
@@ -502,7 +457,7 @@ export default function AutomationsView() {
         {/* Blog Research */}
         <ActionCard
           title="Blog Topic Research"
-          description="Search Reddit and other sources to find trending topics that Central Oregon property owners and tenants care about. Generates blog post ideas with audience targeting and content angles."
+          description="Find relevant discussions and articles dated within the past 30 days. Review the source dates and excerpts, then choose a topic to turn into a draft."
           buttonLabel={researchResult.status === 'loading' ? 'Searching...' : 'Find Topics'}
           icon={
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -562,7 +517,7 @@ export default function AutomationsView() {
         {/* Blog Agent — full pipeline */}
         <ActionCard
           title="Blog Agent (full pipeline)"
-          description="Runs the complete pipeline the twice-weekly cron uses: research Reddit + web, write a draft with Claude, attach a license-safe featured image, and email the digest with social media copy to the inbox. Takes a few minutes."
+          description="Research recent sources, check the reporting period and source accuracy, create a draft with a featured image, and email you the draft and social copy. Review before publishing. May skip if no suitable source passes review. Takes a few minutes."
           buttonLabel="Run Blog Agent"
           icon={
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -571,54 +526,6 @@ export default function AutomationsView() {
           }
           onRun={runBlogAgent}
           result={blogAgentResult}
-        />
-
-        {/* Refresh Blog Images */}
-        <ActionCard
-          title="Refresh Blog Images (Unsplash)"
-          description="Assign a relevant Unsplash featured image to blog posts, searching by each post's topic (Wikimedia fallback). The previous image stays in the media library, so any post can be reverted by hand. Takes a couple of minutes."
-          buttonLabel={backfillOnlyMissing ? 'Fill Missing Images' : 'Refresh All Images'}
-          icon={
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-            </svg>
-          }
-          onRun={runBackfillImages}
-          result={backfillResult}
-        >
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginTop: '12px',
-              fontSize: '13px',
-              color: 'var(--theme-elevation-500, #666)',
-              cursor: 'pointer',
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={backfillOnlyMissing}
-              onChange={(e) => setBackfillOnlyMissing(e.target.checked)}
-              style={{ accentColor: 'var(--theme-success-500, #28a745)' }}
-            />
-            Only posts missing an image (leave existing images alone)
-          </label>
-        </ActionCard>
-
-        {/* Apply Curated Blog Images (one-off recovery) */}
-        <ActionCard
-          title="Apply Curated Blog Images"
-          description="Apply the 22 hand-picked, topic-matched Central Oregon featured images to their posts. Downloads each from the Unsplash CDN and sets it as the post's featured image. One-off recovery for the posts that lost images."
-          buttonLabel="Apply Curated Images"
-          icon={
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-            </svg>
-          }
-          onRun={applyCuratedImages}
-          result={curatedResult}
         />
 
         {/* Apply SEO Suggestions */}
@@ -649,21 +556,24 @@ export default function AutomationsView() {
           result={listingsResult}
         />
 
-        {/* CRM Automations */}
-        <ActionCard
-          title="Run CRM Automation Cycle"
-          description="Check for overdue tasks, escalate stale leads, and trigger follow-up reminders. This normally runs on a schedule."
-          buttonLabel="Run Now"
-          icon={
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M21.015 4.382v4.993" />
-            </svg>
-          }
-          onRun={async () => {
-            // This will be implemented when CRM cron is ready for manual triggers
-          }}
-          result={{ status: 'idle' }}
-        />
+        <details style={{ marginTop: '16px', borderTop: '1px solid var(--theme-elevation-150, #ddd)', paddingTop: '20px' }}>
+          <summary style={{ cursor: 'pointer', fontSize: '16px', fontWeight: 600 }}>
+            Archived automations (2)
+          </summary>
+          <p style={{ fontSize: '13px', color: 'var(--theme-elevation-500, #666)', lineHeight: 1.5 }}>
+            Past cleanup tools, kept here for reference. To change a single post’s photo, use Find a featured image in the post editor.
+          </p>
+          <div style={{ display: 'grid', gap: '12px' }}>
+            <article style={{ padding: '16px', border: '1px solid var(--theme-elevation-150, #ddd)', borderRadius: '8px' }}>
+              <h3 style={{ margin: '0 0 6px', fontSize: '14px' }}>Refresh Blog Images (Unsplash)</h3>
+              <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.5 }}>Bulk image replacement and missing-image cleanup. Archived to keep routine editing focused on individual posts.</p>
+            </article>
+            <article style={{ padding: '16px', border: '1px solid var(--theme-elevation-150, #ddd)', borderRadius: '8px' }}>
+              <h3 style={{ margin: '0 0 6px', fontSize: '14px' }}>Apply Curated Blog Images</h3>
+              <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.5 }}>One-time recovery using 22 hand-picked images for the original posts that lost their featured photos.</p>
+            </article>
+          </div>
+        </details>
       </div>
     </div>
   )
