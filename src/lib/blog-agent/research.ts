@@ -281,6 +281,7 @@ interface Candidate {
 
 export function acceptCandidate(c: Candidate, focus: ResearchFocus): (TopicSuggestion & { _score: number }) | null {
   const evidence: SourceEvidence = {
+    title: c.title,
     sourceUrl: `https://reddit.com${c.permalink}`,
     sourcePublishedAt: sourceDateFromReddit(c.createdUTC),
     sourceDateBasis: 'published',
@@ -406,7 +407,7 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
   for (const query of tavilyQueries) {
     const results = await searchTavily(query)
     for (const r of results) {
-      const evidence: SourceEvidence = { sourceUrl: r.url, sourcePublishedAt: r.published_date, sourceDateBasis: 'published-or-updated', sourceExcerpt: (r.raw_content || r.content).slice(0, 6000) }
+      const evidence: SourceEvidence = { title: r.title, sourceUrl: r.url, sourcePublishedAt: r.published_date, sourceDateBasis: 'published-or-updated', sourceExcerpt: (r.raw_content || r.content).slice(0, 6000) }
       if (!hasRecentEvidence(evidence)) continue
       const text = `${r.title} ${r.content.slice(0, 400)}`
       if (EXCLUDED_CONTENT.test(text)) continue

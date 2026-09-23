@@ -32,3 +32,22 @@ test('Reddit hot ranking cannot bypass age checks and source body survives resea
   assert.equal(acceptCandidate({ ...candidate, createdUTC: candidate.createdUTC - 31 * 86400 }, 'owners'), null)
   assert.equal(acceptCandidate({ ...candidate, body: '[removed]' }, 'owners'), null)
 })
+
+test('recent page timestamps do not rescue stale market overviews', async () => {
+  const { hasStaleOverviewTitle, requireCurrentReportingPeriod } = await import('../src/lib/blog-agent/freshness')
+  assert.equal(hasStaleOverviewTitle("Central Oregon Rental Market Trends: A 2025 Owner's Guide", now), true)
+  assert.equal(hasStaleOverviewTitle('Central Oregon rental market overview 2025', now), true)
+  assert.equal(hasStaleOverviewTitle('Rental market: 2025 vs 2026', now), false)
+  assert.equal(hasStaleOverviewTitle('Home built in 2025: maintenance tips', now), false)
+  const source = { title: '2025 rental market overview', sourceUrl: 'https://example.com/report', sourcePublishedAt: '2026-09-22', sourceExcerpt: 'A recently updated page describing last year’s rental market. '.repeat(4) }
+  assert.equal(hasRecentEvidence(source, now), false)
+  assert.throws(() => requireCurrentReportingPeriod({ approved: true, timeSensitive: true, reportingPeriodCurrent: true }, source.title, now))
+  // Semantic review must also establish the month/quarter and underlying data,
+  // even if the headline contains no year or has the current year pasted on it.
+  for (const title of ['Latest rental market update', '2026 rental market overview']) {
+    assert.throws(() => requireCurrentReportingPeriod({ approved: true, timeSensitive: true, reportingPeriodCurrent: false }, title, now))
+    assert.throws(() => requireCurrentReportingPeriod({ approved: true }, title, now))
+    assert.doesNotThrow(() => requireCurrentReportingPeriod({ approved: true, timeSensitive: true, reportingPeriodCurrent: true }, title, now))
+  }
+  assert.doesNotThrow(() => requireCurrentReportingPeriod({ approved: true, timeSensitive: false }, 'A recent discussion of maintenance services', now))
+})
