@@ -59,3 +59,10 @@ save immediately: On publishes a draft or closed job; Off closes an open job.
 Only users with content-editing permissions can use the switch. Failed saves
 leave the displayed status unchanged and show an error. The list refreshes its
 current filters after a successful change.
+
+## Description spacing
+
+The public job list renders descriptions with compact headings, paragraphs, and
+bullets. Legacy blank Lexical paragraphs are ignored for display, and known
+section-label paragraphs become headings. The saved Payload description is
+not changed, so future edits remain intact.

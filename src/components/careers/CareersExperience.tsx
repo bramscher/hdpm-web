@@ -5,6 +5,8 @@ import { careerRoleImage } from '@/lib/career-role-images'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { Job } from '@/payload-types'
 import ApplicationForm from './ApplicationForm'
+import { compactJobDescription } from '@/lib/job-description-format'
+import styles from './JobDescription.module.css'
 
 export default function CareersExperience({ jobs }: { jobs: Job[] }) {
   const [selectedJob, setSelectedJob] = useState('')
@@ -51,7 +53,7 @@ export default function CareersExperience({ jobs }: { jobs: Job[] }) {
                   id={job.slug}
                   className="scroll-mt-28 p-5 sm:p-7"
                 >
-                  <div className="grid grid-cols-[96px_minmax(0,1fr)] items-start gap-4 sm:flex sm:gap-7">
+                  <div className="grid grid-cols-[96px_minmax(0,1fr)] items-start gap-4 sm:flex sm:gap-5">
                     {roleImage ? (
                       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-neutral-100 sm:h-32 sm:w-48">
                         <Image
@@ -72,9 +74,9 @@ export default function CareersExperience({ jobs }: { jobs: Job[] }) {
                     )}
                     <div className="contents sm:block sm:min-w-0 sm:flex-1">
                       <div
-                        className={`${roleImage ? '' : 'col-span-2'} flex flex-wrap items-center justify-between gap-4`}
+                        className={`${roleImage ? '' : 'col-span-2'} flex flex-wrap items-center justify-between gap-2`}
                       >
-                        <h3 className="font-heading text-xl font-semibold text-primary sm:text-2xl">
+                        <h3 className="font-heading text-xl font-semibold leading-tight text-primary sm:text-2xl">
                           {job.title}
                         </h3>
                         <button
@@ -96,7 +98,7 @@ export default function CareersExperience({ jobs }: { jobs: Job[] }) {
                             <span key={i}>{text}</span>
                           ))}
                       </div>
-                      <details className="group col-span-2 sm:mt-4">
+                      <details className="group col-span-2 sm:mt-3">
                         <summary className="w-fit cursor-pointer text-sm font-semibold text-[#246b38]">
                           About this role{' '}
                           <span
@@ -106,13 +108,13 @@ export default function CareersExperience({ jobs }: { jobs: Job[] }) {
                             +
                           </span>
                         </summary>
-                        <div className="mt-4 max-w-3xl border-l-2 border-accent/30 pl-5">
-                          <p className="whitespace-pre-line leading-relaxed text-neutral-mid">
+                        <div className="mt-3 max-w-3xl border-l-2 border-accent/30 pl-4">
+                          <p className="leading-normal text-neutral-mid">
                             {job.summary}
                           </p>
                           {job.description && (
-                            <div className="prose mt-4 max-w-none">
-                              <RichText data={job.description} />
+                            <div className={`${styles.description} mt-3 text-neutral-mid`}>
+                              <RichText data={compactJobDescription(job.description)} />
                             </div>
                           )}
                         </div>

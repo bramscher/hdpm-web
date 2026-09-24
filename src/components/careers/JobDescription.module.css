@@ -1,0 +1,28 @@
+.description {
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.description p { margin: 0 0 0.5rem; }
+
+.description :is(h1, h2, h3, h4, h5, h6) {
+  margin: 1rem 0 0.375rem;
+  font-size: 1.125rem;
+  line-height: 1.35;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.description ul,
+.description ol { margin: 0.375rem 0 0.75rem; padding-left: 1.25rem; }
+.description ul { list-style-type: disc; }
+.description ol { list-style-type: decimal; }
+.description li { margin: 0.25rem 0; padding-left: 0.125rem; }
+.description li > p { margin: 0; }
+.description li > :is(ul, ol) { margin: 0.25rem 0; }
+.description a { text-decoration: underline; text-underline-offset: 2px; }
+.description blockquote { margin: 0.75rem 0; padding-left: 1rem; border-left: 2px solid #ddd; }
+.description hr { margin: 1rem 0; }
+.description > div > :first-child { margin-top: 0; }
+.description > div > :last-child { margin-bottom: 0; }
