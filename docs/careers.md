@@ -66,3 +66,6 @@ The public job list renders descriptions with compact headings, paragraphs, and
 bullets. Legacy blank Lexical paragraphs are ignored for display, and known
 section-label paragraphs become headings. The saved Payload description is
 not changed, so future edits remain intact.
+
+`/careers#application` targets the application heading, so direct Apply links
+land at the form rather than at the top padding of its section.

@@ -139,7 +139,6 @@ export default function CareersExperience({ jobs }: { jobs: Job[] }) {
       </section>
       {jobs.length > 0 && (
         <section
-          id="application"
           className="scroll-mt-24 bg-[#eeeee7] py-16 sm:py-24"
         >
           <div className="mx-auto grid max-w-6xl items-start gap-10 px-5 sm:px-8 lg:grid-cols-[.7fr_1.3fr]">
@@ -147,7 +146,7 @@ export default function CareersExperience({ jobs }: { jobs: Job[] }) {
               <p className="text-xs font-semibold tracking-[.18em] text-[#246b38]">
                 ONE FORM. YOUR NEXT STEP.
               </p>
-              <h2 className="mt-4 font-heading text-4xl leading-tight text-primary sm:text-5xl">
+              <h2 id="application" className="scroll-mt-28 font-heading text-4xl leading-tight text-primary sm:text-5xl">
                 Bring your skills.
                 <br />
                 And your curiosity.
