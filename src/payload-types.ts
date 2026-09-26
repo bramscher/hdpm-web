@@ -623,6 +623,10 @@ export interface Job {
   order?: number | null;
   summary: string;
   /**
+   * Optional. Shown on the public careers card. Upload a lifestyle photo in Media or choose an existing one. Leave blank to keep the numbered list. A centered subject crops cleanly.
+   */
+  image?: (number | null) | Media;
+  /**
    * Responsibilities, qualifications, and other role details.
    */
   description?: {
@@ -1678,6 +1682,7 @@ export interface JobsSelect<T extends boolean = true> {
   status?: T;
   order?: T;
   summary?: T;
+  image?: T;
   description?: T;
   location?: T;
   schedule?: T;
