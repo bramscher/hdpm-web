@@ -8,7 +8,7 @@ export const Jobs: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     group: 'Content',
-    defaultColumns: ['title', 'status', 'location', 'order'],
+    defaultColumns: ['title', 'image', 'status', 'location', 'order'],
     description: 'Use the Availability toggle in this list to publish or unpublish a job instantly. Only Open / Published jobs appear on the careers page and application form.',
   },
   defaultSort: 'order',
@@ -46,6 +46,15 @@ export const Jobs: CollectionConfig = {
     },
     { name: 'order', type: 'number', defaultValue: 0, admin: { position: 'sidebar', description: 'Lower numbers appear first.' } },
     { name: 'summary', type: 'textarea', required: true },
+    {
+      name: 'image',
+      label: 'Role photo',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description: 'Optional. Shown on the public careers card. Upload a lifestyle photo in Media or choose an existing one. Leave blank to keep the numbered list. A centered subject crops cleanly.',
+      },
+    },
     { name: 'description', type: 'richText', admin: { description: 'Responsibilities, qualifications, and other role details.' } },
     { name: 'location', type: 'text' },
     { name: 'schedule', type: 'text', admin: { description: 'Optional: full-time, part-time, or working hours.' } },
