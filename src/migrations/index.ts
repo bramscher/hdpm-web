@@ -1,3 +1,4 @@
+import * as migration_20260927_180000_rewrite_job_apply_instructions from './20260927_180000_rewrite_job_apply_instructions';
 import * as migration_20260926_203100_add_jobs_image from './20260926_203100_add_jobs_image';
 import * as migration_20260922_120000_add_job_applications from './20260922_120000_add_job_applications';
 import * as migration_20260920_120000_add_jobs from './20260920_120000_add_jobs';
@@ -50,5 +51,10 @@ export const migrations = [
     up: migration_20260926_203100_add_jobs_image.up,
     down: migration_20260926_203100_add_jobs_image.down,
     name: '20260926_203100_add_jobs_image',
+  },
+  {
+    up: migration_20260927_180000_rewrite_job_apply_instructions.up,
+    down: migration_20260927_180000_rewrite_job_apply_instructions.down,
+    name: '20260927_180000_rewrite_job_apply_instructions',
   },
 ];
