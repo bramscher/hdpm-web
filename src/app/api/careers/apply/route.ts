@@ -8,6 +8,7 @@ import {
   sameOrigin,
   type Attachment,
 } from '@/lib/career-storage'
+import { findOpenJobById } from '@/lib/open-jobs'
 import { SITE_URL } from '@/lib/site-url'
 
 export const runtime = 'nodejs'
@@ -45,15 +46,8 @@ export async function POST(request: Request) {
       depth: 0,
     })
     if (existing.docs.length) return Response.json({ ok: true })
-    const { docs } = await payload.find({
-      collection: 'jobs',
-      where: {
-        and: [{ id: { equals: form.jobId } }, { status: { equals: 'open' } }],
-      },
-      limit: 1,
-      depth: 0,
-    })
-    if (!docs.length)
+    const job = await findOpenJobById(payload, form.jobId)
+    if (!job)
       return Response.json(
         {
           error: 'This position is no longer open. Please choose another role.',
@@ -94,7 +88,7 @@ export async function POST(request: Request) {
       data: {
         ...fields,
         job: jobId,
-        jobTitle: docs[0].title,
+        jobTitle: job.title,
         attachments: JSON.parse(JSON.stringify(attachments)),
         resumeDownload: attachments.some((f) => f.kind === 'resume')
           ? `${SITE_URL}/api/careers/files/${form.submissionId}?kind=resume`

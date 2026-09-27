@@ -8,6 +8,7 @@ import {
   sameOrigin,
   signAttachment,
 } from '@/lib/career-storage'
+import { findOpenJobById } from '@/lib/open-jobs'
 
 export const runtime = 'nodejs'
 export async function POST(request: Request) {
@@ -34,18 +35,8 @@ export async function POST(request: Request) {
         { error: 'Too many uploads. Please try again in an hour.' },
         { status: 429 },
       )
-    const jobs = await payload.find({
-      collection: 'jobs',
-      where: {
-        and: [
-          { id: { equals: Number(body.jobId) } },
-          { status: { equals: 'open' } },
-        ],
-      },
-      limit: 1,
-      depth: 0,
-    })
-    if (!jobs.docs.length)
+    const job = await findOpenJobById(payload, Number(body.jobId))
+    if (!job)
       return Response.json(
         { error: 'Please choose an open position.' },
         { status: 400 },
