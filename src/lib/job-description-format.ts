@@ -1,4 +1,5 @@
 import type { Job } from '@/payload-types'
+import { rewriteJobApplyInstructions } from './job-apply-instructions'
 
 const SECTION_LABELS = new Set([
   'about high desert property management', 'role overview', 'responsibilities',
@@ -6,9 +7,17 @@ const SECTION_LABELS = new Set([
   'schedule and working conditions', 'compensation and benefits', 'how to apply',
 ])
 
-/** Normalize display only; preserve the original CMS content and all substantive nodes. */
-export function compactJobDescription(description: NonNullable<Job['description']>): NonNullable<Job['description']> {
-  const children = description.root.children.flatMap(node => {
+/**
+ * Display normalization. Does not write back to the CMS.
+ * Email-a-résumé apply instructions are replaced for the public page; a migration
+ * stores the same wording so the editor matches what candidates see.
+ */
+export function compactJobDescription(
+  description: NonNullable<Job['description']>,
+  roleTitle = '',
+): NonNullable<Job['description']> {
+  const source = rewriteJobApplyInstructions(description, roleTitle)
+  const children = source.root.children.flatMap(node => {
     if (node.type !== 'paragraph' || !Array.isArray(node.children)) return [node]
     const inline = node.children as Array<{ type: string; text?: string }>
     if (inline.every(child => child.type === 'linebreak' || (child.type === 'text' && !child.text?.trim()))) return []
@@ -17,5 +26,5 @@ export function compactJobDescription(description: NonNullable<Job['description'
       : ''
     return [SECTION_LABELS.has(plainText) ? { ...node, type: 'heading', tag: 'h3' } : node]
   })
-  return { ...description, root: { ...description.root, children } }
+  return { ...source, root: { ...source.root, children } }
 }

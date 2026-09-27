@@ -79,3 +79,15 @@ not changed, so future edits remain intact.
 
 `/careers#application` targets the application heading, so direct Apply links
 land at the form rather than at the top padding of its section.
+
+## How to apply
+
+Role details tell candidates to fill out the application form on this page
+and select the role. The words “application form” link to `/careers#application`.
+The Apply button still selects that role in the form. Emailing a résumé to
+info@highdesertpm.com is not how candidates apply.
+
+The public page rewrites leftover email-a-résumé instructions when it renders.
+Migration `20260927_180000_rewrite_job_apply_instructions` stores the same
+sentence on each job so the CMS matches the page. The equal-opportunity line
+and the rest of the description stay in place.

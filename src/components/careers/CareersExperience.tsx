@@ -114,7 +114,7 @@ export default function CareersExperience({ jobs }: { jobs: Job[] }) {
                           </p>
                           {job.description && (
                             <div className={`${styles.description} mt-3 text-neutral-mid`}>
-                              <RichText data={compactJobDescription(job.description)} />
+                              <RichText data={compactJobDescription(job.description, job.title)} />
                             </div>
                           )}
                         </div>
