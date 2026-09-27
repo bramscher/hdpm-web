@@ -766,11 +766,13 @@ propagation, and Unsplash tracking destinations. See
 findings and validation limits.
 
 ### Database Migrations
-Payload migrations live in `src/migrations/`. Run via:
+Payload migrations live in `src/migrations/`. Apply the historical set locally with:
 
 ```bash
 npm run payload migrate
 ```
+
+Vercel does not run that command. `prodMigrations` is intentionally unset: Payload 3.80 stops the process if a migration fails or if dev-mode push left a `payload_migrations` row with batch `-1`, and the older migration files are not safe to replay. The Jobs role-photo change (`20260926_203100_add_jobs_image`) is applied idempotently by `npm run db:ensure-jobs-image` before `next build`, and again on server init. `/careers` still renders static photos if `jobs.image_id` is missing. Once the migration name is recorded, `npm run payload migrate` skips it.
 
 ---
 

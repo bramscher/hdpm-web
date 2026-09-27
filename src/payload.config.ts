@@ -30,6 +30,7 @@ import { LandingPages } from './collections/LandingPages'
 import { Campaigns } from './collections/Campaigns'
 import { CampaignVisits } from './collections/CampaignVisits'
 import { ListingGeocodes } from './collections/ListingGeocodes'
+import { ensureJobsImageColumn } from './lib/ensure-jobs-image-column'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -138,6 +139,16 @@ export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
+  onInit: async (payload) => {
+    await ensureJobsImageColumn(payload)
+  },
+  // Do not set prodMigrations to the full src/migrations array. Payload 3.80
+  // runs that list on production init and calls process.exit if a migration
+  // fails or if dev-mode push left a payload_migrations batch of -1. Older
+  // migrations in this repo are not idempotent, so a replay would take down
+  // every route on Vercel. The jobs image column is applied by onInit and by
+  // `npm run db:ensure-jobs-image` before next build. `npm run payload migrate`
+  // remains the manual path for the historical files.
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',

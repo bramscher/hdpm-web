@@ -1,6 +1,7 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import CareersPageContent from '@/components/careers/CareersPageContent'
+import { findOpenJobs } from '@/lib/open-jobs'
 import { createMetadata } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
@@ -13,13 +14,6 @@ export const metadata = createMetadata({
 
 export default async function CareersPage() {
   const payload = await getPayload({ config })
-  const { docs: jobs } = await payload.find({
-    collection: 'jobs',
-    overrideAccess: false,
-    where: { status: { equals: 'open' } },
-    sort: ['order', 'title'],
-    pagination: false,
-    depth: 1,
-  })
+  const jobs = await findOpenJobs(payload)
   return <CareersPageContent jobs={jobs} />
 }
