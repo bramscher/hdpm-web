@@ -1,3 +1,5 @@
+import type { Job, Media } from '@/payload-types'
+
 const roleImages = {
   'accounting-bookkeeper-ap-ar':
     'Bookkeeper reviewing an invoice at a wood desk beside a Mac in a bright Central Oregon office.',
@@ -15,7 +17,25 @@ const roleImages = {
     'Cleaning technician wearing gloves and a work polo wiping a bright rental-home kitchen counter.',
 } as const
 
-export function careerRoleImage(job: { slug: string; title: string }) {
+function mediaUrl(image: Media): string | null {
+  return (
+    image.url ||
+    image.sizes?.card?.url ||
+    image.sizes?.thumbnail?.url ||
+    image.thumbnailURL ||
+    null
+  )
+}
+
+function mediaRoleImage(job: { title: string; image?: Job['image'] }) {
+  const image = job.image
+  if (!image || typeof image !== 'object') return null
+  const src = mediaUrl(image)
+  if (!src) return null
+  return { src, alt: image.alt?.trim() || job.title }
+}
+
+function staticRoleImage(job: { slug: string; title: string }) {
   const titleSlug = job.title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
@@ -27,4 +47,17 @@ export function careerRoleImage(job: { slug: string; title: string }) {
   return role
     ? { src: `/images/careers/${role}.webp`, alt: roleImages[role] }
     : null
+}
+
+/**
+ * Careers card photo. A populated Media Role photo wins. Otherwise use the
+ * static WebP matched by slug or title. Unrecognized roles return null so the
+ * card keeps the numbered list.
+ */
+export function careerRoleImage(job: {
+  slug: string
+  title: string
+  image?: Job['image']
+}) {
+  return mediaRoleImage(job) ?? staticRoleImage(job)
 }

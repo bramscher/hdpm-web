@@ -1,6 +1,6 @@
 {
   "generator": "Built-in image_gen",
-  "description": "Illustrative, AI-generated role imagery; not photographs of actual HDPM employees or properties.",
+  "description": "Illustrative, AI-generated role imagery; not photographs of actual HDPM employees or properties. These static files are the careers-page fallback when a Job has no Media Role photo.",
   "images": [
     {
       "file": "/images/careers/property-manager.webp",

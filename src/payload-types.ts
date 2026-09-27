@@ -623,6 +623,10 @@ export interface Job {
   order?: number | null;
   summary: string;
   /**
+   * Optional. Overrides the built-in careers photo for this job. Leave blank to keep the matching static image, or the numbered list if this role has none.
+   */
+  image?: (number | null) | Media;
+  /**
    * Responsibilities, qualifications, and other role details.
    */
   description?: {
@@ -1678,6 +1682,7 @@ export interface JobsSelect<T extends boolean = true> {
   status?: T;
   order?: T;
   summary?: T;
+  image?: T;
   description?: T;
   location?: T;
   schedule?: T;

@@ -19,7 +19,7 @@ export default async function CareersPage() {
     where: { status: { equals: 'open' } },
     sort: ['order', 'title'],
     pagination: false,
-    depth: 0,
+    depth: 1,
   })
   return <CareersPageContent jobs={jobs} />
 }

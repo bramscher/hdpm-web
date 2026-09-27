@@ -7,7 +7,7 @@ Manage listings in **Payload → Content → Jobs**. Only Open jobs appear publi
 ## Deployment
 
 1. Set `DATABASE_URL`, `PAYLOAD_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `RESEND_API_KEY`. Use the canonical production `NEXT_PUBLIC_SITE_URL`. `CAREERS_FROM_EMAIL` optionally overrides the verified `LEAD_FROM_EMAIL` sender. Notifications always go to **work@highdesertpm.com**.
-2. Run `npm run payload -- migrate` to create private application records and database-backed rate limits (after the existing Jobs migration).
+2. Run `npm run payload -- migrate` to create private application records, database-backed rate limits, and the optional Jobs role-photo column (after the existing Jobs migration). The photo migration only adds a nullable `image_id` on existing job rows. It does not upload images or change titles, copy, status, or order.
 3. Run `npx tsx scripts/setup-career-storage.ts` against the intended environment. It creates/updates the **private** `job-applications` bucket, allowed MIME types, and 100 MB maximum. Never make this bucket public or add anonymous storage policies. The browser only receives a signed URL for one random upload path; server credentials are never sent to it.
 4. Deploy, then submit a test application with a résumé and a video. Verify the saved record, inbox delivery, administrator-only downloads, and rejection of anonymous collection reads. Check mobile video selection with an actual phone. Database, storage, and email integration require configured services and are not verified by unit tests.
 
@@ -23,7 +23,7 @@ Uploads abandoned before submission and files belonging to deleted records remai
 
 ## Checks
 
-`npx tsx --test tests/career-validation.test.ts tests/career-notification.test.ts tests/job-links.test.ts` covers form validation, supported formats and limits, tamper-resistant upload receipts, expiry, origin checks, administrator access, and notification success/failure. Run `npx tsc --noEmit` and `npm run build` before release.
+`npx tsx --test tests/career-validation.test.ts tests/career-notification.test.ts tests/job-links.test.ts tests/career-role-images.test.ts` covers form validation, supported formats and limits, tamper-resistant upload receipts, expiry, origin checks, administrator access, notification success/failure, and careers photo resolution. Run `npx tsc --noEmit` and `npm run build` before release.
 
 ## Job Description Creator
 
@@ -36,11 +36,21 @@ The assistant is available to authenticated admins and editors via `/api/job-des
 This is a virtual UI field using the existing Jobs schema; no database migration is needed.
 
 
-## Role images
+## Role photos
 
-The seven role illustrations live in `public/images/careers/` as optimized WebP files. They depict fictional professionals actively working in Central Oregon-inspired settings; they are not photos of HDPM employees or actual managed properties. Office roles show Mac workstations. Original generation prompts are in `docs/assets/career-image-prompts.json` (built-in image generation).
+Each Job has an optional **Role photo** (`image`), an upload related to the existing Media collection — the same pattern as team member photos and post featured images. In **Payload → Content → Jobs**, open a listing, set **Role photo**, and save. Only **Open** jobs appear on `/careers`, still in ascending `order` (then title).
 
-`src/lib/career-role-images.ts` matches the role slug or normalized title, including draft-creator UUID slug suffixes. Unrecognized roles retain the numbered list treatment. Images use responsive Next Image thumbnails with lazy loading; no database migration or CMS image upload is needed.
+The card uses the first match:
+
+1. The Job’s Media Role photo, when it is set and populated.
+2. The static illustration in `public/images/careers/`, matched by slug or normalized title (including draft-creator UUID slug suffixes).
+3. The numbered list, when neither image exists.
+
+No Media seed is required. Existing open roles keep their static photos until an editor sets Role photo. Migration `20260926_203100_add_jobs_image` only adds a nullable `image_id` and does not change job rows. Deleting the Media file clears the override (`ON DELETE SET NULL`); the static image is used again when one exists.
+
+The seven role illustrations are optimized WebP files. They depict fictional professionals actively working in Central Oregon-inspired settings; they are not photos of HDPM employees or actual managed properties. Office roles show Mac workstations. Original generation prompts are in `docs/assets/career-image-prompts.json`.
+
+The public page loads jobs at depth 1 so the Media relation includes `url` and `alt`. Thumbnails use the existing careers card crop (square on small screens, wide on larger screens) with `object-cover`. A Media photo uses that record’s alt text, or the job title if alt is blank. Static photos use their existing captions.
 
 ## Publish or unpublish a job
 
