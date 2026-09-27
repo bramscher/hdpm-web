@@ -1,6 +1,6 @@
 {
   "generator": "Built-in image_gen",
-  "description": "Historical prompts for the old static files in public/images/careers. The careers page no longer reads those files. Role photos are optional Media uploads on each Job.",
+  "description": "Illustrative, AI-generated role imagery; not photographs of actual HDPM employees or properties. These static files are the careers-page fallback when a Job has no Media Role photo.",
   "images": [
     {
       "file": "/images/careers/property-manager.webp",

@@ -52,7 +52,7 @@ export const Jobs: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
       admin: {
-        description: 'Optional. Shown on the public careers card. Upload a lifestyle photo in Media or choose an existing one. Leave blank to keep the numbered list. A centered subject crops cleanly.',
+        description: 'Optional. Overrides the built-in careers photo for this job. Leave blank to keep the matching static image, or the numbered list if this role has none.',
       },
     },
     { name: 'description', type: 'richText', admin: { description: 'Responsibilities, qualifications, and other role details.' } },
