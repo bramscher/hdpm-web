@@ -11,6 +11,8 @@ import {
 import { SITE_URL } from '@/lib/site-url'
 
 export const runtime = 'nodejs'
+// The confirmation email downloads and attaches the applicant's files.
+export const maxDuration = 60
 export async function POST(request: Request) {
   if (!sameOrigin(request))
     return Response.json(

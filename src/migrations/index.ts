@@ -1,3 +1,4 @@
+import * as migration_20261005_120000_add_hiring_settings from './20261005_120000_add_hiring_settings';
 import * as migration_20260927_180000_rewrite_job_apply_instructions from './20260927_180000_rewrite_job_apply_instructions';
 import * as migration_20260926_203100_add_jobs_image from './20260926_203100_add_jobs_image';
 import * as migration_20260922_120000_add_job_applications from './20260922_120000_add_job_applications';
@@ -56,5 +57,10 @@ export const migrations = [
     up: migration_20260927_180000_rewrite_job_apply_instructions.up,
     down: migration_20260927_180000_rewrite_job_apply_instructions.down,
     name: '20260927_180000_rewrite_job_apply_instructions',
+  },
+  {
+    up: migration_20261005_120000_add_hiring_settings.up,
+    down: migration_20261005_120000_add_hiring_settings.down,
+    name: '20261005_120000_add_hiring_settings',
   },
 ];
