@@ -33,11 +33,14 @@ export const HiringSettings: GlobalConfig = {
         })
         let sent = 0
         for (const application of docs) {
+          // No shared `req`: Payload merges each save's context into
+          // req.context, so the email hook's skipCareerEmail flag would leak
+          // into the next application and silently skip its email.
           const updated = await req.payload.update({
             collection: 'job-applications',
             id: application.id,
             data: { notificationStatus: 'pending' },
-            req,
+            depth: 0,
           })
           if (updated.notificationStatus === 'sent') sent++
           await pause()
@@ -45,7 +48,7 @@ export const HiringSettings: GlobalConfig = {
         const since = new Date(doc.resendSince).toLocaleDateString('en-US', {
           timeZone: 'America/Los_Angeles',
         })
-        const lastResend = `${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })}: ${sent} of ${docs.length} applications since ${since} sent. ${docs.length - sent ? 'Failed ones are marked Failed in Job Applications.' : ''}`.trim()
+        const lastResend = `${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })}: ${sent} of ${docs.length} applications since ${since} sent.${docs.length - sent ? ' Unsent ones show Failed or Pending in Job Applications; open one and use Email again.' : ''}`
         return req.payload.updateGlobal({
           slug: 'hiring-settings',
           data: { resendSince: null, lastResend },
