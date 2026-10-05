@@ -151,3 +151,51 @@ test('oversized videos are listed for the download link instead of attached', as
   assert.equal(attached.length, 0)
   assert.match(skipped[0], /intro\.mov.*too large/)
 })
+
+test('resend since a date emails every matching application, not just the first', async () => {
+  const { HiringSettings } = await import('../src/globals/HiringSettings')
+  const resend = HiringSettings.hooks!.afterChange![0]
+  const key = process.env.RESEND_API_KEY
+  const originalFetch = globalThis.fetch
+  process.env.RESEND_API_KEY = 're_test_placeholder'
+  let emails = 0
+  globalThis.fetch = async () => {
+    emails++
+    return new Response(JSON.stringify({ id: `email-${emails}` }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+  // Mimics Payload: passing `req` merges the call's context into req.context.
+  const req: any = { context: {} }
+  const payload: any = {
+    find: async () => ({ docs: [{ id: 1 }, { id: 2 }, { id: 3 }] }),
+    findGlobal: async () => ({}),
+    updateGlobal: async (args: any) => args.data,
+    update: async (args: any) => {
+      const shared = args.req ?? { context: {}, payload }
+      shared.context = { ...shared.context, ...(args.context || {}) }
+      if (args.collection !== 'job-applications' || args.data.notificationStatus !== 'pending')
+        return { id: args.id, ...args.data }
+      return notify({
+        doc: { ...doc, id: args.id, notificationStatus: 'pending', updatedAt: 'now' },
+        context: shared.context,
+        req: shared,
+      } as any)
+    },
+  }
+  req.payload = payload
+  try {
+    const result: any = await resend({
+      doc: { resendSince: '2026-10-01T07:00:00.000Z' },
+      req,
+      context: {},
+    } as any)
+    assert.equal(emails, 3)
+    assert.match(result.lastResend, /3 of 3 applications/)
+  } finally {
+    globalThis.fetch = originalFetch
+    if (key) process.env.RESEND_API_KEY = key
+    else delete process.env.RESEND_API_KEY
+  }
+})
