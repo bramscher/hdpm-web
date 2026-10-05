@@ -30,6 +30,7 @@ import { LandingPages } from './collections/LandingPages'
 import { Campaigns } from './collections/Campaigns'
 import { CampaignVisits } from './collections/CampaignVisits'
 import { ListingGeocodes } from './collections/ListingGeocodes'
+import { HiringSettings } from './globals/HiringSettings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -105,6 +106,7 @@ export default buildConfig({
     // Admin
     Users,
   ],
+  globals: [HiringSettings],
   plugins: [
     seoPlugin({
       collections: ['posts', 'pages'],

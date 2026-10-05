@@ -125,8 +125,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'hiring-settings': HiringSetting;
+  };
+  globalsSelect: {
+    'hiring-settings': HiringSettingsSelect<false> | HiringSettingsSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -604,7 +608,7 @@ export interface TeamMember {
   createdAt: string;
 }
 /**
- * Manage openings on Work at High Desert. Only open jobs appear publicly.
+ * Use the Availability toggle in this list to publish or unpublish a job instantly. Only Open / Published jobs appear on the careers page and application form.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "jobs".
@@ -616,6 +620,9 @@ export interface Job {
    * Unique link anchor, e.g. maintenance-technician.
    */
   slug: string;
+  /**
+   * Choose Open to publish and accept applications, or Closed to hide the role. Click Save to apply. You can reopen it anytime; existing applications are kept.
+   */
   status: 'draft' | 'open' | 'closed';
   /**
    * Lower numbers appear first.
@@ -671,7 +678,7 @@ export interface Job {
   createdAt: string;
 }
 /**
- * Private applications. To retry an email, set Notification Status to Pending and save. Attachment download links are included in the saved application and notification.
+ * Private applications. Each one is emailed with its résumé and video attached to the recipients in Hiring Settings. To resend an email, set Notification Status to Pending and save.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "job-applications".
@@ -2046,6 +2053,36 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hiring-settings".
+ */
+export interface HiringSetting {
+  id: number;
+  /**
+   * One email address per line. Every new job application is emailed here with the résumé and video attached.
+   */
+  applicationRecipients: string;
+  /**
+   * Optional. Pick a date and save to email every application received on or after it to the recipients above. Clears itself once sent.
+   */
+  resendSince?: string | null;
+  lastResend?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hiring-settings_select".
+ */
+export interface HiringSettingsSelect<T extends boolean = true> {
+  applicationRecipients?: T;
+  resendSince?: T;
+  lastResend?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,6 +1,10 @@
 import type { CollectionConfig } from 'payload'
 import { Resend } from 'resend'
 import { SITE_URL } from '../lib/site-url'
+import {
+  getApplicationRecipients,
+  loadApplicationAttachments,
+} from '../lib/career-notification'
 
 export const JobApplications: CollectionConfig = {
   slug: 'job-applications',
@@ -15,7 +19,7 @@ export const JobApplications: CollectionConfig = {
       'createdAt',
     ],
     description:
-      'Private applications. To retry an email, set Notification Status to Pending and save. Attachment download links are included in the saved application and notification.',
+      'Private applications. Each one is emailed with its résumé and video attached to the recipients in Hiring Settings. To resend an email, set Notification Status to Pending and save.',
   },
   access: {
     read: ({ req }) => req.user?.role === 'admin',
@@ -43,9 +47,20 @@ export const JobApplications: CollectionConfig = {
             'resumeDownload',
             'videoDownload',
           ]
+          const to = await getApplicationRecipients(req.payload)
+          const { attached, skipped } = await loadApplicationAttachments(
+            doc.attachments,
+          )
+          const files = [
+            attached.length &&
+              `Attached:\n${attached.map((f) => f.filename).join('\n')}`,
+            skipped.length &&
+              `Not attached (use the download link above):\n${skipped.join('\n')}`,
+          ].filter(Boolean)
           const text = fields
             .filter((key) => doc[key])
             .map((key) => `${key}:\n${doc[key]}`)
+            .concat(files as string[])
             .join('\n\n')
           const result = await new Resend(
             process.env.RESEND_API_KEY,
@@ -55,12 +70,17 @@ export const JobApplications: CollectionConfig = {
                 process.env.CAREERS_FROM_EMAIL ||
                 process.env.LEAD_FROM_EMAIL ||
                 'HDPM Website <leads@highdesertpm.com>',
-              to: 'work@highdesertpm.com',
+              to,
               replyTo: doc.email,
               subject: `New application: ${doc.jobTitle} — ${doc.fullName}`,
               text: `${text}\n\nReview application (admin sign-in required):\n${SITE_URL}/admin/collections/job-applications/${doc.id}`,
+              attachments: attached,
             },
-            { idempotencyKey: `job-application-${doc.id}` },
+            // updatedAt changes on every save, so a deliberate retry (status
+            // set back to Pending) sends again while duplicate hooks don't.
+            {
+              idempotencyKey: `job-application-${doc.id}-${doc.updatedAt ?? ''}`,
+            },
           )
           if (result.error) throw new Error(result.error.message)
           sent = true
