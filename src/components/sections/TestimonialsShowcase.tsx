@@ -51,9 +51,14 @@ function formatDate(iso?: string | null) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 
-function Avatar({ name, size = 'h-11 w-11 text-sm' }: { name: string; size?: string }) {
+function Avatar({ name, size = 'h-11 w-11 text-sm', onDark = false }: { name: string; size?: string; onDark?: boolean }) {
   return (
-    <span className={`inline-flex shrink-0 items-center justify-center rounded-full bg-primary font-heading font-bold text-white ${size}`} aria-hidden="true">
+    <span
+      className={`inline-flex shrink-0 items-center justify-center rounded-full font-heading font-bold ${
+        onDark ? 'bg-accent text-primary' : 'bg-primary text-white'
+      } ${size}`}
+      aria-hidden="true"
+    >
       {initials(name)}
     </span>
   )
@@ -101,7 +106,7 @@ function Spotlight({ reviews }: { reviews: ShowcaseReview[] }) {
               &ldquo;{review.text}&rdquo;
             </blockquote>
             <figcaption className="mt-auto flex items-center gap-3 pt-8">
-              <Avatar name={review.author} />
+              <Avatar name={review.author} onDark />
               <div>
                 <p className="font-heading font-bold">{review.author}</p>
                 <p className="flex items-center gap-1.5 text-sm text-white/60">
