@@ -106,10 +106,10 @@ function Scene({ i, reduced }: { i: number; reduced: boolean }) {
           </g>
         </motion.g>
         <motion.g initial={false} animate={show(i === 0)} transition={t}>
-          <rect x="196" y="236" width="4" height="64" fill="#5b4636" />
-          <rect x="160" y="232" width="76" height="34" rx="3" fill="#1a1a1a" />
+          <rect x="118" y="236" width="4" height="64" fill="#5b4636" />
+          <rect x="78" y="232" width="84" height="34" rx="3" fill="#1a1a1a" />
           <motion.text
-            x="198" y="254" textAnchor="middle" fontSize="12" fontWeight="800" fill="#ffffff"
+            x="120" y="254" textAnchor="middle" fontSize="12" fontWeight="800" fill="#ffffff"
             initial={false}
             animate={{ opacity: i === 0 && !reduced ? [1, 1, 0] : 0 }}
             transition={reduced ? { duration: 0 } : { duration: 1.6, times: [0, 0.7, 1], delay: 0.6 }}
@@ -117,7 +117,7 @@ function Scene({ i, reduced }: { i: number; reduced: boolean }) {
             FOR RENT
           </motion.text>
           <motion.text
-            x="198" y="254" textAnchor="middle" fontSize="13" fontWeight="800" fill="#4ade6b"
+            x="120" y="254" textAnchor="middle" fontSize="13" fontWeight="800" fill="#4ade6b"
             initial={false}
             animate={{ opacity: i === 0 && !reduced ? [0, 0, 1] : 1 }}
             transition={reduced ? { duration: 0 } : { duration: 1.6, times: [0, 0.7, 1], delay: 0.6 }}

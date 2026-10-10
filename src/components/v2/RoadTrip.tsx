@@ -12,19 +12,19 @@ import {
 } from 'motion/react'
 
 /**
- * Drive the service area. Scrolling moves a car down the highway from Madras
+ * Drive the service area. Scrolling moves a car along a loop from Prineville
  * to Bend; each town lights up as the car reaches it and links to its page.
  * Positions are a stylized map of Central Oregon, not to scale.
  */
 
 const towns = [
-  { name: 'Madras', slug: 'madras', x: 560, y: 70, note: 'Jefferson County seat' },
-  { name: 'Metolius', slug: 'metolius', x: 470, y: 140, note: 'Small-town quiet' },
-  { name: 'Culver', slug: 'culver', x: 430, y: 220, note: 'Near Lake Billy Chinook' },
-  { name: 'Redmond', slug: 'redmond', x: 540, y: 340, note: 'Fast-growing hub' },
-  { name: 'Prineville', slug: 'prineville', x: 800, y: 320, note: 'Crook County seat' },
-  { name: 'Sisters', slug: 'sisters', x: 230, y: 420, note: 'Gateway to the Cascades' },
-  { name: 'Bend', slug: 'bend', x: 470, y: 560, note: "Central Oregon's largest city" },
+  { name: 'Prineville', slug: 'prineville', x: 820, y: 300, side: 'right', note: 'Crook County seat' },
+  { name: 'Madras', slug: 'madras', x: 600, y: 80, side: 'right', note: 'Jefferson County seat' },
+  { name: 'Metolius', slug: 'metolius', x: 470, y: 140, side: 'left', note: 'Small-town quiet' },
+  { name: 'Culver', slug: 'culver', x: 450, y: 240, side: 'left', note: 'Near Lake Billy Chinook' },
+  { name: 'Redmond', slug: 'redmond', x: 580, y: 350, side: 'right', note: 'Fast-growing hub' },
+  { name: 'Sisters', slug: 'sisters', x: 290, y: 430, side: 'left', note: 'Gateway to the Cascades' },
+  { name: 'Bend', slug: 'bend', x: 520, y: 575, side: 'right', note: "Central Oregon's largest city" },
 ]
 
 /** Smooth path through the towns (Catmull-Rom → cubic Bézier). */
@@ -136,7 +136,7 @@ export default function RoadTrip() {
               <path d="M0 640 L0 120 L40 160 L70 90 L105 150 L130 60 L170 140 L195 100 L230 190 L250 640 Z" fill="#dfe5e0" />
               <path d="M60 104 L70 90 L80 104 M122 74 L130 60 L138 74" stroke="#fff" strokeWidth="6" fill="none" strokeLinecap="round" />
               {/* Lake Billy Chinook */}
-              <path d="M350 170 q30 -20 50 10 q15 25 -10 40 q-30 10 -45 -15 q-8 -20 5 -35 Z" fill="#b9d3df" />
+              <path d="M330 205 q30 -20 50 10 q15 25 -10 40 q-30 10 -45 -15 q-8 -20 5 -35 Z" fill="#b9d3df" />
 
               <path d={ROUTE} fill="none" stroke="#e2d6bf" strokeWidth="22" strokeLinecap="round" />
               <path ref={pathRef} d={ROUTE} fill="none" stroke="#bfae8f" strokeWidth="3" strokeDasharray="10 12" />
@@ -144,7 +144,7 @@ export default function RoadTrip() {
 
               {towns.map((t, k) => {
                 const lit = k < reached
-                const labelLeft = t.x > 700 || t.slug === 'redmond'
+                const labelLeft = t.side === 'right'
                 return (
                   <g key={t.slug}>
                     <motion.circle

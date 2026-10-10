@@ -5,6 +5,7 @@ import {
   motion,
   useMotionTemplate,
   useMotionValue,
+  useMotionValueEvent,
   useReducedMotion,
   useScroll,
   useTransform,
@@ -28,7 +29,22 @@ const captions = [
 /** Fade in at `from`, out after `to`. Offsets stay within 0..1 because
  *  motion may hand scroll-linked transforms to native animations. */
 function useWindow(p: MotionValue<number>, from: number, to: number) {
-  return useTransform(p, [Math.max(0, from - 0.06), from, to, Math.min(1, to + 0.06)], [0, 1, 1, 0])
+  return useTransform(
+    p,
+    from <= 0 ? [0, to, to + 0.06] : [from - 0.06, from, to, Math.min(1, to + 0.06)],
+    from <= 0 ? [1, 1, 0] : [0, 1, 1, 0],
+  )
+}
+
+/**
+ * Mirror a value into a plain motion value. Motion hands scroll-linked
+ * opacity on HTML elements to a native ScrollTimeline, which ignores the
+ * section's target offsets; SVG and JS-driven values are unaffected.
+ */
+function useJsDriven(source: MotionValue<number>) {
+  const out = useMotionValue(source.get())
+  useMotionValueEvent(source, 'change', (v) => out.set(v))
+  return out
 }
 
 export default function DesertHero() {
@@ -60,11 +76,12 @@ export default function DesertHero() {
   const smokeY = useTransform(p, [0.75, 1], [0, -40])
 
   const headY = useTransform(p, [0, 1], [0, -24])
-  const cue = useTransform(p, [0, 0.08], [1, 0])
+  const cue = useJsDriven(useTransform(p, [0, 0.08], [1, 0]))
 
-  const c0 = useWindow(p, 0, 0.26)
-  const c1 = useWindow(p, 0.34, 0.58)
-  const c2 = useTransform(p, [0.6, 0.68], [0, 1])
+  // Caption windows don't overlap, so one line fades out before the next.
+  const c0 = useJsDriven(useWindow(p, 0, 0.26))
+  const c1 = useJsDriven(useWindow(p, 0.4, 0.58))
+  const c2 = useJsDriven(useTransform(p, [0.66, 0.74], [0, 1]))
   const captionOpacity = [c0, c1, c2]
 
   return (
@@ -92,8 +109,8 @@ export default function DesertHero() {
           </motion.g>
 
           <motion.g style={{ y: sunY }}>
-            <circle cx="1120" cy="640" r="120" fill="#ffd89a" opacity="0.25" />
-            <circle cx="1120" cy="640" r="70" fill="#ffe2a8" />
+            <circle cx="1340" cy="640" r="120" fill="#ffd89a" opacity="0.25" />
+            <circle cx="1340" cy="640" r="70" fill="#ffe2a8" />
           </motion.g>
 
           {/* Three Sisters + Broken Top */}
@@ -130,7 +147,7 @@ export default function DesertHero() {
               </g>
             ))}
 
-            <g transform="translate(700 600)">
+            <g transform="translate(960 600)">
               <motion.path
                 d="M0 130 L0 60 L100 0 L200 60 L200 130"
                 fill="#f6efe2"
