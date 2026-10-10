@@ -89,3 +89,14 @@
   .astra-hero-copy > * { animation: none; }
   .astra-page > section:not(.astra-hero):first-child > div.relative { animation: none; }
 }
+/* Testimonial marquee: track holds two copies, so -50% loops seamlessly. */
+@keyframes v2-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.v2-marquee-track { animation: v2-marquee var(--marquee-duration, 60s) linear infinite; }
+.v2-marquee-track > div { padding-right: 1.25rem; }
+.v2-marquee-reverse { animation-direction: reverse; }
+.v2-marquee:hover .v2-marquee-track, .v2-marquee:focus-within .v2-marquee-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .v2-marquee { overflow-x: auto; }
+  .v2-marquee-track { animation: none; }
+  .v2-marquee-track > div[aria-hidden="true"] { display: none; }
+}
