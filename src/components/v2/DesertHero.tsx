@@ -25,8 +25,10 @@ const captions = [
   'We find the people who make it a home, and look after both.',
 ]
 
+/** Fade in at `from`, out after `to`. Offsets stay within 0..1 because
+ *  motion may hand scroll-linked transforms to native animations. */
 function useWindow(p: MotionValue<number>, from: number, to: number) {
-  return useTransform(p, [from - 0.06, from, to, to + 0.06], [0, 1, 1, 0])
+  return useTransform(p, [Math.max(0, from - 0.06), from, to, Math.min(1, to + 0.06)], [0, 1, 1, 0])
 }
 
 export default function DesertHero() {

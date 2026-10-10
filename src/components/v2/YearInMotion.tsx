@@ -30,7 +30,7 @@ function StepCard({ step, index, progress }: { step: (typeof steps)[number]; ind
   // Each card draws its icon as the track brings it into view.
   const center = (index + 0.5) / steps.length
   const fallback = useMotionValue(1)
-  const draw = useTransform(progress ?? fallback, [center - 0.2, center - 0.04], [0, 1])
+  const draw = useTransform(progress ?? fallback, [Math.max(0, center - 0.2), Math.max(0, center - 0.04)], [0, 1])
 
   return (
     <article className="relative flex h-full w-[78vw] max-w-[360px] shrink-0 snap-start flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-7 sm:w-[360px]">
