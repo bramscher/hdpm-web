@@ -3,12 +3,12 @@ import { createMetadata } from '@/lib/seo'
 import { FOUNDED_YEAR } from '@/lib/constants'
 import { getPageBySlug } from '@/lib/page-content'
 import { getCachedListings } from '@/lib/appfolio'
-import DesertHero from '@/components/v2/DesertHero'
+import Hero from '@/components/sections/Hero'
 import ProofStrip from '@/components/v2/ProofStrip'
-import OwnerWorlds from '@/components/v2/OwnerWorlds'
-import YearInMotion from '@/components/v2/YearInMotion'
-import RoadTrip from '@/components/v2/RoadTrip'
+import StatementReveal from '@/components/v2/StatementReveal'
+import ManagementStory from '@/components/v2/ManagementStory'
 import FeaturedListings from '@/components/sections/FeaturedListings'
+import MarketAreasSection from '@/components/sections/MarketAreasSection'
 import TestimonialsSection from '@/components/sections/TestimonialsSection'
 import CTASection from '@/components/sections/CTASection'
 
@@ -27,18 +27,22 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  // Degrade to no featured listings (the section hides itself) rather than
-  // 500ing the home page when AppFolio isn't configured, e.g. on Previews.
-  const listings = await getCachedListings().catch(() => [])
+  const [page, listings] = await Promise.all([
+    getPageBySlug('home'),
+    // Degrade to no featured listings (the section hides itself) rather than
+    // 500ing the home page when AppFolio isn't configured, e.g. on Previews.
+    getCachedListings().catch(() => []),
+  ])
+  const heroContent = page?.homeContent
 
   return (
     <>
-      <DesertHero />
+      <Hero content={heroContent} />
       <ProofStrip />
-      <OwnerWorlds />
-      <YearInMotion />
-      <RoadTrip />
+      <StatementReveal />
+      <ManagementStory />
       <FeaturedListings listings={listings} />
+      <MarketAreasSection />
       <TestimonialsSection />
       <CTASection />
     </>

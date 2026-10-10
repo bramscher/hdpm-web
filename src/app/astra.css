@@ -89,7 +89,3 @@
   .astra-hero-copy > * { animation: none; }
   .astra-page > section:not(.astra-hero):first-child > div.relative { animation: none; }
 }
-/* v2 homepage */
-@keyframes v2-scroll-cue { 0% { transform: translateY(-100%); } 100% { transform: translateY(340%); } }
-.v2-scroll-cue { animation: v2-scroll-cue 1.6s cubic-bezier(.22,1,.36,1) infinite; }
-@media (prefers-reduced-motion: reduce) { .v2-scroll-cue { animation: none; } }
