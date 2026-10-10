@@ -19,6 +19,9 @@ import { useJsDriven } from './useJsDriven'
  * and the message, and the rail on the right tracks progress.
  */
 
+/** Scroll distance per step, as a fraction of the viewport. */
+const STEP_SVH = 40
+
 const steps = [
   {
     label: 'Tenant placement',
@@ -83,7 +86,7 @@ export default function ManagementStory() {
       ref={ref}
       aria-labelledby="v2-story-title"
       className="relative bg-primary"
-      style={{ height: `${steps.length * 100}svh` }}
+      style={{ height: `calc(100svh + ${steps.length * STEP_SVH}svh)` }}
     >
       <h2 id="v2-story-title" className="sr-only">
         What we do for property owners
@@ -96,7 +99,7 @@ export default function ManagementStory() {
             className="absolute inset-0"
             initial={false}
             animate={{ opacity: k === active ? 1 : 0, scale: k === active ? 1 : 1.08 }}
-            transition={{ opacity: { duration: 0.8, ease: 'easeInOut' }, scale: { duration: 1.6, ease: [0.22, 1, 0.36, 1] } }}
+            transition={{ opacity: { duration: 0.6, ease: 'easeInOut' }, scale: { duration: 1.6, ease: [0.22, 1, 0.36, 1] } }}
             aria-hidden={k !== active}
           >
             <Image src={s.image} alt={s.alt} fill sizes="100vw" className="object-cover" priority={k === 0} />
@@ -117,7 +120,7 @@ export default function ManagementStory() {
                 initial={{ opacity: 0, y: 28, filter: 'blur(6px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                 exit={{ opacity: 0, y: -20, filter: 'blur(6px)' }}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
                 <p className="mt-6 font-heading text-sm font-semibold uppercase tracking-[0.14em] text-white/70">
                   {step.label}
