@@ -172,7 +172,13 @@ export default function Footer() {
                 <dt className="font-medium text-white/90">
                   Emergency Maintenance
                 </dt>
-                <dd>24/7 Online Portal</dd>
+                <dd>
+                  24/7: call{' '}
+                  <a href="tel:+15415480383" className="underline-offset-2 hover:text-accent hover:underline">
+                    (541) 548-0383
+                  </a>{' '}
+                  to reach Max, or use the online portal
+                </dd>
               </div>
             </dl>
             <div className="mt-6">

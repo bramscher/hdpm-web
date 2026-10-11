@@ -42,7 +42,7 @@ const steps = [
   {
     label: 'Maintenance',
     headline: 'We answer the 2 a.m. call.',
-    body: 'Our network of licensed Central Oregon contractors handles repairs quickly and cost-effectively, with 24/7 emergency response included.',
+    body: 'Call our main line any hour and Max, our maintenance agent, picks up and gets urgent repairs moving, or tenants can submit a request through the online portal. Our licensed Central Oregon contractors handle the work quickly and cost-effectively.',
     href: '/owners#maintenance',
     image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1920&q=80&auto=format&fit=crop',
     alt: 'A licensed contractor making a repair',
