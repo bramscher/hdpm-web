@@ -210,11 +210,9 @@ function MarqueeRow({ reviews, reverse = false }: { reviews: ShowcaseReview[]; r
 
 export default function TestimonialsShowcase({
   reviews,
-  ratingLabel,
   reviewUrl,
 }: {
   reviews: ShowcaseReview[]
-  ratingLabel: string
   reviewUrl: string
 }) {
   const spotlight = reviews.slice(0, 5)
@@ -230,12 +228,14 @@ export default function TestimonialsShowcase({
 
         <div className="flex flex-col justify-between gap-6 rounded-2xl border border-neutral-200 bg-[#edf1ee] p-8">
           <div>
-            <p className="font-heading text-overline uppercase text-accent">Owner rating</p>
-            <p className="mt-4 font-heading text-7xl font-extrabold tracking-tight text-neutral-dark">4.9</p>
-            <div className="mt-3">
-              <Stars rating={5} className="h-6 w-6" />
-            </div>
-            <p className="mt-3 text-neutral-mid">{ratingLabel}</p>
+            <p className="font-heading text-overline uppercase text-accent">Your experience</p>
+            <p className="mt-4 font-heading text-3xl font-extrabold tracking-tight text-neutral-dark">
+              Worked with us?
+            </p>
+            <p className="mt-3 text-neutral-mid">
+              Owners and tenants, we&apos;d love to hear how it went. Your review helps other Central
+              Oregon property owners find a manager they can trust.
+            </p>
           </div>
           <a
             href={reviewUrl}

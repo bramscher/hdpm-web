@@ -54,7 +54,6 @@ export default async function TestimonialsSection() {
           source: t.source,
           publishedAt: t.publishedAt,
         }))}
-        ratingLabel="100+ owner reviews"
         reviewUrl={REVIEW_URL}
       />
     </Section>

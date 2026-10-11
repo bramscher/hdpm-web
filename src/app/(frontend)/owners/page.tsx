@@ -127,7 +127,7 @@ const defaultServices = [
       'Customizable reporting for multi-property portfolios',
       'Direct deposit of owner proceeds on a consistent schedule',
     ],
-    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
     imageAlt: 'Financial documents and reporting dashboard for property owners',
   },
 ]

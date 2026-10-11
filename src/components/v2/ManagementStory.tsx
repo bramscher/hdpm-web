@@ -52,8 +52,8 @@ const steps = [
     headline: 'We collect the rent and show the numbers.',
     body: 'Online rent collection, monthly owner statements, year-end tax documents, and a real-time owner portal you can check anytime.',
     href: '/owners#reporting',
-    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1920&q=80&auto=format&fit=crop',
-    alt: 'Financial statements and a calculator',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1920&q=80&auto=format&fit=crop',
+    alt: 'An owner reporting dashboard on a laptop',
   },
   {
     label: 'Your time back',
