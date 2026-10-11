@@ -13,3 +13,6 @@ media/
 # macOS
 .DS_Store
 .env*
+
+# Orca workspace drops (local screenshots)
+.orca/
