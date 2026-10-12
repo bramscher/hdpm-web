@@ -82,8 +82,8 @@ const defaultServices = [
       'Regular property inspections and condition reports',
       'Lease renewal negotiations to minimize turnover',
     ],
-    image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80',
-    imageAlt: 'Modern residential home in the Pacific Northwest with mountain views',
+    image: 'https://images.unsplash.com/photo-1449844908441-8829872d2607?w=800&q=80',
+    imageAlt: 'A home among tall pines, typical of Central Oregon',
   },
   {
     id: 'tenant-placement',
