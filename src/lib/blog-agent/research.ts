@@ -1,4 +1,6 @@
 import { hasRecentEvidence, researchDateRange, sourceDateFromReddit, type SourceEvidence } from './freshness'
+import { classifySource, isAllowedSource, isOutOfState, TRUSTED_WEB_HOSTS, type SourceKind } from './sources'
+import { monthPlan } from './calendar'
 
 /**
  * Blog topic research: mines professional property-management communities
@@ -11,6 +13,10 @@ import { hasRecentEvidence, researchDateRange, sourceDateFromReddit, type Source
  * - no grievance/conflict/personal-drama content, ever
  * - ranking favors professional relevance over raw engagement, so viral
  *   drama can't outrank useful industry topics
+ *
+ * Source rules (Craig, 2026-10-20 — see sources.ts): web results come only
+ * from government/public-data hosts and newsrooms, never other property
+ * managers, brokerages or vendors; Reddit posts about another state are out.
  */
 
 export interface TopicSuggestion extends SourceEvidence {
@@ -19,6 +25,7 @@ export interface TopicSuggestion extends SourceEvidence {
   audience: 'owners' | 'tenants' | 'both'
   source: string
   sourceUrl?: string
+  sourceKind: SourceKind
   relevance: string
   upvotes?: number
   comments?: number
@@ -195,6 +202,7 @@ async function searchTavily(query: string): Promise<TavilyResult[]> {
       body: JSON.stringify({
         query,
         search_depth: 'advanced',
+        include_domains: TRUSTED_WEB_HOSTS,
         ...researchDateRange(),
         include_published_date: true,
         filter_by_published_date: true,
@@ -290,6 +298,7 @@ export function acceptCandidate(c: Candidate, focus: ResearchFocus): (TopicSugge
   if (!hasRecentEvidence(evidence)) return null
   const text = `${c.title} ${c.body.slice(0, 400)}`
   if (EXCLUDED_CONTENT.test(text)) return null
+  if (isOutOfState(c.title, c.body)) return null // another state's rules don't apply here
   if (c.title.length > 110) return null // story posts, not topics
   if (proScore(text) < 2) return null // must be clearly on-topic
 
@@ -304,6 +313,7 @@ export function acceptCandidate(c: Candidate, focus: ResearchFocus): (TopicSugge
     audience,
     source: `r/${c.subreddit}`,
     sourceUrl: `https://reddit.com${c.permalink}`,
+    sourceKind: 'reddit',
     relevance: c.relevanceLabel,
     upvotes: c.upvotes,
     comments: c.comments,
@@ -389,24 +399,23 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
     }
   }
 
-  // 3. Tavily web search — industry publications and Oregon news. These are
-  //    professionally written, so they get a ranking boost over forum posts.
-  const month = new Date().toLocaleString('en-US', { month: 'long' }).toLowerCase()
+  // 3. Tavily web search, restricted to government/public-data hosts and
+  //    newsrooms (include_domains, re-checked below). Primary sources rank
+  //    above news, news above forum posts. Queries follow this month's owner
+  //    calendar plus standing rental-law searches.
   const year = new Date().getFullYear()
   const tavilyQueries = [
-    'property management industry trends landlords',
-    `central oregon bend redmond rental market ${year}`,
     // Rental-law / legislative updates: timely, high-authority, and rarely a
     // duplicate of an evergreen how-to already on the blog.
     `oregon rental law changes ${year} landlords`,
     'oregon residential landlord tenant act update',
-    `bend oregon housing market ${month} ${year}`,
-    `${month} rental property maintenance checklist`,
+    ...monthPlan().searches,
   ]
 
   for (const query of tavilyQueries) {
     const results = await searchTavily(query)
     for (const r of results) {
+      if (!isAllowedSource(r.url)) continue
       const evidence: SourceEvidence = { title: r.title, sourceUrl: r.url, sourcePublishedAt: r.published_date, sourceDateBasis: 'published-or-updated', sourceExcerpt: (r.raw_content || r.content).slice(0, 6000) }
       if (!hasRecentEvidence(evidence)) continue
       const text = `${r.title} ${r.content.slice(0, 400)}`
@@ -425,15 +434,21 @@ export async function researchTopics(focus: ResearchFocus = 'both'): Promise<{
         // keep generic label
       }
 
+      const sourceKind = classifySource(r.url)
       scored.push({
         ...evidence,
         title: r.title,
-        angle: 'Cover this industry topic with a Central Oregon lens',
+        angle:
+          sourceKind === 'primary'
+            ? 'Explain what this official source says and what it means for Central Oregon owners'
+            : 'Explain this news report and what it means for Central Oregon owners',
         audience,
         source: host,
         sourceUrl: r.url,
+        sourceKind,
         relevance: 'Dated within 30 days (Tavily publication/update estimate)',
-        _score: proScore(text) * 25 + 20, // publication bonus in lieu of upvotes
+        // Authority bonus in lieu of upvotes: official sources first, then news.
+        _score: proScore(text) * 25 + (sourceKind === 'primary' ? 45 : 30),
       })
     }
   }
