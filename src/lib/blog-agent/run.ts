@@ -1,6 +1,8 @@
 /**
- * The full blog-agent pipeline: research topics (Reddit + Tavily), skip
- * anything too similar to an existing post, write a draft with Claude,
+ * The full blog-agent pipeline: research topics (Reddit + Tavily on trusted
+ * hosts), skip anything too similar to an existing post, let an editor pass
+ * pick what's worth writing this month (or nothing), write and fact-check a
+ * draft with Claude,
  * attach a license-safe featured image, and email the digest (draft link +
  * social copy) to Craig. Runs twice weekly via cron and on-demand from the
  * admin Automations page.
@@ -12,6 +14,8 @@ import { researchTopics, EXCLUDED_CONTENT, type TopicSuggestion } from './resear
 import { generateBlogPost, type GeneratedBlogPost } from './generate'
 import { findAndAttachFeaturedImage, type AttachedImage } from './image'
 import { hasRecentEvidence, SourceGroundingError } from './freshness'
+import { isAllowedSource } from './sources'
+import { triageTopics } from './triage'
 import { sendLeadNotification } from '@/lib/notify'
 
 // Blog-agent emails are Craig's alone — never the monitored info@ inbox.
@@ -98,6 +102,7 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
       collection: 'posts',
       limit: 300,
       depth: 0,
+      sort: '-createdAt',
       select: { title: true, sourceUrl: true },
     })
     existingDocs = existing.docs
@@ -109,6 +114,7 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
       collection: 'posts',
       limit: 300,
       depth: 0,
+      sort: '-createdAt',
       select: { title: true },
     })
     existingDocs = existing.docs
@@ -121,10 +127,11 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
   // Editorial rule (Craig, 2026-08-03): never publish grievance/conflict or
   // personal-drama content. research.ts already filters at the source; this
   // is defense in depth with the same shared pattern.
-  const otherState = /\[(?!OR\b)[A-Z]{2}\b/
-  const candidates = research.topics
-    .filter((t) => hasRecentEvidence(t) && !EXCLUDED_CONTENT.test(t.title))
-    .sort((a, b) => Number(otherState.test(a.title)) - Number(otherState.test(b.title)))
+  // research.ts also drops out-of-state posts and untrusted web hosts; the
+  // source check here is the same defense in depth.
+  const candidates = research.topics.filter(
+    (t) => hasRecentEvidence(t) && !EXCLUDED_CONTENT.test(t.title) && isAllowedSource(t.sourceUrl),
+  )
 
   const fresh = candidates.filter(
     (t) =>
@@ -142,7 +149,25 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
     return { ok: false, skipped: 'all topics already covered' }
   }
 
-  // 3. Generate the draft. Claude rewrites each research topic into an SEO
+  // 3. Editorial triage: is any of this worth a post for our readers this
+  //    month? A recent date isn't enough (drafts #54–57 all had one). Nothing
+  //    qualifying means no draft, not the least-bad one.
+  const recentTitles = existingDocs.slice(0, 40).map((d) => String(d.title ?? '')).filter(Boolean)
+  const triage = await triageTopics(fresh.slice(0, 15), recentTitles)
+  if (triage.picks.length === 0) {
+    await sendLeadNotification({
+      to: BLOG_AGENT_NOTIFY,
+      subject: 'Blog agent: nothing worth writing this run',
+      fields: [
+        ['Detail', `${fresh.length} new topics researched; none was timely and relevant enough for Central Oregon owners. No draft created.`],
+        ['Editor notes', triage.summary || 'None'],
+        ['Top candidates', fresh.slice(0, 5).map((t) => `${t.title} (${t.source})`).join('; ')],
+      ],
+    })
+    return { ok: false, skipped: 'no topic passed editorial triage' }
+  }
+
+  // 4. Generate the draft. Claude rewrites each research topic into an SEO
   //    headline the pre-generation dedup can't predict, so a topic that maps to
   //    an already-published post only reveals itself once written (this is how
   //    the Aug-2026 "Showing Occupied Rentals" post got regenerated). So: after
@@ -154,7 +179,12 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
   let topic: TopicSuggestion | null = null
   const rejectedDuplicates: string[] = []
   const rejectedGrounding: string[] = []
-  for (const candidate of fresh.slice(0, MAX_ATTEMPTS)) {
+  let pickReason = ''
+  // Each attempt is a write plus a fact-check; don't start one the 300s
+  // function limit can't finish.
+  const startedAt = Date.now()
+  for (const { topic: candidate, reason } of triage.picks.slice(0, MAX_ATTEMPTS)) {
+    if (Date.now() - startedAt > 120_000) break
     let generated: GeneratedBlogPost
     try { generated = await generateBlogPost({
       title: candidate.title,
@@ -178,6 +208,7 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
     }
     post = generated
     topic = candidate
+    pickReason = reason
     break
   }
 
@@ -190,6 +221,7 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
           'Detail',
           'No candidate passed both source-grounding review and duplicate checks. No draft retained.',
         ],
+        ['Editor picks', triage.picks.map((p) => p.topic.title).join('; ')],
         ['Source review rejections', rejectedGrounding.join('; ') || 'None'],
         ['Duplicate headlines', rejectedDuplicates.join('; ') || 'None'],
         ['Next step', 'Review the dated research sources or wait for the next scheduled run.'],
@@ -198,10 +230,10 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
     return { ok: false, skipped: 'no candidates passed source review and duplicate checks' }
   }
 
-  // 4. Featured image (best-effort)
+  // 5. Featured image (best-effort)
   const image = await findAndAttachFeaturedImage(post.id, post.imageQuery, post.imageAlt)
 
-  // 5. Digest email
+  // 6. Digest email
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://hdpm-web.vercel.app'
   await sendLeadNotification({
     to: BLOG_AGENT_NOTIFY,
@@ -210,6 +242,7 @@ export async function runBlogAgent(): Promise<BlogAgentResult> {
       ['Draft', `${siteUrl}${post.adminUrl}`],
       ['Excerpt', post.excerpt],
       ['Topic source', `${topic.source}${topic.sourceUrl ? ` — ${topic.sourceUrl}` : ''}`],
+      ['Why this topic', pickReason],
       ['Audience', topic.audience],
       ['Source date', topic.sourcePublishedAt],
       ['Source date basis', topic.sourceDateBasis],
