@@ -120,9 +120,6 @@ export default function ListingCard({
           </p>
         </Link>
 
-        {/* Office line, near the top: staff answer 9–4 weekdays */}
-        <CallOffice className="mt-3" />
-
         {/* Beds / Baths / SqFt */}
         <div className="mt-4 flex items-center gap-4 border-t border-neutral-100 pt-4 text-sm text-neutral-mid">
           <div className="flex items-center gap-1.5">
@@ -150,7 +147,7 @@ export default function ListingCard({
           {formatAvailableDate(listing.AvailableOn)}
         </p>
 
-        {/* Apply / Details, then Leesa (AI, 24/7) */}
+        {/* Apply / Details / Call the office, then Leesa (AI, 24/7) */}
         <div className="mt-4 flex flex-col gap-2 pt-1">
           <div className="flex gap-2">
             <Button
@@ -175,7 +172,8 @@ export default function ListingCard({
               View Details
             </Button>
           </div>
-          <p className="text-center font-body text-[11px] text-neutral-mid">After hours? Our AI leasing agent answers 24/7</p>
+          <CallOffice />
+          <p className="mt-1 text-center font-body text-[11px] text-neutral-mid">After hours? Our AI leasing agent answers 24/7</p>
           <CallLeesa
             className="w-full justify-center"
             size="sm"
