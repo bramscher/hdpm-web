@@ -468,12 +468,13 @@ export default async function ListingDetailPage({
                   Request Info
                 </Button>
 
+                <CallOffice className="mt-3" />
+                <p className="mt-3 text-center font-body text-[11px] text-neutral-mid">After hours? Our AI leasing agent answers 24/7</p>
                 <CallLeesa
-                  className="mt-3 w-full justify-center"
+                  className="mt-1 w-full justify-center"
                   size="sm"
                   propertyAddress={`${listing.Address1}, ${listing.City}, ${listing.State} ${listing.Zip}`}
                 />
-                <CallOffice className="mt-2" />
 
                 <p className="mt-3 text-center font-body text-xs text-neutral-mid">
                   {rentZapUrl
