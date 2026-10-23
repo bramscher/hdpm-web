@@ -390,6 +390,8 @@ export default async function ListingDetailPage({
                   </span>
                 </p>
 
+                <CallOffice className="mt-4" />
+
                 <div className="mt-4 space-y-2 border-t border-neutral-100 pt-4 font-body text-sm text-neutral-mid">
                   <div className="flex justify-between">
                     <span>Bedrooms</span>
@@ -468,7 +470,6 @@ export default async function ListingDetailPage({
                   Request Info
                 </Button>
 
-                <CallOffice className="mt-3" />
                 <p className="mt-3 text-center font-body text-[11px] text-neutral-mid">After hours? Our AI leasing agent answers 24/7</p>
                 <CallLeesa
                   className="mt-1 w-full justify-center"
