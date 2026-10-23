@@ -6,27 +6,30 @@ import { type Agent, telHref, smsHref } from '@/lib/agents'
  * and a Text action side by side so people can reach the agent whichever way
  * they prefer. Both actions always show/announce the dialable number so a
  * device that can't place a tel:/sms: (e.g. a desktop with no calling app) can
- * still read and use it. Pass `className` (e.g. `w-full`) to fit the layout.
+ * still read and use it. Pass `className` (e.g. `w-full`) to fit the layout;
+ * `size="sm"` shrinks the avatar to a small circle (listing cards and pages).
  */
 export default function CallAgent({
   agent,
   className = '',
   smsBody = agent.smsGreeting,
+  size = 'md',
 }: {
   agent: Agent
   className?: string
   smsBody?: string
+  size?: 'md' | 'sm'
 }) {
   return (
     <div
       className={`inline-flex items-center gap-3 rounded-full border border-accent/30 bg-white py-2 pl-2 pr-3 shadow-sm ${className}`}
     >
-      <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full">
+      <span className={`relative shrink-0 overflow-hidden rounded-full ${size === 'sm' ? 'h-7 w-7' : 'h-11 w-11'}`}>
         <Image
           src={agent.image}
           alt={`${agent.name}, AI ${agent.role.toLowerCase()} agent`}
           fill
-          sizes="44px"
+          sizes={size === 'sm' ? '28px' : '44px'}
           className="object-cover object-top"
         />
       </span>

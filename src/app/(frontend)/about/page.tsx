@@ -89,9 +89,8 @@ const serviceAreas = ['Bend', 'Redmond', 'Sisters', 'Prineville', 'Culver', 'Met
 const aiAgents = [
   {
     ...AGENTS.leesa,
-    availability: 'After hours',
     description:
-      'Ask for Leesa for anything leasing — current availability, application questions, and scheduling tours — whenever our leasing team is away.',
+      'Ask for Leesa for anything leasing — current availability, application questions, and scheduling tours — any time, day or night.',
   },
   {
     ...AGENTS.sally,

@@ -5,6 +5,7 @@ import { isListingPetFriendly, formatAvailableDate } from '@/lib/listing-utils'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import CallLeesa from '@/components/CallLeesa'
+import CallOffice from '@/components/CallOffice'
 import Card from '@/components/ui/Card'
 
 // Neutral placeholder while AppFolio photos stream in
@@ -146,7 +147,7 @@ export default function ListingCard({
           {formatAvailableDate(listing.AvailableOn)}
         </p>
 
-        {/* Apply / Details / Call Leesa */}
+        {/* Apply / Details / Call the office, then Leesa (AI, 24/7) */}
         <div className="mt-4 flex flex-col gap-2 pt-1">
           <div className="flex gap-2">
             <Button
@@ -171,8 +172,11 @@ export default function ListingCard({
               View Details
             </Button>
           </div>
+          <CallOffice />
+          <p className="mt-1 text-center font-body text-[11px] text-neutral-mid">After hours? Our AI leasing agent answers 24/7</p>
           <CallLeesa
             className="w-full justify-center"
+            size="sm"
             propertyAddress={`${listing.Address1}, ${listing.City}, ${listing.State} ${listing.Zip}`}
           />
         </div>
