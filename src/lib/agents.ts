@@ -3,8 +3,8 @@
  * numbers, and the prefilled text people see when they choose to text instead
  * of call. During business hours they answer overflow (when the team is on
  * another call); after hours they're the primary responders. Sally routes
- * callers to Leesa (leasing) or Max (maintenance) as needed. Max is the only
- * true around-the-clock agent.
+ * callers to Leesa (leasing) or Max (maintenance) as needed. Leesa and Max
+ * answer around the clock.
  */
 
 export type AgentId = 'leesa' | 'sally' | 'max'
@@ -18,7 +18,7 @@ export interface Agent {
   video: string
   /** One-line description of what this agent helps with. */
   tagline: string
-  /** Marketing availability label — only Max is genuinely 24/7. */
+  /** Marketing availability label — Leesa and Max answer 24/7. */
   availability: '24/7' | 'After hours'
   /** Human-formatted number, e.g. '541-406-6409'. */
   phone: string
@@ -34,7 +34,7 @@ export const AGENTS: Record<AgentId, Agent> = {
     image: '/agents/leesa.png',
     video: '/agents/leesa.mp4',
     tagline: 'Current availability, applications, and booking tours.',
-    availability: 'After hours',
+    availability: '24/7',
     phone: '541-406-6409',
     smsGreeting: 'Hi Leesa, I have a question about a rental.',
   },
@@ -61,6 +61,9 @@ export const AGENTS: Record<AgentId, Agent> = {
     smsGreeting: "Hi Max, I'd like to report a maintenance issue.",
   },
 }
+
+/** The office line and when a person answers it (listing pages point renters here). */
+export const OFFICE = { phone: '541-548-0383', hours: '9–4 weekdays' } as const
 
 export const AGENT_LIST: Agent[] = [AGENTS.leesa, AGENTS.sally, AGENTS.max]
 

@@ -5,6 +5,7 @@ import { isListingPetFriendly, formatAvailableDate } from '@/lib/listing-utils'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import CallLeesa from '@/components/CallLeesa'
+import CallOffice from '@/components/CallOffice'
 import Card from '@/components/ui/Card'
 
 // Neutral placeholder while AppFolio photos stream in
@@ -173,8 +174,10 @@ export default function ListingCard({
           </div>
           <CallLeesa
             className="w-full justify-center"
+            size="sm"
             propertyAddress={`${listing.Address1}, ${listing.City}, ${listing.State} ${listing.Zip}`}
           />
+          <CallOffice />
         </div>
       </div>
     </Card>

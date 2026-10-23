@@ -17,7 +17,7 @@ export function generateMetadata() {
   return createMetadata({
     title: 'AI Agents: Leesa, Max & Sally',
     description:
-      'Meet the AI phone agents at High Desert Property Management. Leesa (leasing), Max (24/7 maintenance), and Sally (general questions) answer calls when our team is busy or after hours — so owners and residents in Central Oregon always reach a helpful voice, with a real person following up.',
+      'Meet the AI phone agents at High Desert Property Management. Leesa (24/7 leasing), Max (24/7 maintenance), and Sally (general questions) answer calls when our team is busy or after hours — so owners and residents in Central Oregon always reach a helpful voice, with a real person following up.',
     path: '/ai-agents',
   })
 }
@@ -78,7 +78,7 @@ const faqs = [
   {
     question: 'Are the agents available 24/7?',
     answer:
-      'Max, our maintenance agent, is available around the clock because maintenance emergencies don’t wait for business hours. Leesa and Max both handle daytime overflow and are the primary responders after hours; Sally covers general questions on the same basis.',
+      'Leesa (leasing) and Max (maintenance) answer around the clock, because renters and maintenance emergencies don’t wait for business hours. Sally covers general questions, answering daytime overflow and after hours. During office hours (9–4 weekdays) you can also call (541) 548-0383 to reach a person.',
   },
 ]
 

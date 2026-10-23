@@ -13,6 +13,7 @@ import {
 import ShareListing from '@/components/listings/ShareListing'
 import PhotoGallery from '@/components/listings/PhotoGallery'
 import CallLeesa from '@/components/CallLeesa'
+import CallOffice from '@/components/CallOffice'
 import ListingInquiryForm from '@/components/listings/ListingInquiryForm'
 import Button from '@/components/ui/Button'
 import TrackView from '@/components/analytics/TrackView'
@@ -469,8 +470,10 @@ export default async function ListingDetailPage({
 
                 <CallLeesa
                   className="mt-3 w-full justify-center"
+                  size="sm"
                   propertyAddress={`${listing.Address1}, ${listing.City}, ${listing.State} ${listing.Zip}`}
                 />
+                <CallOffice className="mt-2" />
 
                 <p className="mt-3 text-center font-body text-xs text-neutral-mid">
                   {rentZapUrl

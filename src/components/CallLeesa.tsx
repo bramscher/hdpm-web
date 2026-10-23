@@ -6,14 +6,17 @@ import { AGENTS } from '@/lib/agents'
  * or text. Rendered next to apply/browse actions (listing detail pages, listing
  * cards, the For Tenants hero) so renters can reach her whichever way they
  * prefer. Thin wrapper over the shared <CallAgent> so every agent pill stays
- * consistent site-wide. Pass `className` (e.g. `w-full`) to fit the layout.
+ * consistent site-wide. Pass `className` (e.g. `w-full`) to fit the layout,
+ * `size="sm"` for the small avatar.
  */
 export default function CallLeesa({
   className = '',
   propertyAddress,
+  size,
 }: {
   className?: string
   propertyAddress?: string
+  size?: 'md' | 'sm'
 }) {
   const address = propertyAddress?.trim()
 
@@ -21,6 +24,7 @@ export default function CallLeesa({
     <CallAgent
       agent={AGENTS.leesa}
       className={className}
+      size={size}
       smsBody={address ? `Hi Leesa, I have a question about the rental at ${address}.` : undefined}
     />
   )
