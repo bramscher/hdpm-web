@@ -50,8 +50,9 @@ export interface SyncListingsResult {
  * listings that are no longer returned by AppFolio (rented / off market).
  *
  * `forceFresh` bypasses the 15-minute ISR cache so the pull genuinely re-reads
- * AppFolio (used by the manual admin "Refresh from AppFolio" sync); the
- * scheduled cron leaves it false to stay cache-cheap.
+ * AppFolio. Both the scheduled cron and the manual admin "Refresh from
+ * AppFolio" sync pass true, so the cache always mirrors AppFolio as of the
+ * last run.
  *
  * Shared by both the scheduled cron route and the admin automations route so
  * the manual sync runs in-process — no internal HTTP round-trip / CRON_SECRET

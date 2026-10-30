@@ -13,7 +13,9 @@ const CRON_SECRET = process.env.CRON_SECRET
  * Protected by CRON_SECRET header check. The actual work lives in
  * runListingsSync() so the admin automations route can invoke it in-process.
  *
- * Pass ?fresh=1 to bypass the 15-minute ISR cache and force a genuine re-pull.
+ * Always pulls fresh (bypasses the 15-minute ISR cache) so a rent, availability
+ * or photo change in AppFolio reaches the site on the next run instead of
+ * waiting out a stale cached response.
  */
 export async function GET(request: NextRequest) {
   // Verify cron secret
@@ -22,12 +24,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const forceFresh = ['1', 'true'].includes(
-    (request.nextUrl.searchParams.get('fresh') || '').toLowerCase(),
-  )
-
   try {
-    const result = await runListingsSync(forceFresh)
+    const result = await runListingsSync(true)
     return NextResponse.json(result)
   } catch (err) {
     console.error('[sync-listings] Sync failed:', err)

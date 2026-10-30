@@ -82,8 +82,9 @@ function getConfig() {
 const LISTINGS_REVALIDATE = 900
 
 /**
- * Build the Next.js caching options for an AppFolio fetch. Scheduled reads use
- * the 15-minute ISR cache; a manual "Sync Now" passes forceFresh to bypass it.
+ * Build the Next.js caching options for an AppFolio fetch. The listing sync
+ * (cron and manual) passes forceFresh to bypass the cache; only the live-API
+ * fallbacks used when the Supabase cache is empty use the 15-minute ISR cache.
  */
 function freshnessOpts(forceFresh?: boolean): RequestInit {
   return forceFresh ? { cache: 'no-store' } : { next: { revalidate: LISTINGS_REVALIDATE } }
