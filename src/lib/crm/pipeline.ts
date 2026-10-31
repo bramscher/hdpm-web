@@ -1,12 +1,15 @@
-import { LeadStatus, ValidStatusTransitions } from './types'
+import { LeadStatus, nextStatuses } from './types'
 
 /**
  * Check if a status transition is allowed.
  */
-export function isValidTransition(from: LeadStatus, to: LeadStatus): boolean {
+export function isValidTransition(
+  from: LeadStatus,
+  to: LeadStatus,
+  leadType?: string | null,
+): boolean {
   if (from === to) return true // no-op is always valid
-  const allowed = ValidStatusTransitions[from]
-  return allowed ? allowed.includes(to) : false
+  return nextStatuses(from, leadType).includes(to)
 }
 
 const STATUS_LABELS_EN: Record<LeadStatus, string> = {
@@ -18,6 +21,9 @@ const STATUS_LABELS_EN: Record<LeadStatus, string> = {
   [LeadStatus.Applied]: 'Applied',
   [LeadStatus.Approved]: 'Approved',
   [LeadStatus.Leased]: 'Leased',
+  [LeadStatus.ConsultBooked]: 'Consult Booked',
+  [LeadStatus.ProposalSent]: 'Proposal Sent',
+  [LeadStatus.Signed]: 'Signed',
   [LeadStatus.Lost]: 'Lost',
   [LeadStatus.Archived]: 'Archived',
 }
@@ -31,6 +37,9 @@ const STATUS_LABELS_ES: Record<LeadStatus, string> = {
   [LeadStatus.Applied]: 'Aplicado',
   [LeadStatus.Approved]: 'Aprobado',
   [LeadStatus.Leased]: 'Arrendado',
+  [LeadStatus.ConsultBooked]: 'Consulta Programada',
+  [LeadStatus.ProposalSent]: 'Propuesta Enviada',
+  [LeadStatus.Signed]: 'Firmado',
   [LeadStatus.Lost]: 'Perdido',
   [LeadStatus.Archived]: 'Archivado',
 }
