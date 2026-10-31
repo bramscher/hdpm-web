@@ -78,3 +78,36 @@ test('unassigned leads do not create invalid tasks and ordinary edits do not add
   } as unknown as Parameters<CollectionAfterChangeHook>[0])
   assert.equal(writes.length, 1)
 })
+
+test('a new owner lead alerts HDPM OS with its owner stages; tenant leads do not', async () => {
+  const calls: Array<{ url: string; body: Record<string, unknown> }> = []
+  const realFetch = globalThis.fetch
+  const env = { base: process.env.HDPM_CHATBOT_BASE_URL, token: process.env.HDPM_SERVICE_TOKEN }
+  process.env.HDPM_CHATBOT_BASE_URL = 'https://os.example.com/'
+  process.env.HDPM_SERVICE_TOKEN = 'test-token'
+  globalThis.fetch = (async (url: string, init: RequestInit) => {
+    calls.push({ url, body: JSON.parse(String(init.body)) })
+    return new Response('{}', { status: 200 })
+  }) as typeof fetch
+  const req = { payload: { create: async () => {} } }
+  try {
+    for (const leadType of ['owner', 'tenant']) {
+      await leadsAfterChange({
+        operation: 'create',
+        doc: { id: 7, firstName: 'Pat', lastName: 'Owner', leadType, status: 'new', subjectProperty: { address: '1 Main', town: 'Bend' } },
+        req,
+      } as unknown as Parameters<CollectionAfterChangeHook>[0])
+    }
+  } finally {
+    globalThis.fetch = realFetch
+    for (const [key, value] of [['HDPM_CHATBOT_BASE_URL', env.base], ['HDPM_SERVICE_TOKEN', env.token]] as const) {
+      if (value === undefined) delete process.env[key]
+      else process.env[key] = value
+    }
+  }
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0].url, 'https://os.example.com/api/intake/owner-lead')
+  assert.equal(calls[0].body.name, 'Pat Owner')
+  assert.equal(calls[0].body.property, '1 Main, Bend')
+  assert.ok((calls[0].body.allowedStatuses as string[]).includes('consult_booked'))
+})
