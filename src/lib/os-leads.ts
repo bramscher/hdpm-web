@@ -1,8 +1,8 @@
 import type { Payload } from 'payload'
 import type { Lead, User } from '@/payload-types'
-import { ValidStatusTransitions, type LeadStatus } from './crm/types'
+import { nextStatuses, type LeadStatus } from './crm/types'
 
-export const CLOSED_STATUSES = ['leased', 'lost', 'archived'] as const
+export const CLOSED_STATUSES = ['leased', 'signed', 'lost', 'archived'] as const
 
 type UserRef = number | User | null | undefined
 
@@ -52,6 +52,9 @@ export function leadSummary(lead: Lead) {
   }
 }
 
-export function allowedNextStatuses(status: string | null | undefined): string[] {
-  return ValidStatusTransitions[(status || 'new') as LeadStatus] ?? []
+export function allowedNextStatuses(
+  status: string | null | undefined,
+  leadType?: string | null,
+): string[] {
+  return nextStatuses((status || 'new') as LeadStatus, leadType)
 }

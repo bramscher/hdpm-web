@@ -37,6 +37,9 @@ const STATUS_LABELS: Record<string, string> = {
   applied: 'Applied',
   approved: 'Approved',
   leased: 'Leased',
+  consult_booked: 'Consult Booked',
+  proposal_sent: 'Proposal Sent',
+  signed: 'Signed',
   lost: 'Lost',
   archived: 'Archived',
 }
@@ -88,6 +91,9 @@ function getStatusBadge(status?: string) {
     applied: { bg: '#fce7f3', text: '#9d174d' },
     approved: { bg: '#d1fae5', text: '#065f46' },
     leased: { bg: '#f0fdf4', text: '#166534' },
+    consult_booked: { bg: '#ede9fe', text: '#5b21b6' },
+    proposal_sent: { bg: '#fce7f3', text: '#9d174d' },
+    signed: { bg: '#f0fdf4', text: '#166534' },
     lost: { bg: '#fee2e2', text: '#991b1b' },
     archived: { bg: '#f3f4f6', text: '#4b5563' },
   }

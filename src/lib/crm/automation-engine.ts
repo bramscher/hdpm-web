@@ -1,3 +1,4 @@
+import type { Lead } from '../../payload-types'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyPayload = any
 
@@ -66,7 +67,7 @@ async function executeAction(
         await payload.update({
           collection: 'leads',
           id: lead.id,
-          data: { status: newStatus as 'new' | 'attempted_contact' | 'engaged' | 'tour_scheduled' | 'toured' | 'applied' | 'approved' | 'leased' | 'lost' | 'archived' },
+          data: { status: newStatus as NonNullable<Lead['status']> },
         })
       }
       break

@@ -55,7 +55,8 @@ export const leadsBeforeChange: CollectionBeforeChangeHook = async ({
     ) {
       const from = originalDoc.status as LeadStatus
       const to = data.status as LeadStatus
-      if (!isValidTransition(from, to)) {
+      const leadType = data.leadType ?? originalDoc.leadType
+      if (!isValidTransition(from, to, leadType)) {
         throw new Error(
           `Invalid status transition from "${from}" to "${to}". Check allowed transitions.`,
         )

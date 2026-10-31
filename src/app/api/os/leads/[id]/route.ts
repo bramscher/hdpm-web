@@ -58,7 +58,7 @@ export async function GET(
       rentAnalysisShortUrl: lead.rentAnalysisShortUrl ?? null,
       lastContactedAt: lead.lastContactedAt ?? null,
       attribution: lead.attribution ?? null,
-      allowedStatuses: allowedNextStatuses(lead.status),
+      allowedStatuses: allowedNextStatuses(lead.status, lead.leadType),
     },
     activities: activities.docs.map((a) => ({
       id: a.id,
@@ -126,7 +126,7 @@ export async function PATCH(
       ...(user ? { user } : {}),
     })
     console.info('[os-leads] lead', id, 'updated by', auth.caller.actor, Object.keys(data))
-    return Response.json({ lead: { ...leadSummary(lead), allowedStatuses: allowedNextStatuses(lead.status) } })
+    return Response.json({ lead: { ...leadSummary(lead), allowedStatuses: allowedNextStatuses(lead.status, lead.leadType) } })
   } catch (error) {
     // Invalid pipeline moves throw a readable message from the leads hook.
     const message = error instanceof Error ? error.message : 'Could not update lead'

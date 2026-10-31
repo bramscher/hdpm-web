@@ -732,6 +732,9 @@ export interface Lead {
         | 'applied'
         | 'approved'
         | 'leased'
+        | 'consult_booked'
+        | 'proposal_sent'
+        | 'signed'
         | 'lost'
         | 'archived'
       )

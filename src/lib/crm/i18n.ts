@@ -20,6 +20,9 @@ const LABELS: Record<string, Record<Lang, string>> = {
   'status.applied': { en: 'Applied', es: 'Aplicación Enviada' },
   'status.approved': { en: 'Approved', es: 'Aprobado' },
   'status.leased': { en: 'Leased', es: 'Arrendado' },
+  'status.consult_booked': { en: 'Consult Booked', es: 'Consulta Programada' },
+  'status.proposal_sent': { en: 'Proposal Sent', es: 'Propuesta Enviada' },
+  'status.signed': { en: 'Signed', es: 'Firmado' },
   'status.lost': { en: 'Lost', es: 'Perdido' },
   'status.archived': { en: 'Archived', es: 'Archivado' },
 
@@ -151,7 +154,8 @@ export function template(
 export function getStatusOptions(lang: Lang = 'en') {
   return [
     'new', 'attempted_contact', 'engaged', 'tour_scheduled',
-    'toured', 'applied', 'approved', 'leased', 'lost', 'archived',
+    'toured', 'applied', 'approved', 'leased',
+    'consult_booked', 'proposal_sent', 'signed', 'lost', 'archived',
   ].map((status) => ({
     value: status,
     label: t(`status.${status}`, lang),

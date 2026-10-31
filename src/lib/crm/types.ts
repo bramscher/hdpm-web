@@ -7,6 +7,10 @@ export enum LeadStatus {
   Applied = 'applied',
   Approved = 'approved',
   Leased = 'leased',
+  // Owner pipeline (owner leads only)
+  ConsultBooked = 'consult_booked',
+  ProposalSent = 'proposal_sent',
+  Signed = 'signed',
   Lost = 'lost',
   Archived = 'archived',
 }
@@ -130,6 +134,56 @@ export const ValidStatusTransitions: Record<LeadStatus, LeadStatus[]> = {
     LeadStatus.Archived,
   ],
   [LeadStatus.Leased]: [LeadStatus.Archived],
+  [LeadStatus.ConsultBooked]: [],
+  [LeadStatus.ProposalSent]: [],
+  [LeadStatus.Signed]: [],
   [LeadStatus.Lost]: [LeadStatus.New, LeadStatus.Archived],
   [LeadStatus.Archived]: [LeadStatus.New],
+}
+
+/**
+ * Owner leads follow their own pipeline (consult → proposal → signed) instead
+ * of the renter path (tour → applied → leased), so "owners won" is countable.
+ */
+export const OwnerStatusTransitions: Partial<Record<LeadStatus, LeadStatus[]>> = {
+  [LeadStatus.New]: [
+    LeadStatus.AttemptedContact,
+    LeadStatus.Engaged,
+    LeadStatus.ConsultBooked,
+    LeadStatus.Lost,
+    LeadStatus.Archived,
+  ],
+  [LeadStatus.AttemptedContact]: [
+    LeadStatus.Engaged,
+    LeadStatus.ConsultBooked,
+    LeadStatus.Lost,
+    LeadStatus.Archived,
+  ],
+  [LeadStatus.Engaged]: [
+    LeadStatus.ConsultBooked,
+    LeadStatus.ProposalSent,
+    LeadStatus.Lost,
+    LeadStatus.Archived,
+  ],
+  [LeadStatus.ConsultBooked]: [
+    LeadStatus.ProposalSent,
+    LeadStatus.Engaged,
+    LeadStatus.Lost,
+    LeadStatus.Archived,
+  ],
+  [LeadStatus.ProposalSent]: [
+    LeadStatus.Signed,
+    LeadStatus.ConsultBooked,
+    LeadStatus.Lost,
+    LeadStatus.Archived,
+  ],
+  [LeadStatus.Signed]: [LeadStatus.Archived],
+  [LeadStatus.Lost]: [LeadStatus.New, LeadStatus.Archived],
+  [LeadStatus.Archived]: [LeadStatus.New],
+}
+
+/** Statuses a lead can move to next, by lead type. */
+export function nextStatuses(status: LeadStatus, leadType?: string | null): LeadStatus[] {
+  const map = leadType === LeadType.Owner ? OwnerStatusTransitions : ValidStatusTransitions
+  return map[status] ?? []
 }

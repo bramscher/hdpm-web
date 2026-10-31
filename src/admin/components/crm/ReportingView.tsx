@@ -30,6 +30,9 @@ const STATUS_LABELS: Record<string, string> = {
   applied: 'Applied',
   approved: 'Approved',
   leased: 'Leased',
+  consult_booked: 'Consult Booked',
+  proposal_sent: 'Proposal Sent',
+  signed: 'Signed',
   lost: 'Lost',
   archived: 'Archived',
 }
