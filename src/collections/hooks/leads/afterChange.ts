@@ -1,5 +1,6 @@
 import type { CollectionAfterChangeHook } from 'payload'
 import { createActivityLog, createFollowUpTask } from '../../../lib/crm/tasks'
+import { sendOwnerLeadAlert } from '../../../lib/crm/owner-lead-alert'
 
 export const leadsAfterChange: CollectionAfterChangeHook = async ({
   doc,
@@ -29,6 +30,9 @@ export const leadsAfterChange: CollectionAfterChangeHook = async ({
         req,
       })
     }
+
+    // New owner leads go to Craig in Slack (via HDPM OS) with stage buttons.
+    if (doc.leadType === 'owner') await sendOwnerLeadAlert(doc)
   }
 
   if (operation === 'update' && previousDoc?.status && doc.status && previousDoc.status !== doc.status) {
