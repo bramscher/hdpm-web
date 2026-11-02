@@ -5,7 +5,12 @@ import Reveal from '@/components/ui/Reveal'
 import Section from '@/components/ui/Section'
 import TestimonialsShowcase from './TestimonialsShowcase'
 
-const REVIEW_URL = 'https://g.page/r/highdesertpm/review'
+// Google's write-a-review page for HDPM's Business Profile (same Place ID the
+// review sync uses). Falls back to a Maps search if the env var is missing.
+const PLACE_ID = process.env.GOOGLE_PLACE_ID?.trim()
+const REVIEW_URL = PLACE_ID
+  ? `https://search.google.com/local/writereview?placeid=${encodeURIComponent(PLACE_ID)}`
+  : 'https://www.google.com/maps/search/?api=1&query=High+Desert+Property+Management'
 
 export default async function TestimonialsSection() {
   // Guarded so the section (and the pages that render it, e.g. the home page)
