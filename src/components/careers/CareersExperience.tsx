@@ -74,15 +74,15 @@ export default function CareersExperience({ jobs }: { jobs: Job[] }) {
                     )}
                     <div className="contents sm:block sm:min-w-0 sm:flex-1">
                       <div
-                        className={`${roleImage ? '' : 'col-span-2'} flex flex-wrap items-center justify-between gap-2`}
+                        className={`${roleImage ? '' : 'col-span-2'} flex flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-4`}
                       >
-                        <h3 className="font-heading text-xl font-semibold leading-tight text-primary sm:text-2xl">
+                        <h3 className="min-w-0 font-heading text-xl font-semibold leading-tight text-primary sm:text-2xl">
                           {job.title}
                         </h3>
                         <button
                           onClick={() => apply(job.id)}
                           aria-label={`Apply for ${job.title}`}
-                          className="rounded-full border border-primary/20 px-5 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+                          className="shrink-0 whitespace-nowrap rounded-full border border-primary/20 px-5 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
                         >
                           Apply <span aria-hidden="true">↗</span>
                         </button>
