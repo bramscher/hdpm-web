@@ -45,6 +45,28 @@ export function validateApplication(input: Record<string, unknown>) {
       )
     return value
   }
+  /** Optional web address. Accepts "linkedin.com/in/sam"; only http(s) is stored. */
+  const link = (key: string, label: string) => {
+    const value = field(key, 500, false)
+    if (!value) return undefined
+    const problem = new Error(
+      `Please enter a full web address for your ${label}, or leave it blank.`,
+    )
+    let url: URL
+    try {
+      url = new URL(
+        /^[a-z][a-z0-9+.-]*:/i.test(value) ? value : `https://${value}`,
+      )
+    } catch {
+      throw problem
+    }
+    if (
+      (url.protocol !== 'https:' && url.protocol !== 'http:') ||
+      !url.hostname.includes('.')
+    )
+      throw problem
+    return url.toString()
+  }
   const email = field('email', 254)
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     throw new Error('Please enter a valid email address.')
@@ -69,6 +91,8 @@ export function validateApplication(input: Record<string, unknown>) {
     experience: field('experience', 5000),
     technology: field('technology', 3000),
     availability: field('availability', 1000),
+    resumeLink: link('resumeLink', 'résumé link'),
+    videoLink: link('videoLink', 'video link'),
     consent: true,
   }
 }

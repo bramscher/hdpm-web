@@ -678,7 +678,7 @@ export interface Job {
   createdAt: string;
 }
 /**
- * Private applications. Each one is emailed with its résumé and video attached to the recipients in Hiring Settings. To resend an email, set Notification Status to Pending and save.
+ * Private applications. Each one is emailed to the recipients in Hiring Settings with its files attached (videos too large to attach are linked) and any links the applicant shared. To resend an email, set Notification Status to Pending and save.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "job-applications".
@@ -694,6 +694,14 @@ export interface JobApplication {
   availability: string;
   experience: string;
   technology: string;
+  /**
+   * Web address the applicant shared. Not checked.
+   */
+  resumeLink?: string | null;
+  /**
+   * Web address the applicant shared. Not checked.
+   */
+  videoLink?: string | null;
   consent: boolean;
   attachments?:
     | {
@@ -1722,6 +1730,8 @@ export interface JobApplicationsSelect<T extends boolean = true> {
   availability?: T;
   experience?: T;
   technology?: T;
+  resumeLink?: T;
+  videoLink?: T;
   consent?: T;
   attachments?: T;
   resumeDownload?: T;

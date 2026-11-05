@@ -305,6 +305,35 @@ export default function ApplicationForm({
               </label>
             ))}
           </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label className="block text-sm font-semibold">
+              Or link to your résumé
+              <span className="mt-1 block text-xs font-normal text-neutral-mid">
+                LinkedIn, Google Drive, or your own site
+              </span>
+              <input
+                name="resumeLink"
+                type="text"
+                inputMode="url"
+                autoComplete="url"
+                maxLength={500}
+                className={control}
+              />
+            </label>
+            <label className="block text-sm font-semibold">
+              Or link to your video
+              <span className="mt-1 block text-xs font-normal text-neutral-mid">
+                YouTube, Vimeo, Loom, or Google Drive
+              </span>
+              <input
+                name="videoLink"
+                type="text"
+                inputMode="url"
+                maxLength={500}
+                className={control}
+              />
+            </label>
+          </div>
         </div>
         <details className="rounded-2xl bg-[#f4f1e9] p-5">
           <summary className="cursor-pointer text-sm font-semibold text-primary">

@@ -99,6 +99,38 @@ test('notification sends the form to the hiring inbox and records delivery; nest
   }
 })
 
+test('notification email shows the links the applicant shared, with plain labels', async () => {
+  const key = process.env.RESEND_API_KEY
+  const originalFetch = globalThis.fetch
+  process.env.RESEND_API_KEY = 're_test_placeholder'
+  let sent: any
+  globalThis.fetch = async (_url, init) => {
+    sent = JSON.parse(String(init?.body))
+    return new Response(JSON.stringify({ id: 'test-email' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+  try {
+    await notify({
+      doc: {
+        ...doc,
+        resumeLink: 'https://linkedin.com/in/sam',
+        videoLink: 'https://youtu.be/abc',
+      },
+      context: {},
+      req: { payload: { update: async () => {} } },
+    } as any)
+    assert.match(sent.text, /Résumé link from the applicant:\nhttps:\/\/linkedin\.com\/in\/sam/)
+    assert.match(sent.text, /Video link from the applicant:\nhttps:\/\/youtu\.be\/abc/)
+    assert.doesNotMatch(sent.text, /fullName|resumeLink/)
+  } finally {
+    globalThis.fetch = originalFetch
+    if (key) process.env.RESEND_API_KEY = key
+    else delete process.env.RESEND_API_KEY
+  }
+})
+
 test('notification uses the recipients saved in Hiring Settings', async () => {
   const key = process.env.RESEND_API_KEY
   const originalFetch = globalThis.fetch
