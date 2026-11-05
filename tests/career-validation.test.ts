@@ -25,6 +25,21 @@ test('validates and normalizes a complete application', () => {
   assert.equal(validateApplication(application).fullName, 'Sam Example')
   assert.equal(validateApplication(application).jobId, 4)
 })
+test('accepts optional résumé and video links and refuses anything but web addresses', () => {
+  const blank = validateApplication(application)
+  assert.equal(blank.resumeLink, undefined)
+  assert.equal(blank.videoLink, undefined)
+  const form = validateApplication({
+    ...application,
+    resumeLink: ' linkedin.com/in/sam ',
+    videoLink: 'https://youtu.be/abc',
+  })
+  assert.equal(form.resumeLink, 'https://linkedin.com/in/sam')
+  assert.equal(form.videoLink, 'https://youtu.be/abc')
+  for (const bad of ['javascript:alert(1)', 'file:///etc/passwd', 'not a link', 'localhost:3000', 'x'.repeat(501)]) {
+    assert.throws(() => validateApplication({ ...application, resumeLink: bad }))
+  }
+})
 test('rejects missing consent, malformed email, missing answers, invalid job IDs, and oversized input', () => {
   for (const update of [
     { consent: false },

@@ -6,6 +6,21 @@ import {
   loadApplicationAttachments,
 } from '../lib/career-notification'
 
+/** What the application email shows, in order. */
+const EMAIL_FIELDS = [
+  ['fullName', 'Name'],
+  ['jobTitle', 'Position'],
+  ['email', 'Email'],
+  ['phone', 'Phone'],
+  ['availability', 'Availability'],
+  ['experience', 'What they would bring'],
+  ['technology', 'How they use technology'],
+  ['resumeLink', 'Résumé link from the applicant'],
+  ['videoLink', 'Video link from the applicant'],
+  ['resumeDownload', 'Uploaded résumé (admin sign-in required)'],
+  ['videoDownload', 'Uploaded video (admin sign-in required)'],
+] as const
+
 export const JobApplications: CollectionConfig = {
   slug: 'job-applications',
   admin: {
@@ -19,7 +34,7 @@ export const JobApplications: CollectionConfig = {
       'createdAt',
     ],
     description:
-      'Private applications. Each one is emailed with its résumé and video attached to the recipients in Hiring Settings. To resend an email, set Notification Status to Pending and save.',
+      'Private applications. Each one is emailed to the recipients in Hiring Settings with its files attached (videos too large to attach are linked) and any links the applicant shared. To resend an email, set Notification Status to Pending and save.',
   },
   access: {
     read: ({ req }) => req.user?.role === 'admin',
@@ -36,17 +51,6 @@ export const JobApplications: CollectionConfig = {
         try {
           if (!process.env.RESEND_API_KEY)
             throw new Error('RESEND_API_KEY is missing')
-          const fields = [
-            'fullName',
-            'jobTitle',
-            'email',
-            'phone',
-            'availability',
-            'experience',
-            'technology',
-            'resumeDownload',
-            'videoDownload',
-          ]
           const to = await getApplicationRecipients(req.payload)
           const { attached, skipped } = await loadApplicationAttachments(
             doc.attachments,
@@ -57,9 +61,8 @@ export const JobApplications: CollectionConfig = {
             skipped.length &&
               `Not attached (use the download link above):\n${skipped.join('\n')}`,
           ].filter(Boolean)
-          const text = fields
-            .filter((key) => doc[key])
-            .map((key) => `${key}:\n${doc[key]}`)
+          const text = EMAIL_FIELDS.filter(([key]) => doc[key])
+            .map(([key, label]) => `${label}:\n${doc[key]}`)
             .concat(files as string[])
             .join('\n\n')
           const result = await new Resend(
@@ -129,6 +132,16 @@ export const JobApplications: CollectionConfig = {
     { name: 'availability', type: 'textarea', required: true },
     { name: 'experience', type: 'textarea', required: true },
     { name: 'technology', type: 'textarea', required: true },
+    {
+      name: 'resumeLink',
+      type: 'text',
+      admin: { description: 'Web address the applicant shared. Not checked.' },
+    },
+    {
+      name: 'videoLink',
+      type: 'text',
+      admin: { description: 'Web address the applicant shared. Not checked.' },
+    },
     { name: 'consent', type: 'checkbox', required: true },
     { name: 'attachments', type: 'json', admin: { readOnly: true } },
     {
