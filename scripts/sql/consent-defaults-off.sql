@@ -12,9 +12,10 @@ ALTER TABLE "payload_web"."leads"
   ALTER COLUMN "sms_opt_in" SET DEFAULT false,
   ALTER COLUMN "email_opt_in" SET DEFAULT false;
 
+-- The batch is computed in a subquery so that a second run inserts nothing.
 INSERT INTO "payload_web"."payload_migrations" ("name", "batch", "updated_at", "created_at")
-SELECT '20261106_150000_consent_defaults_off', COALESCE(MAX("batch"), 0) + 1, now(), now()
-FROM "payload_web"."payload_migrations"
+SELECT '20261106_150000_consent_defaults_off', next_batch, now(), now()
+FROM (SELECT COALESCE(MAX("batch"), 0) + 1 AS next_batch FROM "payload_web"."payload_migrations") AS m
 WHERE NOT EXISTS (
   SELECT 1 FROM "payload_web"."payload_migrations"
   WHERE "name" = '20261106_150000_consent_defaults_off'
