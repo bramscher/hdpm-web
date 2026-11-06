@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import { explicitConsent } from './consent'
+import { consentFields } from './consent'
 import { normalizeEmail, normalizePhone, splitName } from '@/lib/crm/normalization'
 import { findDuplicateLead } from '@/lib/crm/dedup'
 import type { LeadNotification } from '@/lib/notify'
@@ -230,8 +230,7 @@ export function createRentalAnalysisHandler(deps: IntakeDependencies) {
             status: 'new',
             subjectProperty,
             rentAnalysisStatus: 'requested',
-            smsOptIn: explicitConsent(body.smsConsent),
-            emailOptIn: explicitConsent(body.emailConsent),
+            ...consentFields(body.smsConsent, body.emailConsent, 'rental-analysis'),
             message: body.message || undefined,
             attribution: body.attribution || undefined,
           },

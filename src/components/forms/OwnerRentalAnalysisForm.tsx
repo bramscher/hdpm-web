@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
+import ConsentBoxes from '@/components/forms/ConsentBoxes'
 import { getAttribution } from '@/lib/attribution'
 import { trackLead } from '@/lib/analytics'
 
@@ -68,6 +69,7 @@ export default function OwnerRentalAnalysisForm() {
   const [phone, setPhone] = useState('')
   const [message, setMessage] = useState('')
   const [honeypot, setHoneypot] = useState('')
+  const [consent, setConsent] = useState({ sms: false, email: false })
 
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [submitting, setSubmitting] = useState(false)
@@ -140,6 +142,8 @@ export default function OwnerRentalAnalysisForm() {
           phone: phone.trim(),
           message: message.trim() || undefined,
           hp: honeypot || undefined,
+          smsConsent: consent.sms,
+          emailConsent: consent.email,
           attribution: getAttribution(),
           subject: {
             address: address.trim(),
@@ -503,6 +507,8 @@ export default function OwnerRentalAnalysisForm() {
               className="block w-full rounded-lg border border-neutral-300 px-4 py-3 text-neutral-dark shadow-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
           </Field>
+
+          <ConsentBoxes idPrefix="ra" value={consent} onChange={setConsent} />
 
           {submitError && (
             <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">

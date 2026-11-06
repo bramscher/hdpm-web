@@ -148,6 +148,38 @@ export const Leads: CollectionConfig = {
                 },
               ],
             },
+            {
+              // Evidence for each ticked consent box. A lead opted in with no
+              // evidence was saved before the website had consent boxes.
+              type: 'row',
+              fields: [
+                {
+                  name: 'smsConsentAt',
+                  type: 'date',
+                  admin: { readOnly: true, description: 'When the person ticked the SMS consent box.' },
+                },
+                {
+                  name: 'emailConsentAt',
+                  type: 'date',
+                  admin: { readOnly: true, description: 'When the person ticked the email consent box.' },
+                },
+              ],
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'consentForm',
+                  type: 'text',
+                  admin: { readOnly: true, description: 'Where consent was given, e.g. contact-form.' },
+                },
+                {
+                  name: 'consentWordingVersion',
+                  type: 'text',
+                  admin: { readOnly: true, description: 'Version of the consent wording the person saw.' },
+                },
+              ],
+            },
           ],
         },
         {

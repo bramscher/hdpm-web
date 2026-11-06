@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
+import ConsentBoxes from '@/components/forms/ConsentBoxes'
 import { getAttribution } from '@/lib/attribution'
 import { trackLead } from '@/lib/analytics'
 
@@ -37,6 +38,7 @@ export default function LeadForm({
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [honeypot, setHoneypot] = useState('')
+  const [consent, setConsent] = useState({ sms: false, email: false })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
@@ -62,6 +64,8 @@ export default function LeadForm({
           email: email.trim(),
           phone: phone.trim(),
           hp: honeypot || undefined,
+          smsConsent: consent.sms,
+          emailConsent: consent.email,
           source_detail: sourceDetail,
           attribution: getAttribution(),
           subject: {
@@ -204,6 +208,8 @@ export default function LeadForm({
           className={inputClass}
         />
       </div>
+
+      <ConsentBoxes idPrefix={`lf-${analyticsTag}`} value={consent} onChange={setConsent} dark={dark} />
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
