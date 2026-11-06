@@ -2,6 +2,7 @@ import * as migration_20261005_120000_add_hiring_settings from './20261005_12000
 import * as migration_20261104_120000_add_application_links from './20261104_120000_add_application_links';
 import * as migration_20261106_120000_add_lead_growth_fields from './20261106_120000_add_lead_growth_fields';
 import * as migration_20261106_140000_add_lead_referral_fields from './20261106_140000_add_lead_referral_fields';
+import * as migration_20261106_150000_consent_defaults_off from './20261106_150000_consent_defaults_off';
 import * as migration_20260927_180000_rewrite_job_apply_instructions from './20260927_180000_rewrite_job_apply_instructions';
 import * as migration_20260926_203100_add_jobs_image from './20260926_203100_add_jobs_image';
 import * as migration_20260922_120000_add_job_applications from './20260922_120000_add_job_applications';
@@ -80,5 +81,10 @@ export const migrations = [
     up: migration_20261106_140000_add_lead_referral_fields.up,
     down: migration_20261106_140000_add_lead_referral_fields.down,
     name: '20261106_140000_add_lead_referral_fields',
+  },
+  {
+    up: migration_20261106_150000_consent_defaults_off.up,
+    down: migration_20261106_150000_consent_defaults_off.down,
+    name: '20261106_150000_consent_defaults_off',
   },
 ];

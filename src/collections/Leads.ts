@@ -150,12 +150,13 @@ export const Leads: CollectionConfig = {
                 {
                   name: 'smsOptIn',
                   type: 'checkbox',
-                  defaultValue: true,
+                  // Explicit opt-in: true only when the person ticked a consent box.
+                  defaultValue: false,
                 },
                 {
                   name: 'emailOptIn',
                   type: 'checkbox',
-                  defaultValue: true,
+                  defaultValue: false,
                 },
               ],
             },

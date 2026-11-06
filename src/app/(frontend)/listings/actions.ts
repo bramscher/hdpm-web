@@ -1,6 +1,7 @@
 'use server'
 
 import { getPayload } from 'payload'
+import { explicitConsent } from '@/lib/crm/consent'
 import config from '@payload-config'
 import { findDuplicateLead } from '@/lib/crm/dedup'
 import { normalizeEmail, normalizePhone, splitName } from '@/lib/crm/normalization'
@@ -100,6 +101,9 @@ export async function submitListingInquiry(
           sourceDetail: `Listing inquiry — ${propertyLabel}`,
           lastInboundAt: new Date().toISOString(),
           attribution,
+          // Opted in only by an explicit consent tick on the form; none of the forms has one yet.
+          smsOptIn: explicitConsent(formData.get('smsConsent')),
+          emailOptIn: explicitConsent(formData.get('emailConsent')),
         },
       })
       leadId = created.id
