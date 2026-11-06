@@ -4,7 +4,9 @@ import { requireOsAdmin } from '@/lib/os-service-auth'
 import {
   allowedNextStatuses,
   assignableUsers,
+  boardLead,
   leadSummary,
+  parseExpectedDoors,
   userSummary,
   websiteUserFor,
 } from '@/lib/os-leads'
@@ -47,6 +49,8 @@ export async function GET(
       preferredLanguage: lead.preferredLanguage ?? null,
       doNotContact: Boolean(lead.doNotContact),
       sourceDetail: lead.sourceDetail ?? null,
+      expectedDoors: lead.expectedDoors ?? null,
+      statusEnteredAt: lead.statusEnteredAt ?? lead.createdAt,
       stageReason: lead.stageReason ?? null,
       notesSummary: lead.notesSummary ?? null,
       message: lead.message ?? null,
@@ -74,7 +78,11 @@ export async function GET(
   })
 }
 
-/** PATCH { status?, nextFollowUpAt? (ISO or null), assignedTo? (user id or null) } */
+/**
+ * PATCH { status?, nextFollowUpAt? (ISO or null), assignedTo? (user id or null),
+ *         expectedDoors? (whole number >= 0 or null) }
+ * Returns { lead } in the growth-board shape (boardLead).
+ */
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -107,6 +115,11 @@ export async function PATCH(
       return Response.json({ error: 'Choose someone to assign.' }, { status: 400 })
     data.assignedTo = userId
   }
+  if ('expectedDoors' in body) {
+    const doors = parseExpectedDoors(body.expectedDoors)
+    if (!doors.ok) return Response.json({ error: doors.error }, { status: 400 })
+    data.expectedDoors = doors.value
+  }
   if (!Object.keys(data).length)
     return Response.json({ error: 'Nothing to update' }, { status: 400 })
 
@@ -126,7 +139,7 @@ export async function PATCH(
       ...(user ? { user } : {}),
     })
     console.info('[os-leads] lead', id, 'updated by', auth.caller.actor, Object.keys(data))
-    return Response.json({ lead: { ...leadSummary(lead), allowedStatuses: allowedNextStatuses(lead.status, lead.leadType) } })
+    return Response.json({ lead: boardLead(lead) })
   } catch (error) {
     // Invalid pipeline moves throw a readable message from the leads hook.
     const message = error instanceof Error ? error.message : 'Could not update lead'
