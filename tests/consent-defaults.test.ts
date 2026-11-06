@@ -120,6 +120,10 @@ test('the consent wording names HDPM, the channel, opt-out and that consent is o
   assert.match(SMS_CONSENT_TEXT, /Msg & data rates may apply/)
   assert.match(SMS_CONSENT_TEXT, /frequency/i)
   assert.match(EMAIL_CONSENT_TEXT, /unsubscribe/i)
+  // Craig: email consent covers the inquiry only.
+  assert.match(EMAIL_CONSENT_TEXT, /about my inquiry\./)
+  assert.doesNotMatch(EMAIL_CONSENT_TEXT, /market updates|management services/)
+  assert.match(EMAIL_CONSENT_TEXT, /Consent is not a condition of service/)
 })
 
 test('consent on a submission that matches an existing lead is kept for review, per channel', async () => {
