@@ -71,6 +71,15 @@ export const LeadActivities: CollectionConfig = {
       type: 'json',
     },
     {
+      // Set on the note that links an HDPM OS partner referral to an existing lead.
+      // Unique, so it records that the referral was handled and stops a resend
+      // from adding a second note.
+      name: 'referralLeadId',
+      type: 'text',
+      unique: true,
+      admin: { readOnly: true, description: 'HDPM OS referral_lead id this note links.' },
+    },
+    {
       name: 'performedBy',
       type: 'relationship',
       relationTo: 'users',

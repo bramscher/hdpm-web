@@ -1,4 +1,12 @@
-import type { Payload, Where } from 'payload'
+import {
+  commitTransaction,
+  createLocalReq,
+  initTransaction,
+  killTransaction,
+  type Payload,
+  type PayloadRequest,
+  type Where,
+} from 'payload'
 import type { Lead, User } from '@/payload-types'
 import { normalizeEmail, normalizePhone, splitName } from './crm/normalization'
 
@@ -127,12 +135,36 @@ export function partnerLabel(partner: NonNullable<ReferralInput['partner']>) {
 
 export type ReferralOutcome = 'created' | 'existing' | 'linked'
 
+/** Runs work in one database transaction: every write commits together or none do. */
+export type Transaction = <T>(
+  payload: Payload,
+  user: User | null,
+  work: (req: PayloadRequest) => Promise<T>,
+) => Promise<T>
+
+export const payloadTransaction: Transaction = async (payload, user, work) => {
+  const req = await createLocalReq(user ? { user } : {}, payload)
+  const owns = await initTransaction(req)
+  try {
+    const result = await work(req)
+    if (owns) await commitTransaction(req)
+    return result
+  } catch (error) {
+    if (owns) await killTransaction(req)
+    throw error
+  }
+}
+
 /**
  * Creates or finds the website lead for a referral:
- * - existing: a lead already carries this referral id. Nothing changes.
- * - linked: the email or phone matches an owner lead (oldest first). It gets a
- *   history note, and the referral id if it has none yet; its contact, source,
- *   stage and assignee stay as they were, so the first touch keeps the attribution.
+ * - existing: this referral was handled before. Either a lead carries its id, or
+ *   a link note does. Nothing changes and no second note is written.
+ * - linked: the email or phone matches an owner lead (oldest first). In one
+ *   transaction it gets a history note carrying the referral id, and the
+ *   referral id itself if it has none yet. Its contact, source, stage and
+ *   assignee stay as they were, so the first touch keeps the attribution. A
+ *   second partner's referral for the same owner gets a note only, so the board
+ *   never shows the owner twice or counts their doors twice.
  * - created: a new owner lead, through the normal lead hooks (round-robin,
  *   follow-up task, Slack card). A match on a non-owner lead still creates one;
  *   the hook marks it as a duplicate.
@@ -141,15 +173,30 @@ export async function upsertReferralLead(
   payload: Payload,
   input: ReferralInput,
   user: User | null,
+  transaction: Transaction = payloadTransaction,
 ): Promise<{ outcome: ReferralOutcome; lead: Lead }> {
-  const asUser = user ? { user } : {}
-  const existing = await payload.find({
+  const byLead = await payload.find({
     collection: 'leads',
     where: { referralLeadId: { equals: input.referralId } },
     limit: 1,
     depth: 1,
   })
-  if (existing.docs[0]) return { outcome: 'existing', lead: existing.docs[0] }
+  if (byLead.docs[0]) return { outcome: 'existing', lead: byLead.docs[0] }
+
+  // A link note is written in the same transaction as the link, so finding one
+  // means the whole link was saved.
+  const byNote = await payload.find({
+    collection: 'lead-activities',
+    where: { referralLeadId: { equals: input.referralId } },
+    limit: 1,
+    depth: 0,
+  })
+  const noted = byNote.docs[0]
+  if (noted) {
+    const leadId = typeof noted.lead === 'object' ? noted.lead.id : noted.lead
+    const lead = await payload.findByID({ collection: 'leads', id: leadId, depth: 1 })
+    return { outcome: 'existing', lead }
+  }
 
   const contact: Where[] = [{ email: { equals: input.email } }]
   if (input.phone) contact.push({ phone: { equals: input.phone } })
@@ -164,38 +211,39 @@ export async function upsertReferralLead(
   const by = input.partner ? partnerLabel(input.partner) : 'the partner portal'
 
   if (owner) {
-    // The first referral is stamped on the lead so its resends find it directly.
-    // A second partner's referral for the same owner links with a note only, so
-    // the board never shows the owner twice or counts their doors twice.
-    const lead = owner.referralLeadId
-      ? await payload.findByID({ collection: 'leads', id: owner.id, depth: 1 })
-      : await payload.update({
-          collection: 'leads',
-          id: owner.id,
-          data: { referralLeadId: input.referralId },
-          depth: 1,
-          ...asUser,
-        })
-    await payload.create({
-      collection: 'lead-activities',
-      data: {
-        lead: owner.id,
-        type: 'note',
-        direction: 'inbound',
-        body: [
-          `Also referred by ${by} through the HDPM OS partner portal.`,
-          'This lead’s contact, source and stage were kept as they were. Check the referral before changing attribution.',
-          input.propertyAddress ? `Referred property: ${input.propertyAddress}` : '',
-          input.unitCount != null ? `Referred units: ${input.unitCount}` : '',
-          input.notes ? `Partner notes: ${input.notes}` : '',
-        ].filter(Boolean).join('\n'),
-        metadata: {
-          kind: 'partner_referral_link',
+    const lead = await transaction(payload, user, async (req) => {
+      await payload.create({
+        collection: 'lead-activities',
+        data: {
+          lead: owner.id,
+          type: 'note',
+          direction: 'inbound',
           referralLeadId: input.referralId,
-          partnerId: input.partner?.id ?? null,
+          body: [
+            `Also referred by ${by} through the HDPM OS partner portal.`,
+            'This lead’s contact, source and stage were kept as they were. Check the referral before changing attribution.',
+            input.propertyAddress ? `Referred property: ${input.propertyAddress}` : '',
+            input.unitCount != null ? `Referred units: ${input.unitCount}` : '',
+            input.notes ? `Partner notes: ${input.notes}` : '',
+          ].filter(Boolean).join('\n'),
+          metadata: {
+            kind: 'partner_referral_link',
+            referralLeadId: input.referralId,
+            partnerId: input.partner?.id ?? null,
+          },
         },
-      },
-      ...asUser,
+        req,
+      })
+      // The first referral is also stamped on the lead itself.
+      return owner.referralLeadId
+        ? payload.findByID({ collection: 'leads', id: owner.id, depth: 1, req })
+        : payload.update({
+            collection: 'leads',
+            id: owner.id,
+            data: { referralLeadId: input.referralId },
+            depth: 1,
+            req,
+          })
     })
     return { outcome: 'linked', lead }
   }
@@ -224,7 +272,7 @@ export async function upsertReferralLead(
       },
     },
     depth: 1,
-    ...asUser,
+    ...(user ? { user } : {}),
   })
   return { outcome: 'created', lead }
 }

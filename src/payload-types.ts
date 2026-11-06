@@ -930,6 +930,10 @@ export interface LeadActivity {
     | number
     | boolean
     | null;
+  /**
+   * HDPM OS referral_lead id this note links.
+   */
+  referralLeadId?: string | null;
   performedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
@@ -1848,6 +1852,7 @@ export interface LeadActivitiesSelect<T extends boolean = true> {
   direction?: T;
   body?: T;
   metadata?: T;
+  referralLeadId?: T;
   performedBy?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -17,11 +17,15 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       ADD COLUMN IF NOT EXISTS "referral_lead_id" varchar;
     CREATE INDEX IF NOT EXISTS "leads_referral_partner_id_idx" ON "payload_web"."leads" USING btree ("referral_partner_id");
     CREATE UNIQUE INDEX IF NOT EXISTS "leads_referral_lead_id_idx" ON "payload_web"."leads" USING btree ("referral_lead_id");
+    ALTER TABLE "payload_web"."lead_activities" ADD COLUMN IF NOT EXISTS "referral_lead_id" varchar;
+    CREATE UNIQUE INDEX IF NOT EXISTS "lead_activities_referral_lead_id_idx" ON "payload_web"."lead_activities" USING btree ("referral_lead_id");
   `)
 }
 
 export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
+    DROP INDEX IF EXISTS "payload_web"."lead_activities_referral_lead_id_idx";
+    ALTER TABLE "payload_web"."lead_activities" DROP COLUMN IF EXISTS "referral_lead_id";
     DROP INDEX IF EXISTS "payload_web"."leads_referral_lead_id_idx";
     DROP INDEX IF EXISTS "payload_web"."leads_referral_partner_id_idx";
     ALTER TABLE "payload_web"."leads"
