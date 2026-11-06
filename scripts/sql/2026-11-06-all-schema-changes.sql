@@ -1,7 +1,11 @@
 -- hdpm-web: ALL schema changes for the 2026-11-06 batch, in one file.
 -- #75, #76, #78, #79 and #81's hiring-settings fix. Paste into the Supabase SQL
 -- editor and run, BEFORE deploying the merged code (the new code reads these
--- columns). It is also safe while the current site is running; see the PR.
+-- columns). It is schema-compatible with the site that's running now (by code
+-- review), but while it runs it locks leads and lead_activities, which can
+-- briefly stall reads and writes on the live site, and requests may time out.
+-- The duration hasn't been measured: run it at a quiet time and watch it
+-- finish. See PR #82.
 --
 -- Each part is ONE self-contained statement (a DO block) copied unchanged from
 -- that PR's own file in scripts/sql/, so each part is all-or-nothing however the
