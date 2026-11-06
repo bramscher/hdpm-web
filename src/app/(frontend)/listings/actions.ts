@@ -1,7 +1,7 @@
 'use server'
 
 import { getPayload } from 'payload'
-import { explicitConsent } from '@/lib/crm/consent'
+import { consentFields, submittedConsent } from '@/lib/crm/consent'
 import config from '@payload-config'
 import { findDuplicateLead } from '@/lib/crm/dedup'
 import { normalizeEmail, normalizePhone, splitName } from '@/lib/crm/normalization'
@@ -71,14 +71,22 @@ export async function submitListingInquiry(
     let leadId: number
     if (existingLeadId) {
       leadId = existingLeadId
+      const consent = submittedConsent(formData.get('smsConsent'), formData.get('emailConsent'), 'listing-inquiry')
       await payload.create({
         collection: 'lead-activities',
         data: {
           lead: existingLeadId,
           type: 'note' as const,
           direction: 'inbound' as const,
-          body: `Listing inquiry — ${propertyLabel}${message ? `: ${message}` : ''}`,
-          metadata: { source: 'website', propertyExternalId, propertyAddress },
+          body: [`Listing inquiry — ${propertyLabel}${message ? `: ${message}` : ''}`, consent?.note]
+            .filter(Boolean)
+            .join('\n'),
+          metadata: {
+            source: 'website',
+            propertyExternalId,
+            propertyAddress,
+            ...(consent ? { consent: consent.metadata } : {}),
+          },
         },
       })
       await payload.update({
@@ -101,9 +109,8 @@ export async function submitListingInquiry(
           sourceDetail: `Listing inquiry — ${propertyLabel}`,
           lastInboundAt: new Date().toISOString(),
           attribution,
-          // Opted in only by an explicit consent tick on the form; none of the forms has one yet.
-          smsOptIn: explicitConsent(formData.get('smsConsent')),
-          emailOptIn: explicitConsent(formData.get('emailConsent')),
+          // Opted in only by an explicit tick on the form's consent boxes, with evidence.
+          ...consentFields(formData.get('smsConsent'), formData.get('emailConsent'), 'listing-inquiry'),
         },
       })
       leadId = created.id

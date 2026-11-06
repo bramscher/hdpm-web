@@ -4,7 +4,7 @@ import config from '@payload-config'
 import { normalizeEmail, normalizePhone, splitName } from '@/lib/crm/normalization'
 import { findDuplicateLead } from '@/lib/crm/dedup'
 import { pushToAppFolio } from '@/lib/crm/appfolio-handoff'
-import { explicitConsent } from '@/lib/crm/consent'
+import { consentFields, submittedConsent } from '@/lib/crm/consent'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyPayload = any
@@ -34,6 +34,7 @@ type AnyPayload = any
  *   propertyAddress?: string,
  *   smsOptIn?: boolean,   // true only if the person ticked an SMS consent box at the source
  *   emailOptIn?: boolean, // true only if the person ticked an email consent box at the source
+ *   consentWordingVersion?: string, // the source's own consent wording id, kept as evidence
  * }
  */
 export async function POST(req: NextRequest) {
@@ -64,16 +65,34 @@ export async function POST(req: NextRequest) {
     // Check for duplicates
     const existingLeadId = await findDuplicateLead(payload, email || undefined, phone || undefined)
 
+    // External sources have no form of ours; their consent is recorded as given
+    // on "crm-api:<source>" with the wording id they send.
+    const consentForm = `crm-api:${body.source || 'other'}`
+    const consentOptions = {
+      wordingVersion:
+        typeof body.consentWordingVersion === 'string' && body.consentWordingVersion.trim()
+          ? body.consentWordingVersion.trim().slice(0, 100)
+          : 'external-unspecified',
+    }
+
     if (existingLeadId) {
       // Append activity to existing lead instead of creating duplicate
+      const consent = submittedConsent(body.smsOptIn, body.emailOptIn, consentForm, consentOptions)
       await payload.create({
         collection: 'lead-activities',
         data: {
           lead: existingLeadId,
           type: 'note' as const,
           direction: 'inbound' as const,
-          body: `Duplicate inquiry from ${body.source || 'unknown source'}${body.message ? `: ${body.message}` : ''}`,
-          metadata: { source: body.source, sourceDetail: body.sourceDetail },
+          body: [
+            `Duplicate inquiry from ${body.source || 'unknown source'}${body.message ? `: ${body.message}` : ''}`,
+            consent?.note,
+          ].filter(Boolean).join('\n'),
+          metadata: {
+            source: body.source,
+            sourceDetail: body.sourceDetail,
+            ...(consent ? { consent: consent.metadata } : {}),
+          },
         },
       })
 
@@ -110,8 +129,7 @@ export async function POST(req: NextRequest) {
         monthlyBudgetMax: body.monthlyBudgetMax || undefined,
         status: 'new' as const,
         lastInboundAt: new Date().toISOString(),
-        smsOptIn: explicitConsent(body.smsOptIn),
-        emailOptIn: explicitConsent(body.emailOptIn),
+        ...consentFields(body.smsOptIn, body.emailOptIn, consentForm, consentOptions),
       } as Record<string, unknown>,
     })
 

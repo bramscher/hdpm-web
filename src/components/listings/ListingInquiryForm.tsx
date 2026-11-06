@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from 'react'
 import Button from '@/components/ui/Button'
+import ConsentBoxes from '@/components/forms/ConsentBoxes'
 import {
   submitListingInquiry,
   type ListingInquiryState,
@@ -159,6 +160,8 @@ export default function ListingInquiryForm({
           />
         </div>
       </div>
+
+      <ConsentBoxes idPrefix="inquiry" />
 
       {/* Submit */}
       <Button

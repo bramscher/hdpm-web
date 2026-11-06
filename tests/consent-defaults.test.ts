@@ -73,3 +73,123 @@ test('a rental analysis request opts in only to what was ticked', async () => {
   assert.equal(lead.smsOptIn, true)
   assert.equal(lead.emailOptIn, false)
 })
+
+test('consent evidence is recorded only for ticked boxes', async () => {
+  const { consentFields } = await import('../src/lib/crm/consent')
+  const { CONSENT_WORDING_VERSION } = await import('../src/lib/crm/consent-wording')
+  const now = new Date('2026-11-06T12:00:00.000Z')
+  const at = now.toISOString()
+  assert.deepEqual(consentFields(undefined, undefined, 'contact-form', { now }), {
+    smsOptIn: false, emailOptIn: false, smsConsentAt: null, emailConsentAt: null,
+    consentForm: null, consentWordingVersion: null,
+  })
+  assert.deepEqual(consentFields('on', undefined, 'contact-form', { now }), {
+    smsOptIn: true, emailOptIn: false, smsConsentAt: at, emailConsentAt: null,
+    consentForm: 'contact-form', consentWordingVersion: CONSENT_WORDING_VERSION,
+  })
+  assert.deepEqual(consentFields(null, 'on', 'listing-inquiry', { now }), {
+    smsOptIn: false, emailOptIn: true, smsConsentAt: null, emailConsentAt: at,
+    consentForm: 'listing-inquiry', consentWordingVersion: CONSENT_WORDING_VERSION,
+  })
+  assert.deepEqual(consentFields(true, true, 'crm-api:zillow', { now, wordingVersion: 'zillow-v3' }), {
+    smsOptIn: true, emailOptIn: true, smsConsentAt: at, emailConsentAt: at,
+    consentForm: 'crm-api:zillow', consentWordingVersion: 'zillow-v3',
+  })
+})
+
+test('a rental analysis request records evidence for each ticked box', async () => {
+  const none = await createdLead({ smsConsent: false, emailConsent: false })
+  assert.deepEqual([none.smsOptIn, none.emailOptIn, none.smsConsentAt, none.consentForm], [false, false, null, null])
+  const both = await createdLead({ smsConsent: true, emailConsent: true })
+  assert.equal(both.smsOptIn, true)
+  assert.equal(both.emailOptIn, true)
+  assert.ok(Number.isFinite(Date.parse(String(both.smsConsentAt))))
+  assert.ok(Number.isFinite(Date.parse(String(both.emailConsentAt))))
+  assert.equal(both.consentForm, 'rental-analysis')
+  const emailOnly = await createdLead({ emailConsent: true })
+  assert.deepEqual([emailOnly.smsOptIn, emailOnly.emailOptIn, emailOnly.smsConsentAt], [false, true, null])
+})
+
+test('the consent wording names HDPM, the channel, opt-out and that consent is optional', async () => {
+  const { SMS_CONSENT_TEXT, EMAIL_CONSENT_TEXT } = await import('../src/lib/crm/consent-wording')
+  for (const text of [SMS_CONSENT_TEXT, EMAIL_CONSENT_TEXT]) {
+    assert.match(text, /High Desert Property Management/)
+    assert.match(text, /not a condition of service/)
+  }
+  assert.match(SMS_CONSENT_TEXT, /Reply STOP/)
+  assert.match(SMS_CONSENT_TEXT, /Msg & data rates may apply/)
+  assert.match(SMS_CONSENT_TEXT, /frequency/i)
+  assert.match(EMAIL_CONSENT_TEXT, /unsubscribe/i)
+  // Craig: email consent covers the inquiry only.
+  assert.match(EMAIL_CONSENT_TEXT, /about my inquiry\./)
+  assert.doesNotMatch(EMAIL_CONSENT_TEXT, /market updates|management services/)
+  assert.match(EMAIL_CONSENT_TEXT, /Consent is not a condition of service/)
+})
+
+test('consent on a submission that matches an existing lead is kept for review, per channel', async () => {
+  const { submittedConsent } = await import('../src/lib/crm/consent')
+  const now = new Date('2026-11-06T12:00:00.000Z')
+  assert.equal(submittedConsent(undefined, false, 'contact-form', { now }), null)
+  const smsOnly = submittedConsent('on', undefined, 'contact-form', { now })!
+  assert.deepEqual(
+    [smsOnly.metadata.sms, smsOnly.metadata.email, smsOnly.metadata.smsConsentAt, smsOnly.metadata.emailConsentAt],
+    [true, false, now.toISOString(), null],
+  )
+  assert.equal(smsOnly.metadata.appliedToLead, false)
+  assert.match(smsOnly.note, /SMS\. Not applied/)
+  const emailOnly = submittedConsent(undefined, 'on', 'listing-inquiry', { now })!
+  assert.deepEqual([emailOnly.metadata.sms, emailOnly.metadata.email], [false, true])
+  assert.match(submittedConsent(true, true, 'rental-analysis', { now })!.note, /SMS and email/)
+})
+
+async function duplicateRequest(extra: Record<string, unknown>) {
+  const existing = {
+    id: 42, email: 'owner@example.com', leadType: 'owner', smsOptIn: false, emailOptIn: false,
+    doNotContact: true, smsConsentAt: null, emailConsentAt: null,
+  }
+  const before = structuredClone(existing)
+  const writes: Array<{ collection: string; data: Record<string, any> }> = []
+  const payload = {
+    find: async () => ({ docs: [existing] }),
+    create: async (write: { collection: string; data: Record<string, any> }) => {
+      writes.push(write)
+      return { id: 1, ...write.data }
+    },
+    update: async (write: { id: number; data: Record<string, unknown> }) => {
+      if (write.id === existing.id) Object.assign(existing, write.data)
+      return {}
+    },
+  } as unknown as Payload
+  const handler = createRentalAnalysisHandler({
+    getPayload: async () => payload,
+    sendLeadNotification: async () => true,
+    fetch: async () => Response.json({ id: 'analysis' }),
+    chatbotBaseUrl: '',
+    serviceToken: '',
+  })
+  const response = await handler(new Request('https://example.com/api/crm/rental-analysis', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...submission, ...extra }),
+  }))
+  assert.equal(response.status, 200)
+  return { existing, before, writes }
+}
+
+test('a returning rental-analysis visitor’s ticks go on the review activity, not the lead', async () => {
+  const both = await duplicateRequest({ smsConsent: true, emailConsent: true })
+  assert.deepEqual(both.existing, both.before, 'opt-ins, doNotContact and evidence on the lead are untouched')
+  assert.deepEqual(both.writes.map((w) => w.collection), ['lead-activities'])
+  const consent = both.writes[0].data.metadata.consent
+  assert.deepEqual([consent.sms, consent.email, consent.consentForm, consent.appliedToLead], [true, true, 'rental-analysis', false])
+  assert.ok(Number.isFinite(Date.parse(consent.smsConsentAt)))
+  assert.match(both.writes[0].data.body, /Consent ticked on this submission: SMS and email/)
+
+  const emailOnly = await duplicateRequest({ emailConsent: true })
+  const only = emailOnly.writes[0].data.metadata.consent
+  assert.deepEqual([only.sms, only.email, only.smsConsentAt], [false, true, null])
+
+  const none = await duplicateRequest({})
+  assert.equal('consent' in none.writes[0].data.metadata, false)
+  assert.doesNotMatch(none.writes[0].data.body, /Consent ticked/)
+})

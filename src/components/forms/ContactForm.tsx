@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from 'react'
 import Button from '@/components/ui/Button'
+import ConsentBoxes from '@/components/forms/ConsentBoxes'
 import { submitContactForm, type ContactFormState } from '@/app/(frontend)/contact/actions'
 import { getAttribution, type Attribution } from '@/lib/attribution'
 import { trackLead } from '@/lib/analytics'
@@ -145,6 +146,8 @@ export default function ContactForm() {
           placeholder="How can we help you?"
         />
       </div>
+
+      <ConsentBoxes idPrefix="contact" />
 
       {/* Submit */}
       <Button

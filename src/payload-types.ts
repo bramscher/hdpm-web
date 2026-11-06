@@ -761,6 +761,22 @@ export interface Lead {
   doNotContact?: boolean | null;
   smsOptIn?: boolean | null;
   emailOptIn?: boolean | null;
+  /**
+   * When the person ticked the SMS consent box.
+   */
+  smsConsentAt?: string | null;
+  /**
+   * When the person ticked the email consent box.
+   */
+  emailConsentAt?: string | null;
+  /**
+   * Where consent was given, e.g. contact-form.
+   */
+  consentForm?: string | null;
+  /**
+   * Version of the consent wording the person saw.
+   */
+  consentWordingVersion?: string | null;
   source?:
     | ('zillow' | 'apartments_com' | 'website' | 'facebook' | 'instagram' | 'phone' | 'walk_in' | 'referral' | 'other')
     | null;
@@ -1792,6 +1808,10 @@ export interface LeadsSelect<T extends boolean = true> {
   doNotContact?: T;
   smsOptIn?: T;
   emailOptIn?: T;
+  smsConsentAt?: T;
+  emailConsentAt?: T;
+  consentForm?: T;
+  consentWordingVersion?: T;
   source?: T;
   sourceDetail?: T;
   leadType?: T;
