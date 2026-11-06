@@ -133,23 +133,16 @@ test('a re-run that clears a newly opted-in channel backs it up so undo can rest
   assert.deepEqual(review.filter((r: unknown[]) => r[0] === 1), [[1, 'sms', true]])
 })
 
-test('apply and undo lock out other lead writes before reading or writing anything', () => {
+test('apply and undo make every change in one DO statement that locks leads before anything else', () => {
   for (const [name, sql] of [['apply', APPLY], ['undo', UNDO]] as const) {
-    const statements = sql
-      .split('\n')
-      .filter((line) => !line.trim().startsWith('--'))
-      .join('\n')
-      .split(';')
-      .map((s) => s.trim())
-      .filter(Boolean)
-    const begin = statements.indexOf('BEGIN')
-    assert.ok(begin >= 0, `${name} runs in a transaction`)
-    assert.match(statements[begin + 1], /^SET LOCAL lock_timeout/, `${name} limits the lock wait`)
-    assert.equal(
-      statements[begin + 2],
-      'LOCK TABLE "payload_web"."leads" IN SHARE ROW EXCLUSIVE MODE',
-      `${name} locks leads before anything else`,
-    )
+    const body = sql.match(/DO \$(\w+)\$\s*BEGIN([\s\S]*?)END\s*\$\1\$;/)
+    assert.ok(body, `${name} has a DO block`)
+    const lines = body[2].split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('--'))
+    // Undo first returns early when there is nothing to undo; that reads no lead data.
+    const start = name === 'undo' ? lines.indexOf('END IF;') + 1 : 0
+    assert.match(lines[start], /^SET LOCAL lock_timeout = '10s';$/, `${name} limits the lock wait`)
+    assert.equal(lines[start + 1], 'LOCK TABLE "payload_web"."leads" IN SHARE ROW EXCLUSIVE MODE;', `${name} locks first`)
+    assert.equal((sql.match(/\bDO \$/g) ?? []).length, 1, `${name} has exactly one DO block`)
   }
   // Apply backs up and clears in one statement, so the cleared set is the backed-up set.
   assert.match(APPLY, /WITH "captured" AS \(\s*INSERT INTO "payload_web"\."lead_opt_in_cleanup_backup"[\s\S]*RETURNING[\s\S]*UPDATE "payload_web"\."leads"/)
