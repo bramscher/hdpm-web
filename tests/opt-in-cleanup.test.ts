@@ -132,3 +132,25 @@ test('a re-run that clears a newly opted-in channel backs it up so undo can rest
   assert.deepEqual(await lead(db, 1), [1, false, true])
   assert.deepEqual(review.filter((r: unknown[]) => r[0] === 1), [[1, 'sms', true]])
 })
+
+test('apply and undo lock out other lead writes before reading or writing anything', () => {
+  for (const [name, sql] of [['apply', APPLY], ['undo', UNDO]] as const) {
+    const statements = sql
+      .split('\n')
+      .filter((line) => !line.trim().startsWith('--'))
+      .join('\n')
+      .split(';')
+      .map((s) => s.trim())
+      .filter(Boolean)
+    const begin = statements.indexOf('BEGIN')
+    assert.ok(begin >= 0, `${name} runs in a transaction`)
+    assert.match(statements[begin + 1], /^SET LOCAL lock_timeout/, `${name} limits the lock wait`)
+    assert.equal(
+      statements[begin + 2],
+      'LOCK TABLE "payload_web"."leads" IN SHARE ROW EXCLUSIVE MODE',
+      `${name} locks leads before anything else`,
+    )
+  }
+  // Apply backs up and clears in one statement, so the cleared set is the backed-up set.
+  assert.match(APPLY, /WITH "captured" AS \(\s*INSERT INTO "payload_web"\."lead_opt_in_cleanup_backup"[\s\S]*RETURNING[\s\S]*UPDATE "payload_web"\."leads"/)
+})
