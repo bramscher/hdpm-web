@@ -4,6 +4,7 @@ import config from '@payload-config'
 import { normalizeEmail, normalizePhone, splitName } from '@/lib/crm/normalization'
 import { findDuplicateLead } from '@/lib/crm/dedup'
 import { pushToAppFolio } from '@/lib/crm/appfolio-handoff'
+import { explicitConsent } from '@/lib/crm/consent'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyPayload = any
@@ -31,6 +32,8 @@ type AnyPayload = any
  *   monthlyBudgetMax?: number,
  *   propertyExternalId?: string,
  *   propertyAddress?: string,
+ *   smsOptIn?: boolean,   // true only if the person ticked an SMS consent box at the source
+ *   emailOptIn?: boolean, // true only if the person ticked an email consent box at the source
  * }
  */
 export async function POST(req: NextRequest) {
@@ -107,6 +110,8 @@ export async function POST(req: NextRequest) {
         monthlyBudgetMax: body.monthlyBudgetMax || undefined,
         status: 'new' as const,
         lastInboundAt: new Date().toISOString(),
+        smsOptIn: explicitConsent(body.smsOptIn),
+        emailOptIn: explicitConsent(body.emailOptIn),
       } as Record<string, unknown>,
     })
 

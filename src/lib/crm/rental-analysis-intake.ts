@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { explicitConsent } from './consent'
 import { normalizeEmail, normalizePhone, splitName } from '@/lib/crm/normalization'
 import { findDuplicateLead } from '@/lib/crm/dedup'
 import type { LeadNotification } from '@/lib/notify'
@@ -41,6 +42,9 @@ interface RentalAnalysisRequestBody {
   source_detail?: string
   /** honeypot — real users never fill this */
   hp?: string
+  /** true only when the person ticked the matching consent box */
+  smsConsent?: boolean
+  emailConsent?: boolean
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -226,6 +230,8 @@ export function createRentalAnalysisHandler(deps: IntakeDependencies) {
             status: 'new',
             subjectProperty,
             rentAnalysisStatus: 'requested',
+            smsOptIn: explicitConsent(body.smsConsent),
+            emailOptIn: explicitConsent(body.emailConsent),
             message: body.message || undefined,
             attribution: body.attribution || undefined,
           },
