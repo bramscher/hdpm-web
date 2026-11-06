@@ -1,7 +1,14 @@
 import { getPayload, type Where } from 'payload'
 import config from '@payload-config'
 import { requireOsAdmin } from '@/lib/os-service-auth'
-import { CLOSED_STATUSES, assignableUsers, leadSummary } from '@/lib/os-leads'
+import {
+  BOARD_LIMIT,
+  BOARD_STATUSES,
+  CLOSED_STATUSES,
+  assignableUsers,
+  boardLead,
+  leadSummary,
+} from '@/lib/os-leads'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -12,6 +19,10 @@ const PAGE_SIZE = 50
  * GET ?view=open|all|<status>&type=tenant|owner|vendor|other&q=search&page=N
  * Lead list for the HDPM OS Leads page. "open" (default) hides leased, lost
  * and archived leads.
+ *
+ * GET ?view=board&type=owner
+ * Every owner lead in a growth-board stage (new through signed, plus lost), not
+ * paged, capped at BOARD_LIMIT. Each lead carries the card fields from boardLead.
  */
 export async function GET(request: Request) {
   const auth = requireOsAdmin(request)
@@ -21,6 +32,8 @@ export async function GET(request: Request) {
   const type = params.get('type')
   const q = (params.get('q') || '').trim().slice(0, 100)
   const page = Math.max(1, Math.min(1000, Number(params.get('page')) || 1))
+
+  if (view === 'board') return boardResponse(type)
 
   const and: Where[] = []
   if (view === 'open') and.push({ status: { not_in: [...CLOSED_STATUSES] } })
@@ -54,5 +67,29 @@ export async function GET(request: Request) {
     totalPages: leads.totalPages,
     totalDocs: leads.totalDocs,
     users,
+  })
+}
+
+async function boardResponse(type: string | null) {
+  if (type !== 'owner')
+    return Response.json({ error: 'The board view is for owner leads (type=owner).' }, { status: 400 })
+  const payload = await getPayload({ config })
+  const [leads, users] = await Promise.all([
+    payload.find({
+      collection: 'leads',
+      where: {
+        and: [{ leadType: { equals: 'owner' } }, { status: { in: [...BOARD_STATUSES] } }],
+      },
+      sort: '-createdAt',
+      limit: BOARD_LIMIT,
+      depth: 1,
+    }),
+    assignableUsers(payload),
+  ])
+  return Response.json({
+    leads: leads.docs.map(boardLead),
+    users,
+    totalDocs: leads.totalDocs,
+    truncated: leads.totalDocs > leads.docs.length,
   })
 }

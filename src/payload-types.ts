@@ -749,6 +749,10 @@ export interface Lead {
     | null;
   assignedTo?: (number | null) | User;
   nextFollowUpAt?: string | null;
+  /**
+   * When the lead entered its current status (days in stage). Set automatically.
+   */
+  statusEnteredAt?: string | null;
   firstName: string;
   lastName: string;
   email: string;
@@ -762,6 +766,10 @@ export interface Lead {
     | null;
   sourceDetail?: string | null;
   leadType?: ('tenant' | 'owner' | 'vendor' | 'other') | null;
+  /**
+   * Owner leads: how many doors HDPM would manage if this owner signs.
+   */
+  expectedDoors?: number | null;
   stageReason?: string | null;
   notesSummary?: string | null;
   /**
@@ -1759,6 +1767,7 @@ export interface LeadsSelect<T extends boolean = true> {
   status?: T;
   assignedTo?: T;
   nextFollowUpAt?: T;
+  statusEnteredAt?: T;
   firstName?: T;
   lastName?: T;
   email?: T;
@@ -1770,6 +1779,7 @@ export interface LeadsSelect<T extends boolean = true> {
   source?: T;
   sourceDetail?: T;
   leadType?: T;
+  expectedDoors?: T;
   stageReason?: T;
   notesSummary?: T;
   message?: T;

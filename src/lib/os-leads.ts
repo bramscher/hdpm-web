@@ -58,3 +58,42 @@ export function allowedNextStatuses(
 ): string[] {
   return nextStatuses((status || 'new') as LeadStatus, leadType)
 }
+
+/** Owner pipeline stages shown as columns on the HDPM OS growth board. */
+export const BOARD_STATUSES = [
+  'new',
+  'attempted_contact',
+  'engaged',
+  'consult_booked',
+  'proposal_sent',
+  'signed',
+  'lost',
+] as const
+
+/** The board loads every owner lead at once; this caps a runaway result. */
+export const BOARD_LIMIT = 1000
+
+/** A lead as a growth-board card: the summary plus what the card and filters show. */
+export function boardLead(lead: Lead) {
+  return {
+    ...leadSummary(lead),
+    expectedDoors: lead.expectedDoors ?? null,
+    sourceDetail: lead.sourceDetail ?? null,
+    town: lead.subjectProperty?.town ?? null,
+    propertyAddress: lead.subjectProperty?.address ?? null,
+    // Leads saved before the field existed and missed by the backfill count from creation.
+    statusEnteredAt: lead.statusEnteredAt ?? lead.createdAt,
+    allowedStatuses: allowedNextStatuses(lead.status, lead.leadType),
+  }
+}
+
+/** Reads expectedDoors from a PATCH body: a whole number of 0 or more, or null to clear it. */
+export function parseExpectedDoors(
+  value: unknown,
+): { ok: true; value: number | null } | { ok: false; error: string } {
+  if (value === null || value === '') return { ok: true, value: null }
+  const doors = typeof value === 'string' ? Number(value.trim()) : value
+  if (typeof doors !== 'number' || !Number.isSafeInteger(doors) || doors < 0)
+    return { ok: false, error: 'Expected doors must be a whole number, 0 or more.' }
+  return { ok: true, value: doors }
+}

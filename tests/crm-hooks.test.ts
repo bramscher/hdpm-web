@@ -111,3 +111,18 @@ test('a new owner lead alerts HDPM OS with its owner stages; tenant leads do not
   assert.equal(calls[0].body.property, '1 Main, Bend')
   assert.ok((calls[0].body.allowedStatuses as string[]).includes('consult_booked'))
 })
+
+test('status changes stamp statusEnteredAt; other edits leave it alone; refused moves read plainly', async () => {
+  const { leadsBeforeChange } = await import('../src/collections/hooks/leads/beforeChange')
+  const invoke = (data: Record<string, unknown>, originalDoc: object) => leadsBeforeChange({
+    data, originalDoc, operation: 'update', req: {},
+  } as unknown as Parameters<CollectionBeforeChangeHook>[0])
+  const moved = await invoke({ status: 'consult_booked' }, { status: 'engaged', leadType: 'owner' })
+  assert.ok(Number.isFinite(Date.parse(moved.statusEnteredAt)))
+  const same = await invoke({ status: 'engaged', expectedDoors: 3 }, { status: 'engaged', leadType: 'owner' })
+  assert.equal(same.statusEnteredAt, undefined)
+  await assert.rejects(
+    invoke({ status: 'signed' }, { status: 'engaged', leadType: 'owner' }),
+    { message: "Can't move a lead from Engaged to Signed." },
+  )
+})
