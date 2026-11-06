@@ -18,9 +18,10 @@ INSERT INTO "payload_web"."hiring_settings" ("application_recipients", "updated_
 SELECT E'work@highdesertpm.com\ncraig@highdesertpm.com\nlisa@highdesertpm.com', now(), now()
 WHERE NOT EXISTS (SELECT 1 FROM "payload_web"."hiring_settings");
 
+-- The batch is computed in a subquery so that a second run inserts nothing.
 INSERT INTO "payload_web"."payload_migrations" ("name", "batch", "updated_at", "created_at")
-SELECT '20261005_120000_add_hiring_settings', COALESCE(MAX("batch"), 0) + 1, now(), now()
-FROM "payload_web"."payload_migrations"
+SELECT '20261005_120000_add_hiring_settings', next_batch, now(), now()
+FROM (SELECT COALESCE(MAX("batch"), 0) + 1 AS next_batch FROM "payload_web"."payload_migrations") AS m
 WHERE NOT EXISTS (
   SELECT 1 FROM "payload_web"."payload_migrations"
   WHERE "name" = '20261005_120000_add_hiring_settings'
