@@ -1,26 +1,61 @@
 -- Opt-in cleanup, step 3 of 3: UNDO. Only if step 2 must be reversed.
 -- Paste into the Supabase SQL editor and run. Safe to run more than once.
 --
--- Restores each opt-in that step 2 cleared, from
--- payload_web.lead_opt_in_cleanup_backup. A field is restored only if it is
--- still false; a value someone has changed since is left alone. The backup
--- table is kept; drop it by hand once the cleanup is final:
+-- Restores a cleared channel from payload_web.lead_opt_in_cleanup_backup ONLY
+-- when nothing has happened to it since the cleanup:
+--   - the lead has not been saved since (updated_at unchanged; every save
+--     through the website, HDPM OS or Payload admin changes it),
+--   - the channel is still false and still has no recorded consent,
+--   - and that backup row has not been restored already.
+-- Anything else may be a later opt-out or a later choice, so it is never
+-- reversed automatically: the last query lists those rows for a person to review.
+-- The backup table is kept; drop it by hand once the cleanup is final:
 --   DROP TABLE "payload_web"."lead_opt_in_cleanup_backup";
 
 BEGIN;
 
-UPDATE "payload_web"."leads" AS l
-SET
-  "sms_opt_in" = CASE WHEN b."sms_cleared" AND l."sms_opt_in" IS FALSE THEN b."sms_opt_in" ELSE l."sms_opt_in" END,
-  "email_opt_in" = CASE WHEN b."email_cleared" AND l."email_opt_in" IS FALSE THEN b."email_opt_in" ELSE l."email_opt_in" END
+-- Only the newest backup row per lead and channel can be restored.
+CREATE TEMP TABLE "restorable" ON COMMIT DROP AS
+SELECT b."id", b."lead_id", b."channel", b."prior_value"
 FROM "payload_web"."lead_opt_in_cleanup_backup" AS b
-WHERE b."lead_id" = l."id";
+JOIN "payload_web"."leads" AS l ON l."id" = b."lead_id"
+WHERE b."restored_at" IS NULL
+  AND b."id" = (
+    SELECT max(n."id") FROM "payload_web"."lead_opt_in_cleanup_backup" AS n
+    WHERE n."lead_id" = b."lead_id" AND n."channel" = b."channel"
+  )
+  AND l."updated_at" IS NOT DISTINCT FROM b."lead_updated_at"
+  AND (
+    (b."channel" = 'sms' AND l."sms_opt_in" IS FALSE AND l."sms_consent_at" IS NULL)
+    OR (b."channel" = 'email' AND l."email_opt_in" IS FALSE AND l."email_consent_at" IS NULL)
+  );
+
+UPDATE "payload_web"."leads" AS l
+SET "sms_opt_in" = r."prior_value"
+FROM "restorable" AS r
+WHERE r."lead_id" = l."id" AND r."channel" = 'sms';
+
+UPDATE "payload_web"."leads" AS l
+SET "email_opt_in" = r."prior_value"
+FROM "restorable" AS r
+WHERE r."lead_id" = l."id" AND r."channel" = 'email';
+
+UPDATE "payload_web"."lead_opt_in_cleanup_backup" AS b
+SET "restored_at" = now()
+FROM "restorable" AS r
+WHERE r."id" = b."id";
 
 COMMIT;
 
--- Check: how many backed-up leads are opted in again.
-SELECT
-  count(*) FILTER (WHERE l."sms_opt_in" IS TRUE AND b."sms_cleared")     AS sms_restored,
-  count(*) FILTER (WHERE l."email_opt_in" IS TRUE AND b."email_cleared") AS email_restored
-FROM "payload_web"."leads" AS l
-JOIN "payload_web"."lead_opt_in_cleanup_backup" AS b ON b."lead_id" = l."id";
+-- Check: cleared channels NOT restored because something changed since. Review
+-- these by hand; restore one only if you know the person did not opt out.
+SELECT b."lead_id", b."channel", b."prior_value", b."cleared_at",
+       l."updated_at" AS lead_updated_at_now, b."lead_updated_at" AS lead_updated_at_at_cleanup
+FROM "payload_web"."lead_opt_in_cleanup_backup" AS b
+JOIN "payload_web"."leads" AS l ON l."id" = b."lead_id"
+WHERE b."restored_at" IS NULL
+  AND b."id" = (
+    SELECT max(n."id") FROM "payload_web"."lead_opt_in_cleanup_backup" AS n
+    WHERE n."lead_id" = b."lead_id" AND n."channel" = b."channel"
+  )
+ORDER BY b."lead_id", b."channel";
