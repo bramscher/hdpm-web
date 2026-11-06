@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import { consentFields } from './consent'
+import { consentFields, submittedConsent } from './consent'
 import { normalizeEmail, normalizePhone, splitName } from '@/lib/crm/normalization'
 import { findDuplicateLead } from '@/lib/crm/dedup'
 import type { LeadNotification } from '@/lib/notify'
@@ -187,6 +187,8 @@ export function createRentalAnalysisHandler(deps: IntakeDependencies) {
       if (duplicateId) {
         // An email/phone match is a routing hint, not proof of identity. Keep
         // all established lead fields and any previous analysis untouched.
+        // Ticked consent goes on the activity for review, never onto the lead.
+        const consent = submittedConsent(body.smsConsent, body.emailConsent, 'rental-analysis')
         await payload.create({
           collection: 'lead-activities',
           data: {
@@ -201,6 +203,7 @@ export function createRentalAnalysisHandler(deps: IntakeDependencies) {
               `Submitted property: ${subject.address}`,
               body.message ? `Message: ${body.message}` : '',
               'Existing contact and analysis details were preserved. Verify the request before changing them or starting an analysis.',
+              consent?.note,
             ].filter(Boolean).join('\n'),
             metadata: {
               kind: 'rental_analysis_request',
@@ -212,6 +215,7 @@ export function createRentalAnalysisHandler(deps: IntakeDependencies) {
               source: 'website',
               sourceDetail: body.source_detail || 'Rental Analysis form',
               attribution: body.attribution,
+              ...(consent ? { consent: consent.metadata } : {}),
             },
           },
         })

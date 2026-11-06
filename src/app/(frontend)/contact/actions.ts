@@ -1,7 +1,7 @@
 'use server'
 
 import { getPayload } from 'payload'
-import { consentFields } from '@/lib/crm/consent'
+import { consentFields, submittedConsent } from '@/lib/crm/consent'
 import config from '@payload-config'
 import { findDuplicateLead } from '@/lib/crm/dedup'
 import { normalizeEmail, normalizePhone, splitName } from '../../../lib/crm/normalization'
@@ -70,16 +70,20 @@ export async function submitContactForm(
     let leadId: number
     if (existingLeadId) {
       leadId = existingLeadId
+      const consent = submittedConsent(formData.get('smsConsent'), formData.get('emailConsent'), 'contact-form')
       await payload.create({
         collection: 'lead-activities',
         data: {
           lead: existingLeadId,
           type: 'note' as const,
           direction: 'inbound' as const,
-          body: `Website contact form inquiry${message ? `: ${message}` : ''}`,
+          body: [`Website contact form inquiry${message ? `: ${message}` : ''}`, consent?.note]
+            .filter(Boolean)
+            .join('\n'),
           metadata: {
             source: 'website',
             propertyInterest: propertyInterest || undefined,
+            ...(consent ? { consent: consent.metadata } : {}),
           },
         },
       })

@@ -34,3 +34,33 @@ export function consentFields(
     consentWordingVersion: any ? (options.wordingVersion ?? CONSENT_WORDING_VERSION) : null,
   }
 }
+
+/**
+ * Consent ticked on a submission that matched an existing lead. An email or
+ * phone match is not proof of identity, so the existing lead's opt-ins, its
+ * doNotContact and its earlier evidence are left alone. Instead the evidence
+ * goes on the reviewable activity, with a line telling staff to verify before
+ * opting the lead in. Returns null when no box was ticked.
+ */
+export function submittedConsent(
+  sms: unknown,
+  email: unknown,
+  form: string,
+  options: { now?: Date; wordingVersion?: string } = {},
+) {
+  const fields = consentFields(sms, email, form, options)
+  if (!fields.smsOptIn && !fields.emailOptIn) return null
+  const channels = [fields.smsOptIn && 'SMS', fields.emailOptIn && 'email'].filter(Boolean).join(' and ')
+  return {
+    metadata: {
+      sms: fields.smsOptIn,
+      email: fields.emailOptIn,
+      smsConsentAt: fields.smsConsentAt,
+      emailConsentAt: fields.emailConsentAt,
+      consentForm: fields.consentForm,
+      consentWordingVersion: fields.consentWordingVersion,
+      appliedToLead: false,
+    },
+    note: `Consent ticked on this submission: ${channels}. Not applied to the lead: verify this is the same person before opting them in.`,
+  }
+}
