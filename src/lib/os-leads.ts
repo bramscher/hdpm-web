@@ -83,6 +83,10 @@ export function boardLead(lead: Lead) {
     propertyAddress: lead.subjectProperty?.address ?? null,
     // Leads saved before the field existed and missed by the backfill count from creation.
     statusEnteredAt: lead.statusEnteredAt ?? lead.createdAt,
+    referralPartner:
+      lead.referralPartnerId && lead.referralPartnerName
+        ? { id: lead.referralPartnerId, name: lead.referralPartnerName }
+        : null,
     allowedStatuses: allowedNextStatuses(lead.status, lead.leadType),
   }
 }

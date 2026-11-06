@@ -770,6 +770,18 @@ export interface Lead {
    * Owner leads: how many doors HDPM would manage if this owner signs.
    */
   expectedDoors?: number | null;
+  /**
+   * Referring partner from the HDPM OS partner portal.
+   */
+  referralPartnerName?: string | null;
+  /**
+   * HDPM OS referral_partner id.
+   */
+  referralPartnerId?: string | null;
+  /**
+   * HDPM OS referral_lead id. Keeps resent referrals from duplicating.
+   */
+  referralLeadId?: string | null;
   stageReason?: string | null;
   notesSummary?: string | null;
   /**
@@ -918,6 +930,10 @@ export interface LeadActivity {
     | number
     | boolean
     | null;
+  /**
+   * HDPM OS referral_lead id this note links.
+   */
+  referralLeadId?: string | null;
   performedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
@@ -1780,6 +1796,9 @@ export interface LeadsSelect<T extends boolean = true> {
   sourceDetail?: T;
   leadType?: T;
   expectedDoors?: T;
+  referralPartnerName?: T;
+  referralPartnerId?: T;
+  referralLeadId?: T;
   stageReason?: T;
   notesSummary?: T;
   message?: T;
@@ -1833,6 +1852,7 @@ export interface LeadActivitiesSelect<T extends boolean = true> {
   direction?: T;
   body?: T;
   metadata?: T;
+  referralLeadId?: T;
   performedBy?: T;
   updatedAt?: T;
   createdAt?: T;
