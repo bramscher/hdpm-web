@@ -85,6 +85,18 @@ export const Leads: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'statusEnteredAt',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'When the lead entered its current status (days in stage). Set automatically.',
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+    },
     // --- Tabs ---
     {
       type: 'tabs',
@@ -188,6 +200,43 @@ export const Leads: CollectionConfig = {
                 { label: 'Other', value: 'other' },
               ],
               index: true,
+            },
+            {
+              name: 'expectedDoors',
+              type: 'number',
+              min: 0,
+              admin: {
+                description: 'Owner leads: how many doors HDPM would manage if this owner signs.',
+                condition: (_data, siblingData) => siblingData?.leadType === 'owner',
+              },
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'referralPartnerName',
+                  type: 'text',
+                  admin: {
+                    readOnly: true,
+                    description: 'Referring partner from the HDPM OS partner portal.',
+                  },
+                },
+                {
+                  name: 'referralPartnerId',
+                  type: 'text',
+                  index: true,
+                  admin: { readOnly: true, description: 'HDPM OS referral_partner id.' },
+                },
+                {
+                  name: 'referralLeadId',
+                  type: 'text',
+                  unique: true,
+                  admin: {
+                    readOnly: true,
+                    description: 'HDPM OS referral_lead id. Keeps resent referrals from duplicating.',
+                  },
+                },
+              ],
             },
             {
               name: 'stageReason',

@@ -24,3 +24,53 @@ test('status choices follow the CRM pipeline', () => {
   assert.equal(allowedNextStatuses('new').includes('leased'), false)
   assert.ok(allowedNextStatuses(undefined).includes('engaged'))
 })
+
+test('board leads carry card fields, the current-status time and their allowed moves', async () => {
+  const { boardLead } = await import('../src/lib/os-leads')
+  const lead = boardLead({
+    id: 9,
+    firstName: 'Test',
+    lastName: 'Owner',
+    email: 'owner@example.com',
+    status: 'engaged',
+    leadType: 'owner',
+    source: 'referral',
+    sourceDetail: 'Partner brokerage',
+    expectedDoors: 4,
+    subjectProperty: { address: '100 Example St', town: 'Bend' },
+    statusEnteredAt: '2026-10-20T00:00:00.000Z',
+    createdAt: '2026-10-01T00:00:00.000Z',
+  } as any)
+  assert.equal(lead.expectedDoors, 4)
+  assert.equal(lead.town, 'Bend')
+  assert.equal(lead.propertyAddress, '100 Example St')
+  assert.equal(lead.sourceDetail, 'Partner brokerage')
+  assert.equal(lead.statusEnteredAt, '2026-10-20T00:00:00.000Z')
+  assert.ok(lead.allowedStatuses.includes('proposal_sent'))
+  assert.equal(lead.allowedStatuses.includes('tour_scheduled'), false)
+  assert.equal('message' in lead, false)
+
+  const bare = boardLead({ id: 10, email: 'x@example.com', leadType: 'owner', createdAt: '2026-10-01T00:00:00.000Z' } as any)
+  assert.equal(bare.expectedDoors, null)
+  assert.equal(bare.town, null)
+  assert.equal(bare.propertyAddress, null)
+  assert.equal(bare.statusEnteredAt, '2026-10-01T00:00:00.000Z')
+})
+
+test('expected doors accept whole numbers of 0 or more, or null to clear', async () => {
+  const { parseExpectedDoors } = await import('../src/lib/os-leads')
+  assert.deepEqual(parseExpectedDoors(3), { ok: true, value: 3 })
+  assert.deepEqual(parseExpectedDoors(0), { ok: true, value: 0 })
+  assert.deepEqual(parseExpectedDoors('12'), { ok: true, value: 12 })
+  assert.deepEqual(parseExpectedDoors(null), { ok: true, value: null })
+  assert.deepEqual(parseExpectedDoors(''), { ok: true, value: null })
+  for (const bad of [-1, 2.5, 'two', true, {}, Number.NaN])
+    assert.equal(parseExpectedDoors(bad).ok, false, `rejects ${String(bad)}`)
+})
+
+test('the board covers the owner pipeline columns and leaves archived leads out', async () => {
+  const { BOARD_STATUSES } = await import('../src/lib/os-leads')
+  assert.deepEqual([...BOARD_STATUSES], [
+    'new', 'attempted_contact', 'engaged', 'consult_booked', 'proposal_sent', 'signed', 'lost',
+  ])
+})

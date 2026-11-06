@@ -2,7 +2,7 @@ import type { CollectionBeforeChangeHook } from 'payload'
 import { normalizeEmail, normalizePhone } from '../../../lib/crm/normalization'
 import { findDuplicateLead } from '../../../lib/crm/dedup'
 import { assignLeadRoundRobin } from '../../../lib/crm/assignment'
-import { isValidTransition } from '../../../lib/crm/pipeline'
+import { getStatusLabel, isValidTransition } from '../../../lib/crm/pipeline'
 import { LeadStatus } from '../../../lib/crm/types'
 
 export const leadsBeforeChange: CollectionBeforeChangeHook = async ({
@@ -39,6 +39,9 @@ export const leadsBeforeChange: CollectionBeforeChangeHook = async ({
       }
     }
 
+    // Days in stage count from here until the first status change.
+    if (!data.statusEnteredAt) data.statusEnteredAt = new Date().toISOString()
+
     // Set default nextFollowUpAt to 10 minutes from now if not set
     if (!data.nextFollowUpAt) {
       const tenMinutes = new Date(Date.now() + 10 * 60 * 1000)
@@ -57,10 +60,12 @@ export const leadsBeforeChange: CollectionBeforeChangeHook = async ({
       const to = data.status as LeadStatus
       const leadType = data.leadType ?? originalDoc.leadType
       if (!isValidTransition(from, to, leadType)) {
+        // Shown as-is by the HDPM OS pipeline board when a drag is refused.
         throw new Error(
-          `Invalid status transition from "${from}" to "${to}". Check allowed transitions.`,
+          `Can't move a lead from ${getStatusLabel(from)} to ${getStatusLabel(to)}.`,
         )
       }
+      data.statusEnteredAt = new Date().toISOString()
     }
   }
 
