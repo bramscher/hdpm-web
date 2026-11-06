@@ -6,33 +6,35 @@
 -- Run AFTER scripts/sql/add-lead-growth-fields.sql (#75).
 -- Mirrors src/migrations/20261106_140000_add_lead_referral_fields.ts and
 -- records it as applied so `payload migrate` will not run it again.
+--
+-- The change is ONE statement (the DO block), so it is all-or-nothing however
+-- the editor sends the file: as one script or statement by statement.
 
-BEGIN;
+DO $migration$
+BEGIN
+  ALTER TABLE "payload_web"."leads"
+    ADD COLUMN IF NOT EXISTS "referral_partner_name" varchar,
+    ADD COLUMN IF NOT EXISTS "referral_partner_id" varchar,
+    ADD COLUMN IF NOT EXISTS "referral_lead_id" varchar;
+  CREATE INDEX IF NOT EXISTS "leads_referral_partner_id_idx"
+    ON "payload_web"."leads" USING btree ("referral_partner_id");
+  CREATE UNIQUE INDEX IF NOT EXISTS "leads_referral_lead_id_idx"
+    ON "payload_web"."leads" USING btree ("referral_lead_id");
 
-ALTER TABLE "payload_web"."leads"
-  ADD COLUMN IF NOT EXISTS "referral_partner_name" varchar,
-  ADD COLUMN IF NOT EXISTS "referral_partner_id" varchar,
-  ADD COLUMN IF NOT EXISTS "referral_lead_id" varchar;
-CREATE INDEX IF NOT EXISTS "leads_referral_partner_id_idx"
-  ON "payload_web"."leads" USING btree ("referral_partner_id");
-CREATE UNIQUE INDEX IF NOT EXISTS "leads_referral_lead_id_idx"
-  ON "payload_web"."leads" USING btree ("referral_lead_id");
+  ALTER TABLE "payload_web"."lead_activities"
+    ADD COLUMN IF NOT EXISTS "referral_lead_id" varchar;
+  CREATE UNIQUE INDEX IF NOT EXISTS "lead_activities_referral_lead_id_idx"
+    ON "payload_web"."lead_activities" USING btree ("referral_lead_id");
 
-ALTER TABLE "payload_web"."lead_activities"
-  ADD COLUMN IF NOT EXISTS "referral_lead_id" varchar;
-CREATE UNIQUE INDEX IF NOT EXISTS "lead_activities_referral_lead_id_idx"
-  ON "payload_web"."lead_activities" USING btree ("referral_lead_id");
-
--- The batch is computed in a subquery so that a second run inserts nothing.
-INSERT INTO "payload_web"."payload_migrations" ("name", "batch", "updated_at", "created_at")
-SELECT '20261106_140000_add_lead_referral_fields', next_batch, now(), now()
-FROM (SELECT COALESCE(MAX("batch"), 0) + 1 AS next_batch FROM "payload_web"."payload_migrations") AS m
-WHERE NOT EXISTS (
-  SELECT 1 FROM "payload_web"."payload_migrations"
-  WHERE "name" = '20261106_140000_add_lead_referral_fields'
-);
-
-COMMIT;
+  INSERT INTO "payload_web"."payload_migrations" ("name", "batch", "updated_at", "created_at")
+  SELECT '20261106_140000_add_lead_referral_fields', next_batch, now(), now()
+  FROM (SELECT COALESCE(MAX("batch"), 0) + 1 AS next_batch FROM "payload_web"."payload_migrations") AS m
+  WHERE NOT EXISTS (
+    SELECT 1 FROM "payload_web"."payload_migrations"
+    WHERE "name" = '20261106_140000_add_lead_referral_fields'
+  );
+END
+$migration$;
 
 -- Check: should list the three indexes.
 SELECT "indexname" FROM pg_indexes
