@@ -24,16 +24,13 @@ WHERE "name" = '20261005_120000_add_hiring_settings'
   )
 ORDER BY "id";
 
-BEGIN;
-
+-- One statement, so it is all-or-nothing however the editor sends the file.
 DELETE FROM "payload_web"."payload_migrations"
 WHERE "name" = '20261005_120000_add_hiring_settings'
   AND "id" > (
     SELECT min("id") FROM "payload_web"."payload_migrations"
     WHERE "name" = '20261005_120000_add_hiring_settings'
   );
-
-COMMIT;
 
 -- Check: should show exactly one row.
 SELECT "id", "name", "batch", "created_at" FROM "payload_web"."payload_migrations"

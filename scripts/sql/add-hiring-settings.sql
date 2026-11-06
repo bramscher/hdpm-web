@@ -2,32 +2,35 @@
 -- Paste into the Supabase SQL editor and run. Safe to run more than once.
 -- Mirrors src/migrations/20261005_120000_add_hiring_settings.ts and records it
 -- as applied so `payload migrate` will not run it again.
+--
+-- The change is ONE statement (the DO block), so it is all-or-nothing however
+-- the editor sends the file: as one script or statement by statement.
 
-BEGIN;
+DO $migration$
+BEGIN
+  CREATE TABLE IF NOT EXISTS "payload_web"."hiring_settings" (
+    "id" serial PRIMARY KEY NOT NULL,
+    "application_recipients" varchar NOT NULL,
+    "resend_since" timestamp(3) with time zone,
+    "last_resend" varchar,
+    "updated_at" timestamp(3) with time zone,
+    "created_at" timestamp(3) with time zone
+  );
 
-CREATE TABLE IF NOT EXISTS "payload_web"."hiring_settings" (
-  "id" serial PRIMARY KEY NOT NULL,
-  "application_recipients" varchar NOT NULL,
-  "resend_since" timestamp(3) with time zone,
-  "last_resend" varchar,
-  "updated_at" timestamp(3) with time zone,
-  "created_at" timestamp(3) with time zone
-);
+  INSERT INTO "payload_web"."hiring_settings" ("application_recipients", "updated_at", "created_at")
+  SELECT E'work@highdesertpm.com\ncraig@highdesertpm.com\nlisa@highdesertpm.com', now(), now()
+  WHERE NOT EXISTS (SELECT 1 FROM "payload_web"."hiring_settings");
 
-INSERT INTO "payload_web"."hiring_settings" ("application_recipients", "updated_at", "created_at")
-SELECT E'work@highdesertpm.com\ncraig@highdesertpm.com\nlisa@highdesertpm.com', now(), now()
-WHERE NOT EXISTS (SELECT 1 FROM "payload_web"."hiring_settings");
-
--- The batch is computed in a subquery so that a second run inserts nothing.
-INSERT INTO "payload_web"."payload_migrations" ("name", "batch", "updated_at", "created_at")
-SELECT '20261005_120000_add_hiring_settings', next_batch, now(), now()
-FROM (SELECT COALESCE(MAX("batch"), 0) + 1 AS next_batch FROM "payload_web"."payload_migrations") AS m
-WHERE NOT EXISTS (
-  SELECT 1 FROM "payload_web"."payload_migrations"
-  WHERE "name" = '20261005_120000_add_hiring_settings'
-);
-
-COMMIT;
+  -- The batch is computed in a subquery so that a second run inserts nothing.
+  INSERT INTO "payload_web"."payload_migrations" ("name", "batch", "updated_at", "created_at")
+  SELECT '20261005_120000_add_hiring_settings', next_batch, now(), now()
+  FROM (SELECT COALESCE(MAX("batch"), 0) + 1 AS next_batch FROM "payload_web"."payload_migrations") AS m
+  WHERE NOT EXISTS (
+    SELECT 1 FROM "payload_web"."payload_migrations"
+    WHERE "name" = '20261005_120000_add_hiring_settings'
+  );
+END
+$migration$;
 
 -- Check: should return one row listing the three addresses.
 SELECT "id", "application_recipients" FROM "payload_web"."hiring_settings";
