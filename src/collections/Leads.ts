@@ -210,6 +210,34 @@ export const Leads: CollectionConfig = {
               },
             },
             {
+              type: 'row',
+              fields: [
+                {
+                  name: 'referralPartnerName',
+                  type: 'text',
+                  admin: {
+                    readOnly: true,
+                    description: 'Referring partner from the HDPM OS partner portal.',
+                  },
+                },
+                {
+                  name: 'referralPartnerId',
+                  type: 'text',
+                  index: true,
+                  admin: { readOnly: true, description: 'HDPM OS referral_partner id.' },
+                },
+                {
+                  name: 'referralLeadId',
+                  type: 'text',
+                  unique: true,
+                  admin: {
+                    readOnly: true,
+                    description: 'HDPM OS referral_lead id. Keeps resent referrals from duplicating.',
+                  },
+                },
+              ],
+            },
+            {
               name: 'stageReason',
               type: 'text',
               admin: {
