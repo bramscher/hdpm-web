@@ -15,9 +15,10 @@ ALTER TABLE "payload_web"."leads"
   ADD COLUMN IF NOT EXISTS "consent_form" varchar,
   ADD COLUMN IF NOT EXISTS "consent_wording_version" varchar;
 
+-- The batch is computed in a subquery so that a second run inserts nothing.
 INSERT INTO "payload_web"."payload_migrations" ("name", "batch", "updated_at", "created_at")
-SELECT '20261106_160000_add_lead_consent_evidence', COALESCE(MAX("batch"), 0) + 1, now(), now()
-FROM "payload_web"."payload_migrations"
+SELECT '20261106_160000_add_lead_consent_evidence', next_batch, now(), now()
+FROM (SELECT COALESCE(MAX("batch"), 0) + 1 AS next_batch FROM "payload_web"."payload_migrations") AS m
 WHERE NOT EXISTS (
   SELECT 1 FROM "payload_web"."payload_migrations"
   WHERE "name" = '20261106_160000_add_lead_consent_evidence'
