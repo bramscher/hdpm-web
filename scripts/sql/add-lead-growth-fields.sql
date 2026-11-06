@@ -27,9 +27,10 @@ SET "status_entered_at" = COALESCE(
 )
 WHERE l."status_entered_at" IS NULL;
 
+-- The batch is computed in a subquery so that a second run inserts nothing.
 INSERT INTO "payload_web"."payload_migrations" ("name", "batch", "updated_at", "created_at")
-SELECT '20261106_120000_add_lead_growth_fields', COALESCE(MAX("batch"), 0) + 1, now(), now()
-FROM "payload_web"."payload_migrations"
+SELECT '20261106_120000_add_lead_growth_fields', next_batch, now(), now()
+FROM (SELECT COALESCE(MAX("batch"), 0) + 1 AS next_batch FROM "payload_web"."payload_migrations") AS m
 WHERE NOT EXISTS (
   SELECT 1 FROM "payload_web"."payload_migrations"
   WHERE "name" = '20261106_120000_add_lead_growth_fields'
